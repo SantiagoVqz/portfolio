@@ -1,0 +1,480 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+/* ========================================
+   TAILWIND THEME EXTENSION
+   ======================================== */
+
+@theme {
+	/* Colors from Tactile Pastel system */
+	--color-base: #fdfcf8;
+	--color-surface: #f2f0e9;
+	--color-accent: #cc8b65;
+	--color-tension: #7d9c8b;
+	--color-ink: #36322f;
+
+	/* Typography */
+	--font-headline: 'Fraunces', 'Times New Roman', serif;
+	--font-data: 'DM Mono', 'Input Mono', 'Courier New', monospace;
+
+	/* Tracking */
+	--tracking-tight: -0.02em;
+	--tracking-wide: 0.04em;
+
+	/* Leading */
+	--leading-tight: 1.1;
+	--leading-relaxed: 1.6;
+
+	/* Shadows */
+	--shadow-diffused: inset 0px 2px 8px -2px rgba(54, 50, 47, 0.08),
+		0px 8px 24px -6px rgba(54, 50, 47, 0.04);
+	--shadow-deep: inset 0px 4px 16px -4px rgba(54, 50, 47, 0.12),
+		0px 12px 32px -8px rgba(54, 50, 47, 0.08);
+
+	/* Grain texture */
+	--glass-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
+html {
+	scroll-behavior: smooth;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	font-family: var(--font-data);
+	background-color: var(--color-base);
+	color: var(--color-ink);
+	line-height: var(--leading-relaxed);
+	min-height: 100vh;
+	overflow-x: hidden;
+}
+
+/* Headline typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--font-headline);
+	letter-spacing: var(--tracking-tight);
+	line-height: var(--leading-tight);
+	color: var(--color-ink);
+}
+
+/* Monospace elements */
+code,
+pre,
+kbd,
+samp {
+	font-family: var(--font-data);
+}
+
+/* Paragraph text - ensure proper contrast */
+p {
+	color: var(--color-ink);
+}
+
+/* Links */
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* Selection styling */
+::selection {
+	background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+	color: var(--color-ink);
+}
+
+/* Focus styles */
+:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Font utilities */
+.font-serif {
+	font-family: var(--font-headline);
+}
+
+.font-mono {
+	font-family: var(--font-data);
+}
+
+/* Tracking utilities */
+.tracking-tight {
+	letter-spacing: var(--tracking-tight);
+}
+
+.tracking-wide {
+	letter-spacing: var(--tracking-wide);
+}
+
+/* Material surfaces */
+.surface-card {
+	background: var(--color-surface);
+	box-shadow: var(--shadow-diffused);
+}
+
+.surface-card:hover {
+	box-shadow: var(--shadow-deep);
+}
+
+/* Grain texture overlay */
+.grain-texture {
+	background-image: var(--glass-grain);
+	background-repeat: repeat;
+}
+
+/* ========================================
+   TEXT COLOR UTILITIES WITH PROPER CONTRAST
+   ======================================== */
+
+/* Primary text - full contrast */
+.text-primary {
+	color: var(--color-ink);
+}
+
+/* Secondary text - 70% opacity for supporting content */
+.text-secondary {
+	color: color-mix(in srgb, var(--color-ink) 70%, transparent);
+}
+
+/* Muted text - 50% opacity for metadata */
+.text-muted {
+	color: color-mix(in srgb, var(--color-ink) 50%, transparent);
+}
+
+/* Accent text */
+.text-accent {
+	color: var(--color-accent);
+}
+
+/* Tension text (for tags, categories) */
+.text-tension {
+	color: var(--color-tension);
+}
+
+/* ========================================
+   SCROLLBAR STYLING
+   ======================================== */
+
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--color-base);
+}
+
+::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--color-ink) 20%, transparent);
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--color-ink) 30%, transparent);
+}
+
+/* ========================================
+   RESPONSIVE UTILITIES
+   ======================================== */
+
+/* Container with responsive padding */
+.container-fluid {
+	width: 100%;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+	.container-fluid {
+		padding-left: 3rem;
+		padding-right: 3rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.container-fluid {
+		padding-left: 5rem;
+		padding-right: 5rem;
+	}
+}
+
+/* Responsive text sizes */
+.text-responsive-sm {
+	font-size: 0.75rem;
+}
+
+@media (min-width: 768px) {
+	.text-responsive-sm {
+		font-size: 0.875rem;
+	}
+}
+
+.text-responsive-base {
+	font-size: 0.875rem;
+}
+
+@media (min-width: 768px) {
+	.text-responsive-base {
+		font-size: 1rem;
+	}
+}
+
+.text-responsive-lg {
+	font-size: 1rem;
+}
+
+@media (min-width: 768px) {
+	.text-responsive-lg {
+		font-size: 1.125rem;
+	}
+}
+
+/* Responsive heading sizes */
+.heading-xl {
+	font-size: 2rem;
+	line-height: 1.1;
+}
+
+@media (min-width: 768px) {
+	.heading-xl {
+		font-size: 3rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.heading-xl {
+		font-size: 3.5rem;
+	}
+}
+
+.heading-2xl {
+	font-size: 2.5rem;
+	line-height: 1.1;
+}
+
+@media (min-width: 768px) {
+	.heading-2xl {
+		font-size: 3.5rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.heading-2xl {
+		font-size: 4rem;
+	}
+}
+
+/* ========================================
+   ANIMATION UTILITIES
+   ======================================== */
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-20px);
+	}
+}
+
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0) rotate(0deg);
+	}
+	50% {
+		transform: translateY(-10px) rotate(2deg);
+	}
+}
+
+@keyframes slideInRight {
+	from {
+		opacity: 0;
+		transform: translateX(40px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes slideOutLeft {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(-40px);
+	}
+}
+
+.animate-fade-in {
+	animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-out {
+	animation: fadeOut 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+	animation: float 6s ease-in-out infinite;
+}
+
+.animate-slide-in {
+	animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-out {
+	animation: slideOutLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ========================================
+   HORIZONTAL SCROLL SECTION
+   ======================================== */
+
+/* Mobile: Disable horizontal scroll behavior */
+@media (max-width: 1023px) {
+	.horizontal-scroll-section {
+		height: auto !important;
+	}
+
+	.horizontal-scroll-section .sticky {
+		position: relative !important;
+		height: auto !important;
+	}
+
+	.horizontal-track {
+		flex-direction: column !important;
+		padding: 0 !important;
+		gap: 2rem !important;
+	}
+
+	.project-card-wrapper {
+		width: 100% !important;
+	}
+}
+
+/* Desktop: Enable smooth horizontal scroll */
+@media (min-width: 1024px) {
+	.horizontal-scroll-section {
+		overflow: hidden;
+	}
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+	:root {
+		--color-ink: #000000;
+		--color-base: #ffffff;
+		--color-surface: #f5f5f5;
+	}
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+	body {
+		background: white;
+		color: black;
+	}
+
+	.no-print {
+		display: none !important;
+	}
+
+	a[href]::after {
+		content: ' (' attr(href) ')';
+	}
+}
+
+/* ========================================
+   SECTION SPACING
+   ======================================== */
+
+section {
+	position: relative;
+}
+
+/* Ensure sections don't have blank areas */
+section:empty {
+	display: none;
+}
+
+/* Smooth section transitions */
+section + section {
+	margin-top: 0;
+}
+
+/* ========================================
+   GLASS MORPHISM UTILITIES
+   ======================================== */
+
+.glass {
+	background: color-mix(in srgb, var(--color-base) 80%, transparent);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+}
+
+.glass-surface {
+	background: color-mix(in srgb, var(--color-surface) 85%, transparent);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+}
+
+/* ========================================
+   Z-INDEX LAYERS
+   ======================================== */
+
+.z-base { z-index: 0; }
+.z-content { z-index: 10; }
+.z-overlay { z-index: 20; }
+.z-modal { z-index: 30; }
+.z-nav { z-index: 40; }
+.z-cursor { z-index: 50; }
