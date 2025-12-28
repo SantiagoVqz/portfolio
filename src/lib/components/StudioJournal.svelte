@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { gsap } from 'gsap';
-	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { browser } from '$app/environment';
 	import type { TimelineItem, Education, Philosophy } from '$lib/constants/profile';
 	import { revealWithExit } from '$lib/actions/reveal';
+
+	// GSAP types for dynamic imports
+	type GSAPInstance = typeof import('gsap').gsap;
+	type ScrollTriggerType = typeof import('gsap/ScrollTrigger').ScrollTrigger;
 
 	interface Props {
 		timeline: TimelineItem[];
@@ -47,37 +50,46 @@
 	}
 
 	onMount(() => {
-		if (!journalRef) return;
-		gsap.registerPlugin(ScrollTrigger);
+		if (!journalRef || !browser) return;
 
-		const ctx = gsap.context(() => {
-			// Animate entries on scroll
-			const entries = journalRef!.querySelectorAll('.journal-entry');
-			entries.forEach((entry, i) => {
-				gsap.fromTo(
-					entry,
-					{
-						opacity: 0,
-						y: 30,
-						filter: 'blur(4px)'
-					},
-					{
-						opacity: 1,
-						y: 0,
-						filter: 'blur(0px)',
-						duration: 0.8,
-						delay: i * 0.05,
-						scrollTrigger: {
-							trigger: entry,
-							start: 'top 85%',
-							toggleActions: 'play none none reverse'
+		let ctx: gsap.Context | null = null;
+
+		const initGSAP = async () => {
+			const { gsap } = await import('gsap');
+			const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+			gsap.registerPlugin(ScrollTrigger);
+
+			ctx = gsap.context(() => {
+				// Animate entries on scroll
+				const entries = journalRef!.querySelectorAll('.journal-entry');
+				entries.forEach((entry, i) => {
+					gsap.fromTo(
+						entry,
+						{
+							opacity: 0,
+							y: 30,
+							filter: 'blur(4px)'
+						},
+						{
+							opacity: 1,
+							y: 0,
+							filter: 'blur(0px)',
+							duration: 0.8,
+							delay: i * 0.05,
+							scrollTrigger: {
+								trigger: entry,
+								start: 'top 85%',
+								toggleActions: 'play none none reverse'
+							}
 						}
-					}
-				);
-			});
-		}, journalRef);
+					);
+				});
+			}, journalRef);
+		};
 
-		return () => ctx.revert();
+		initGSAP();
+
+		return () => ctx?.revert();
 	});
 </script>
 

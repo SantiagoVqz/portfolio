@@ -1,8 +1,6 @@
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-// Register ScrollTrigger plugin
-gsap.registerPlugin(ScrollTrigger);
+// Type definitions for GSAP imports
+type GSAPInstance = typeof import('gsap').gsap;
+type ScrollTriggerInstance = import('gsap/ScrollTrigger').ScrollTrigger;
 
 /**
  * Global Scroll Progress State
@@ -16,11 +14,15 @@ function createScrollState() {
 	let isScrolling = $state(false);
 
 	let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
-	let scrollTriggerInstance: ScrollTrigger | null = null;
+	let scrollTriggerInstance: ScrollTriggerInstance | null = null;
 
-	function init() {
+	async function init() {
 		// Only run in browser
 		if (typeof window === 'undefined') return;
+
+		const { gsap } = await import('gsap');
+		const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+		gsap.registerPlugin(ScrollTrigger);
 
 		// Create a ScrollTrigger for the entire document
 		scrollTriggerInstance = ScrollTrigger.create({
@@ -84,41 +86,8 @@ function createCursorState() {
 	let smoothX = $state(0);
 	let smoothY = $state(0);
 
-	let xTo: gsap.QuickToFunc | null = null;
-	let yTo: gsap.QuickToFunc | null = null;
-
-	function init() {
-		if (typeof window === 'undefined') return;
-
-		// Use quickTo for smooth cursor following
-		const cursorProxy = { x: 0, y: 0 };
-
-		xTo = gsap.quickTo(cursorProxy, 'x', {
-			duration: 0.4,
-			ease: 'power4.out',
-			onUpdate: () => {
-				smoothX = cursorProxy.x;
-			}
-		});
-
-		yTo = gsap.quickTo(cursorProxy, 'y', {
-			duration: 0.4,
-			ease: 'power4.out',
-			onUpdate: () => {
-				smoothY = cursorProxy.y;
-			}
-		});
-
-		window.addEventListener('mousemove', handleMouseMove);
-		window.addEventListener('mousedown', handleMouseDown);
-		window.addEventListener('mouseup', handleMouseUp);
-		window.addEventListener('mouseleave', handleMouseLeave);
-		window.addEventListener('mouseenter', handleMouseEnter);
-
-		// Detect hoverable elements
-		document.addEventListener('mouseover', handleMouseOver);
-		document.addEventListener('mouseout', handleMouseOut);
-	}
+	let xTo: ReturnType<GSAPInstance['quickTo']> | null = null;
+	let yTo: ReturnType<GSAPInstance['quickTo']> | null = null;
 
 	function handleMouseMove(e: MouseEvent) {
 		x = e.clientX;
@@ -169,6 +138,41 @@ function createCursorState() {
 			isHovering = false;
 			hoverTarget = null;
 		}
+	}
+
+	async function init() {
+		if (typeof window === 'undefined') return;
+
+		const { gsap } = await import('gsap');
+
+		// Use quickTo for smooth cursor following
+		const cursorProxy = { x: 0, y: 0 };
+
+		xTo = gsap.quickTo(cursorProxy, 'x', {
+			duration: 0.4,
+			ease: 'power4.out',
+			onUpdate: () => {
+				smoothX = cursorProxy.x;
+			}
+		});
+
+		yTo = gsap.quickTo(cursorProxy, 'y', {
+			duration: 0.4,
+			ease: 'power4.out',
+			onUpdate: () => {
+				smoothY = cursorProxy.y;
+			}
+		});
+
+		window.addEventListener('mousemove', handleMouseMove);
+		window.addEventListener('mousedown', handleMouseDown);
+		window.addEventListener('mouseup', handleMouseUp);
+		window.addEventListener('mouseleave', handleMouseLeave);
+		window.addEventListener('mouseenter', handleMouseEnter);
+
+		// Detect hoverable elements
+		document.addEventListener('mouseover', handleMouseOver);
+		document.addEventListener('mouseout', handleMouseOut);
 	}
 
 	function destroy() {

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { gsap } from 'gsap';
+	import { browser } from '$app/environment';
 	import type { Skill } from '$lib/constants/profile';
+
+	// GSAP types for dynamic imports
+	type GSAPInstance = typeof import('gsap').gsap;
+	let gsapInstance: GSAPInstance | null = null;
 
 	interface Props {
 		skills: Skill[];
@@ -277,28 +281,39 @@
 	}
 
 	onMount(() => {
-		if (!containerRef) return;
+		if (!containerRef || !browser) return;
 
-		const ctx = gsap.context(() => {
-			gsap.fromTo(
-				'.category-group',
-				{ opacity: 0, y: 20 },
-				{
-					opacity: 1,
-					y: 0,
-					duration: 0.6,
-					stagger: 0.08,
-					ease: 'power3.out',
-					scrollTrigger: {
-						trigger: containerRef,
-						start: 'top 80%'
+		let ctx: gsap.Context | null = null;
+
+		const initGSAP = async () => {
+			const { gsap } = await import('gsap');
+			const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+			gsap.registerPlugin(ScrollTrigger);
+			gsapInstance = gsap;
+
+			ctx = gsap.context(() => {
+				gsap.fromTo(
+					'.category-group',
+					{ opacity: 0, y: 20 },
+					{
+						opacity: 1,
+						y: 0,
+						duration: 0.6,
+						stagger: 0.08,
+						ease: 'power3.out',
+						scrollTrigger: {
+							trigger: containerRef,
+							start: 'top 80%'
+						}
 					}
-				}
-			);
-		}, containerRef);
+				);
+			}, containerRef);
+		};
+
+		initGSAP();
 
 		return () => {
-			ctx.revert();
+			ctx?.revert();
 			stopPhysics();
 		};
 	});

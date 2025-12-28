@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { gsap } from 'gsap';
-	import { ScrollTrigger } from 'gsap/ScrollTrigger';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { magnetic } from '$lib/actions/magnetic';
 	import { revealWithExit } from '$lib/actions/reveal';
 	import AnimatedAvatar from '$lib/components/AnimatedAvatar.svelte';
@@ -24,14 +23,18 @@
 		timelineData
 	} from '$lib/constants';
 
-	gsap.registerPlugin(ScrollTrigger);
-
 	// Refs for horizontal scroll
 	let horizontalSection = $state<HTMLElement | null>(null);
 	let horizontalTrack = $state<HTMLElement | null>(null);
 	let isMobile = $state(false);
 	let sectionHeight = $state<string>('100vh');
 	let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+
+	// GSAP instances (loaded dynamically)
+	type GSAPInstance = typeof import('gsap').gsap;
+	type ScrollTriggerType = typeof import('gsap/ScrollTrigger').ScrollTrigger;
+	let gsapInstance: GSAPInstance | null = null;
+	let ScrollTriggerInstance: ScrollTriggerType | null = null;
 
 	onMount(() => {
 		// Check if mobile
@@ -45,7 +48,7 @@
 		let ctx: gsap.Context | null = null;
 
 		const initHorizontalScroll = () => {
-			if (isMobile || !horizontalSection || !horizontalTrack) return;
+			if (isMobile || !horizontalSection || !horizontalTrack || !gsapInstance) return;
 
 			// Ensure context is clean before creating a new one
 			if (ctx) {
@@ -61,6 +64,8 @@
 			const scrollDistance = Math.max(0, totalWidth - viewportWidth);
 
 			sectionHeight = '100vh';
+
+			const gsap = gsapInstance;
 
 			requestAnimationFrame(() => {
 				ctx = gsap.context(() => {
@@ -100,11 +105,6 @@
 			});
 		};
 
-		// Initial start
-		const timer = setTimeout(() => {
-			initHorizontalScroll();
-		}, 100);
-
 		const handleResize = () => {
 			clearTimeout(resizeTimer);
 			checkMobile();
@@ -121,14 +121,29 @@
 					sectionHeight = '100vh';
 					requestAnimationFrame(initHorizontalScroll);
 				}
-				ScrollTrigger.refresh();
+				ScrollTriggerInstance?.refresh();
 			}, 200);
 		};
+
+		// Load GSAP dynamically and initialize
+		const loadGSAP = async () => {
+			const { gsap } = await import('gsap');
+			const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+			gsap.registerPlugin(ScrollTrigger);
+			gsapInstance = gsap;
+			ScrollTriggerInstance = ScrollTrigger;
+
+			// Initial start after GSAP is loaded
+			setTimeout(() => {
+				initHorizontalScroll();
+			}, 100);
+		};
+
+		loadGSAP();
 
 		window.addEventListener('resize', handleResize);
 
 		return () => {
-			clearTimeout(timer);
 			clearTimeout(resizeTimer);
 			window.removeEventListener('resize', checkMobile);
 			window.removeEventListener('resize', handleResize);

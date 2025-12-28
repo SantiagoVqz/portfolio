@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { gsap } from 'gsap';
+	import { browser } from '$app/environment';
 	import { magnetic } from '$lib/actions/magnetic';
+
+	// GSAP types for dynamic imports
+	type GSAPInstance = typeof import('gsap').gsap;
 
 	interface Props {
 		size?: number;
@@ -22,49 +25,64 @@
 
 	// Initialize breathing animation
 	$effect(() => {
-		if (!containerRef) return;
+		if (!containerRef || !browser) return;
 
-		const circles = containerRef.querySelectorAll('.orbit-circle');
-		const innerGlow = containerRef.querySelector('.inner-glow');
-		const pulseRing = containerRef.querySelector('.pulse-ring');
+		let breatheTl: gsap.core.Timeline | null = null;
+		let gsapInstance: GSAPInstance | null = null;
 
-		// Breathing animation for inner glow
-		const breatheTl = gsap.timeline({ repeat: -1, yoyo: true });
-		breatheTl.to(innerGlow, {
-			scale: 1.05,
-			opacity: 0.8,
-			duration: 3,
-			ease: 'sine.inOut'
-		});
+		const initAnimations = async () => {
+			const { gsap } = await import('gsap');
+			gsapInstance = gsap;
 
-		// Rotating orbits with different speeds
-		circles.forEach((circle, i) => {
-			const direction = i % 2 === 0 ? 1 : -1;
-			const duration = 20 + i * 8;
+			const circles = containerRef.querySelectorAll('.orbit-circle');
+			const innerGlow = containerRef.querySelector('.inner-glow');
+			const pulseRing = containerRef.querySelector('.pulse-ring');
 
-			gsap.to(circle, {
-				rotation: 360 * direction,
-				duration,
-				repeat: -1,
-				ease: 'none',
-				transformOrigin: '50% 50%'
+			// Breathing animation for inner glow
+			breatheTl = gsap.timeline({ repeat: -1, yoyo: true });
+			breatheTl.to(innerGlow, {
+				scale: 1.05,
+				opacity: 0.8,
+				duration: 3,
+				ease: 'sine.inOut'
 			});
-		});
 
-		// Pulse ring animation
-		gsap.to(pulseRing, {
-			scale: 1.4,
-			opacity: 0,
-			duration: 2.5,
-			repeat: -1,
-			ease: 'power2.out'
-		});
+			// Rotating orbits with different speeds
+			circles.forEach((circle, i) => {
+				const direction = i % 2 === 0 ? 1 : -1;
+				const duration = 20 + i * 8;
+
+				gsap.to(circle, {
+					rotation: 360 * direction,
+					duration,
+					repeat: -1,
+					ease: 'none',
+					transformOrigin: '50% 50%'
+				});
+			});
+
+			// Pulse ring animation
+			gsap.to(pulseRing, {
+				scale: 1.4,
+				opacity: 0,
+				duration: 2.5,
+				repeat: -1,
+				ease: 'power2.out'
+			});
+		};
+
+		initAnimations();
 
 		return () => {
-			breatheTl.kill();
-			gsap.killTweensOf(circles);
-			gsap.killTweensOf(innerGlow);
-			gsap.killTweensOf(pulseRing);
+			if (gsapInstance && containerRef) {
+				breatheTl?.kill();
+				const circles = containerRef.querySelectorAll('.orbit-circle');
+				const innerGlow = containerRef.querySelector('.inner-glow');
+				const pulseRing = containerRef.querySelector('.pulse-ring');
+				gsapInstance.killTweensOf(circles);
+				gsapInstance.killTweensOf(innerGlow);
+				gsapInstance.killTweensOf(pulseRing);
+			}
 		};
 	});
 </script>

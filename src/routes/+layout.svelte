@@ -2,8 +2,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { cssVariables } from '$lib/theme';
-	import { gsap } from 'gsap';
-	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { browser } from '$app/environment';
 
 	let { children } = $props();
 
@@ -16,108 +15,118 @@
 	let isHovering = $state(false);
 	let isVisible = $state(false);
 
-	// GSAP quick setters for performance
-	let sunlightXTo: gsap.QuickToFunc;
-	let sunlightYTo: gsap.QuickToFunc;
-	let cursorXTo: gsap.QuickToFunc;
-	let cursorYTo: gsap.QuickToFunc;
-
 	$effect(() => {
 		// Only run on client
-		if (typeof window === 'undefined') return;
+		if (!browser) return;
 
-		// Register GSAP plugins
-		gsap.registerPlugin(ScrollTrigger);
+		// Dynamically import GSAP to avoid SSR issues
+		const initGSAP = async () => {
+			const { gsap } = await import('gsap');
+			const { ScrollTrigger } = await import('gsap/ScrollTrigger');
 
-		// Initialize sunlight follower with slower, dreamy movement
-		const sunlightProxy = { x: 0, y: 0 };
-		sunlightXTo = gsap.quickTo(sunlightProxy, 'x', {
-			duration: 1.5,
-			ease: 'power2.out',
-			onUpdate: () => {
-				sunlightX = sunlightProxy.x;
-			}
-		});
-		sunlightYTo = gsap.quickTo(sunlightProxy, 'y', {
-			duration: 1.5,
-			ease: 'power2.out',
-			onUpdate: () => {
-				sunlightY = sunlightProxy.y;
-			}
-		});
+			// Register GSAP plugins
+			gsap.registerPlugin(ScrollTrigger);
 
-		// Initialize cursor follower with snappy movement
-		const cursorProxy = { x: 0, y: 0 };
-		cursorXTo = gsap.quickTo(cursorProxy, 'x', {
-			duration: 0.4,
-			ease: 'power4.out',
-			onUpdate: () => {
-				cursorX = cursorProxy.x;
-			}
-		});
-		cursorYTo = gsap.quickTo(cursorProxy, 'y', {
-			duration: 0.4,
-			ease: 'power4.out',
-			onUpdate: () => {
-				cursorY = cursorProxy.y;
-			}
-		});
+			// Initialize sunlight follower with slower, dreamy movement
+			const sunlightProxy = { x: 0, y: 0 };
+			const sunlightXTo = gsap.quickTo(sunlightProxy, 'x', {
+				duration: 1.5,
+				ease: 'power2.out',
+				onUpdate: () => {
+					sunlightX = sunlightProxy.x;
+				}
+			});
+			const sunlightYTo = gsap.quickTo(sunlightProxy, 'y', {
+				duration: 1.5,
+				ease: 'power2.out',
+				onUpdate: () => {
+					sunlightY = sunlightProxy.y;
+				}
+			});
 
-		// Mouse move handler
-		const handleMouseMove = (e: MouseEvent) => {
-			sunlightXTo(e.clientX);
-			sunlightYTo(e.clientY);
-			cursorXTo(e.clientX);
-			cursorYTo(e.clientY);
+			// Initialize cursor follower with snappy movement
+			const cursorProxy = { x: 0, y: 0 };
+			const cursorXTo = gsap.quickTo(cursorProxy, 'x', {
+				duration: 0.4,
+				ease: 'power4.out',
+				onUpdate: () => {
+					cursorX = cursorProxy.x;
+				}
+			});
+			const cursorYTo = gsap.quickTo(cursorProxy, 'y', {
+				duration: 0.4,
+				ease: 'power4.out',
+				onUpdate: () => {
+					cursorY = cursorProxy.y;
+				}
+			});
+
+			// Mouse move handler
+			const handleMouseMove = (e: MouseEvent) => {
+				sunlightXTo(e.clientX);
+				sunlightYTo(e.clientY);
+				cursorXTo(e.clientX);
+				cursorYTo(e.clientY);
+			};
+
+			// Hover detection for interactive elements
+			const handleMouseOver = (e: MouseEvent) => {
+				const target = e.target as HTMLElement;
+				if (
+					target.tagName === 'A' ||
+					target.tagName === 'BUTTON' ||
+					target.closest('a') ||
+					target.closest('button') ||
+					target.hasAttribute('data-cursor-hover')
+				) {
+					isHovering = true;
+					cursorScale = 2;
+				}
+			};
+
+			const handleMouseOut = (e: MouseEvent) => {
+				const target = e.target as HTMLElement;
+				if (
+					target.tagName === 'A' ||
+					target.tagName === 'BUTTON' ||
+					target.closest('a') ||
+					target.closest('button') ||
+					target.hasAttribute('data-cursor-hover')
+				) {
+					isHovering = false;
+					cursorScale = 1;
+				}
+			};
+
+			const handleMouseEnter = () => (isVisible = true);
+			const handleMouseLeave = () => (isVisible = false);
+
+			window.addEventListener('mousemove', handleMouseMove);
+			document.addEventListener('mouseover', handleMouseOver);
+			document.addEventListener('mouseout', handleMouseOut);
+			document.addEventListener('mouseenter', handleMouseEnter);
+			document.addEventListener('mouseleave', handleMouseLeave);
+
+			// Trigger visibility
+			isVisible = true;
+
+			// Return cleanup function
+			return () => {
+				window.removeEventListener('mousemove', handleMouseMove);
+				document.removeEventListener('mouseover', handleMouseOver);
+				document.removeEventListener('mouseout', handleMouseOut);
+				document.removeEventListener('mouseenter', handleMouseEnter);
+				document.removeEventListener('mouseleave', handleMouseLeave);
+			};
 		};
 
-		// Hover detection for interactive elements
-		const handleMouseOver = (e: MouseEvent) => {
-			const target = e.target as HTMLElement;
-			if (
-				target.tagName === 'A' ||
-				target.tagName === 'BUTTON' ||
-				target.closest('a') ||
-				target.closest('button') ||
-				target.hasAttribute('data-cursor-hover')
-			) {
-				isHovering = true;
-				cursorScale = 2;
-			}
-		};
-
-		const handleMouseOut = (e: MouseEvent) => {
-			const target = e.target as HTMLElement;
-			if (
-				target.tagName === 'A' ||
-				target.tagName === 'BUTTON' ||
-				target.closest('a') ||
-				target.closest('button') ||
-				target.hasAttribute('data-cursor-hover')
-			) {
-				isHovering = false;
-				cursorScale = 1;
-			}
-		};
-
-		const handleMouseEnter = () => (isVisible = true);
-		const handleMouseLeave = () => (isVisible = false);
-
-		window.addEventListener('mousemove', handleMouseMove);
-		document.addEventListener('mouseover', handleMouseOver);
-		document.addEventListener('mouseout', handleMouseOut);
-		document.addEventListener('mouseenter', handleMouseEnter);
-		document.addEventListener('mouseleave', handleMouseLeave);
-
-		// Trigger visibility
-		isVisible = true;
+		let cleanup: (() => void) | undefined;
+		initGSAP().then((cleanupFn) => {
+			cleanup = cleanupFn;
+		});
 
 		return () => {
-			window.removeEventListener('mousemove', handleMouseMove);
-			document.removeEventListener('mouseover', handleMouseOver);
-			document.removeEventListener('mouseout', handleMouseOut);
-			document.removeEventListener('mouseenter', handleMouseEnter);
-			document.removeEventListener('mouseleave', handleMouseLeave);
+			cleanup?.();
 		};
 	});
 </script>

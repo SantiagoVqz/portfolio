@@ -1,55 +1,62 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { gsap } from 'gsap';
-	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { browser } from '$app/environment';
 	import { timelineData } from '$lib/constants';
-
-	gsap.registerPlugin(ScrollTrigger);
 
 	let timelineRef = $state<HTMLElement>();
 	let lineRef = $state<HTMLElement>();
 
 	onMount(() => {
-		if (!timelineRef || !lineRef) return;
+		if (!timelineRef || !lineRef || !browser) return;
 
-		const ctx = gsap.context(() => {
-			// Animate the vertical line
-			gsap.fromTo(
-				lineRef!,
-				{ scaleY: 0, transformOrigin: 'top' },
-				{
-					scaleY: 1,
-					ease: 'none',
-					scrollTrigger: {
-						trigger: timelineRef,
-						start: 'top 70%',
-						end: 'bottom 70%',
-						scrub: true
-					}
-				}
-			);
+		let ctx: gsap.Context | null = null;
 
-			// Animate items
-			const items = gsap.utils.toArray('.timeline-item', timelineRef) as HTMLElement[];
-			items.forEach((item) => {
+		const initGSAP = async () => {
+			const { gsap } = await import('gsap');
+			const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+			gsap.registerPlugin(ScrollTrigger);
+
+			ctx = gsap.context(() => {
+				// Animate the vertical line
 				gsap.fromTo(
-					item,
-					{ opacity: 0, y: 50 },
+					lineRef!,
+					{ scaleY: 0, transformOrigin: 'top' },
 					{
-						opacity: 1,
-						y: 0,
-						duration: 0.8,
+						scaleY: 1,
+						ease: 'none',
 						scrollTrigger: {
-							trigger: item,
-							start: 'top 85%',
-							toggleActions: 'play none none reverse'
+							trigger: timelineRef,
+							start: 'top 70%',
+							end: 'bottom 70%',
+							scrub: true
 						}
 					}
 				);
-			});
-		}, timelineRef);
 
-		return () => ctx.revert();
+				// Animate items
+				const items = gsap.utils.toArray('.timeline-item', timelineRef) as HTMLElement[];
+				items.forEach((item) => {
+					gsap.fromTo(
+						item,
+						{ opacity: 0, y: 50 },
+						{
+							opacity: 1,
+							y: 0,
+							duration: 0.8,
+							scrollTrigger: {
+								trigger: item,
+								start: 'top 85%',
+								toggleActions: 'play none none reverse'
+							}
+						}
+					);
+				});
+			}, timelineRef);
+		};
+
+		initGSAP();
+
+		return () => ctx?.revert();
 	});
 </script>
 
@@ -78,26 +85,30 @@
 					class="absolute left-6 z-10 mt-1.5 h-4 w-4 -translate-x-1/2 transform rounded-full border-2 border-[--color-accent] bg-[--color-base] shadow-[0_0_0_4px_var(--color-base)] md:left-1/2 md:mt-0 md:translate-x-[-50%]"
 				></div>
 
-				<!-- Content Spacer (for alternating layout) -->
-				<div class="hidden flex-1 md:block"></div>
-
 				<!-- Content Card -->
-				<div class="w-full flex-1 pl-12 text-left md:pl-0 {i % 2 === 0 ? 'md:text-right' : ''}">
-					<div class="group relative">
+				<div class="ml-12 w-full md:ml-0 md:w-[calc(50%-3rem)]">
+					<div
+						class="rounded-2xl border border-[--color-ink]/5 bg-[--color-surface] p-6 shadow-[--shadow-diffused] transition-shadow hover:shadow-[--shadow-deep]"
+					>
+						<!-- Year badge -->
 						<span
-							class="mb-3 inline-block rounded-full bg-[--color-accent]/10 px-3 py-1 font-mono text-xs font-bold tracking-widest text-[--color-accent]"
+							class="inline-block rounded-full bg-[--color-accent]/10 px-3 py-1 font-mono text-xs text-[--color-accent]"
 						>
 							{item.year}
 						</span>
-						<h3 class="mb-1 font-serif text-2xl text-[--color-ink]">{item.title}</h3>
-						<div class="mb-4 font-mono text-sm tracking-wide text-[--color-ink]/60 uppercase">
-							{item.company}
-						</div>
-						<p
-							class="max-w-md leading-relaxed text-[--color-ink]/70 text-base {i % 2 === 0
-								? 'md:ml-auto'
-								: ''}"
+
+						<h4
+							class="mt-3 font-serif text-lg font-medium text-[--color-ink]"
+							style="font-family: var(--font-headline)"
 						>
+							{item.title}
+						</h4>
+
+						<p class="text-sm text-[--color-ink]/60">
+							{item.company}
+						</p>
+
+						<p class="mt-3 text-sm leading-relaxed text-[--color-ink]/70">
 							{item.description}
 						</p>
 					</div>

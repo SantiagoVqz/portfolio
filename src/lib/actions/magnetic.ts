@@ -1,4 +1,3 @@
-import { gsap } from 'gsap';
 import type { Action } from 'svelte/action';
 
 interface MagneticOptions {
@@ -17,22 +16,17 @@ interface MagneticOptions {
 export const magnetic: Action<HTMLElement, MagneticOptions | undefined> = (node, options = {}) => {
 	const { strength = 0.5, duration = 0.6 } = options;
 
-	let xTo: gsap.QuickToFunc;
-	let yTo: gsap.QuickToFunc;
+	// Only run on client
+	if (typeof window === 'undefined') {
+		return { destroy() {} };
+	}
 
-	const init = () => {
-		// quickTo is 10x more performant for mouse-followers than gsap.to
-		xTo = gsap.quickTo(node, 'x', {
-			duration,
-			ease: 'power4.out'
-		});
-		yTo = gsap.quickTo(node, 'y', {
-			duration,
-			ease: 'power4.out'
-		});
-	};
+	let xTo: ReturnType<typeof import('gsap').gsap.quickTo> | null = null;
+	let yTo: ReturnType<typeof import('gsap').gsap.quickTo> | null = null;
+	let gsapInstance: typeof import('gsap').gsap | null = null;
 
 	const handleMouseMove = (e: MouseEvent) => {
+		if (!xTo || !yTo) return;
 		const { clientX, clientY } = e;
 		const { height, width, left, top } = node.getBoundingClientRect();
 
@@ -45,12 +39,29 @@ export const magnetic: Action<HTMLElement, MagneticOptions | undefined> = (node,
 	};
 
 	const handleMouseLeave = () => {
+		if (!gsapInstance) return;
 		// Return to origin with a 'weighted' elastic snap
-		gsap.to(node, {
+		gsapInstance.to(node, {
 			x: 0,
 			y: 0,
 			duration: duration * 1.5,
 			ease: 'elastic.out(1, 0.3)'
+		});
+	};
+
+	// Initialize GSAP asynchronously
+	const init = async () => {
+		const { gsap } = await import('gsap');
+		gsapInstance = gsap;
+
+		// quickTo is 10x more performant for mouse-followers than gsap.to
+		xTo = gsap.quickTo(node, 'x', {
+			duration,
+			ease: 'power4.out'
+		});
+		yTo = gsap.quickTo(node, 'y', {
+			duration,
+			ease: 'power4.out'
 		});
 	};
 
@@ -64,7 +75,9 @@ export const magnetic: Action<HTMLElement, MagneticOptions | undefined> = (node,
 			node.removeEventListener('mousemove', handleMouseMove);
 			node.removeEventListener('mouseleave', handleMouseLeave);
 			// Kill any ongoing animations to prevent memory leaks
-			gsap.killTweensOf(node);
+			if (gsapInstance) {
+				gsapInstance.killTweensOf(node);
+			}
 		}
 	};
 };

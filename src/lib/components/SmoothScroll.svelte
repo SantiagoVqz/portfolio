@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { gsap } from 'gsap';
-	import { ScrollSmoother } from 'gsap/ScrollSmoother';
-	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { browser } from '$app/environment';
 	import type { Snippet } from 'svelte';
 
 	// Note: ScrollSmoother requires GSAP Club membership
@@ -18,17 +16,22 @@
 
 	let wrapper = $state<HTMLDivElement | null>(null);
 	let content = $state<HTMLDivElement | null>(null);
-	let smoother: ScrollSmoother | null = null;
+	let smoother: import('gsap/ScrollSmoother').ScrollSmoother | null = null;
 	let useNativeSmooth = $state(true);
 
-	// Use $effect to initialize when elements are bound
+	// Use $effect to initialize when elements are available
 	$effect(() => {
 		// Only try to initialize ScrollSmoother when elements are available
-		if (!wrapper || !content) return;
+		if (!wrapper || !content || !browser) return;
 
-		// Check if ScrollSmoother is available (requires GSAP Club)
-		if (typeof ScrollSmoother !== 'undefined') {
+		let cleanupFn: (() => void) | undefined;
+
+		const initSmoother = async () => {
 			try {
+				const { gsap } = await import('gsap');
+				const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+				const { ScrollSmoother } = await import('gsap/ScrollSmoother');
+
 				gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
 				smoother = ScrollSmoother.create({
@@ -40,14 +43,20 @@
 				});
 
 				useNativeSmooth = false;
+
+				cleanupFn = () => {
+					smoother?.kill();
+				};
 			} catch {
 				// ScrollSmoother not available, use native smooth scroll
 				useNativeSmooth = true;
 			}
-		}
+		};
+
+		initSmoother();
 
 		return () => {
-			smoother?.kill();
+			cleanupFn?.();
 		};
 	});
 
@@ -85,38 +94,28 @@
 {/if}
 
 <style>
-	/* Native smooth scroll fallback */
 	.smooth-scroll-native {
-		min-height: 100vh;
+		display: contents;
 	}
 
-	:global(html) {
-		scroll-behavior: smooth;
-	}
-
-	/* GSAP ScrollSmoother styles */
 	.smooth-wrapper {
-		overflow: hidden;
 		position: fixed;
-		height: 100%;
-		width: 100%;
 		top: 0;
 		left: 0;
 		right: 0;
 		bottom: 0;
+		overflow: hidden;
 	}
 
 	.smooth-content {
-		overflow: visible;
-		width: 100%;
+		display: contents;
 	}
 
-	/* Parallax effect classes for use with data-speed attribute */
+	/* Data-speed effects for ScrollSmoother */
 	:global([data-speed]) {
 		will-change: transform;
 	}
 
-	/* Lag effect for trailing elements */
 	:global([data-lag]) {
 		will-change: transform;
 	}

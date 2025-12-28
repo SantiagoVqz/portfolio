@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { gsap } from 'gsap';
+	import { browser } from '$app/environment';
 	import type { Skill } from '$lib/constants/profile';
 
 	interface Props {
@@ -64,28 +64,36 @@
 	}
 
 	onMount(() => {
-		if (!toolboxRef) return;
+		if (!toolboxRef || !browser) return;
 
-		// Initial animation - drawers slide in staggered
-		const drawers = toolboxRef.querySelectorAll('.drawer');
-		gsap.fromTo(
-			drawers,
-			{
-				x: -20,
-				opacity: 0
-			},
-			{
-				x: 0,
-				opacity: 1,
-				stagger: 0.1,
-				duration: 0.6,
-				ease: 'power3.out',
-				scrollTrigger: {
-					trigger: toolboxRef,
-					start: 'top 80%'
+		const initGSAP = async () => {
+			const { gsap } = await import('gsap');
+			const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+			gsap.registerPlugin(ScrollTrigger);
+
+			// Initial animation - drawers slide in staggered
+			const drawers = toolboxRef!.querySelectorAll('.drawer');
+			gsap.fromTo(
+				drawers,
+				{
+					x: -20,
+					opacity: 0
+				},
+				{
+					x: 0,
+					opacity: 1,
+					stagger: 0.1,
+					duration: 0.6,
+					ease: 'power3.out',
+					scrollTrigger: {
+						trigger: toolboxRef,
+						start: 'top 80%'
+					}
 				}
-			}
-		);
+			);
+		};
+
+		initGSAP();
 	});
 </script>
 
