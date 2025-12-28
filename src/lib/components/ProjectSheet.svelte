@@ -49,7 +49,7 @@
 	const displayTotal = $derived(String(total).padStart(2, '0'));
 
 	// Determine if we should show fallback
-	const showFallback = $derived(!image && !video && !children || mediaError);
+	const showFallback = $derived((!image && !video && !children) || mediaError);
 
 	// Handle media load states
 	function handleMediaLoad() {
@@ -75,11 +75,11 @@
 
 {#snippet artifactLabel(text: string, position: 'tl' | 'tr' | 'bl' | 'br')}
 	<span
-		class="absolute font-mono text-[10px] tracking-widest uppercase text-[--color-ink]/40
+		class="absolute font-mono text-[10px] tracking-widest text-[--color-ink]/40 uppercase
 			   {position === 'tl' ? 'top-6 left-6' : ''}
 			   {position === 'tr' ? 'top-6 right-6' : ''}
 			   {position === 'bl' ? 'bottom-6 left-6' : ''}
-			   {position === 'br' ? 'bottom-6 right-6' : ''}"
+			   {position === 'br' ? 'right-6 bottom-6' : ''}"
 	>
 		{text}
 	</span>
@@ -87,31 +87,31 @@
 
 {#snippet tagPill(text: string)}
 	<span
-		class="inline-block px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest
-			   rounded-full border border-current text-[--color-ink]/60"
+		class="inline-block rounded-full border border-current px-3 py-1.5 font-mono
+			   text-[10px] tracking-widest text-[--color-ink]/60 uppercase"
 	>
 		{text}
 	</span>
 {/snippet}
 
 <article
-	class="project-sheet relative w-full min-h-screen will-change-transform"
+	class="project-sheet relative min-h-screen w-full will-change-transform"
 	style="--accent: {accentColor}; --sheet-index: {index}"
 	onmouseenter={() => (isHovered = true)}
 	onmouseleave={() => (isHovered = false)}
 	data-sheet-index={index}
 >
 	<!-- Paper texture background -->
-	<div class="absolute inset-0 bg-[--color-surface] rounded-t-3xl overflow-hidden">
+	<div class="absolute inset-0 overflow-hidden rounded-t-3xl bg-[--color-surface]">
 		<!-- Grain texture -->
 		<div
-			class="absolute inset-0 opacity-30 pointer-events-none mix-blend-multiply"
+			class="pointer-events-none absolute inset-0 opacity-30 mix-blend-multiply"
 			style="background-image: var(--glass-grain); background-repeat: repeat"
 		></div>
 
 		<!-- Subtle gradient overlay -->
 		<div
-			class="absolute inset-0 pointer-events-none"
+			class="pointer-events-none absolute inset-0"
 			style="background: linear-gradient(
 				180deg,
 				transparent 0%,
@@ -129,13 +129,13 @@
 		{@render artifactLabel('Project', 'br')}
 
 		<!-- Main content grid -->
-		<div class="h-full flex flex-col justify-center max-w-6xl mx-auto">
-			<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+		<div class="mx-auto flex h-full max-w-6xl flex-col justify-center">
+			<div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-16">
 				<!-- Left column: Meta -->
-				<div class="lg:col-span-5 space-y-8">
+				<div class="space-y-8 lg:col-span-5">
 					<!-- Subtitle / Category -->
 					<span
-						class="inline-block font-mono text-xs uppercase tracking-widest"
+						class="inline-block font-mono text-xs tracking-widest uppercase"
 						style="color: var(--accent)"
 					>
 						{subtitle}
@@ -143,7 +143,7 @@
 
 					<!-- Title -->
 					<h2
-						class="font-serif text-4xl md:text-5xl lg:text-6xl font-medium leading-none tracking-tight text-[--color-ink]"
+						class="font-serif text-4xl leading-none font-medium tracking-tight text-[--color-ink] md:text-5xl lg:text-6xl"
 						style="font-family: var(--font-headline); letter-spacing: var(--tracking-tight)"
 					>
 						{title}
@@ -151,7 +151,7 @@
 
 					<!-- Description -->
 					<p
-						class="text-base lg:text-lg leading-relaxed max-w-md text-[--color-ink]/70"
+						class="max-w-md leading-relaxed text-[--color-ink]/70 text-base lg:text-lg"
 						style="line-height: var(--leading-relaxed)"
 					>
 						{description}
@@ -161,11 +161,19 @@
 					{#if metrics && metrics.length > 0}
 						<div class="flex flex-wrap gap-4">
 							{#each metrics as metric (metric.label)}
-								<div class="p-3 bg-[--color-base] rounded-xl" style="box-shadow: var(--shadow-diffused)">
-									<div class="font-serif text-xl font-semibold text-[--color-ink]" style="font-family: var(--font-headline)">
+								<div
+									class="rounded-xl bg-[--color-base] p-3"
+									style="box-shadow: var(--shadow-diffused)"
+								>
+									<div
+										class="font-serif text-xl font-semibold text-[--color-ink]"
+										style="font-family: var(--font-headline)"
+									>
 										{metric.value}
 									</div>
-									<div class="font-mono text-[10px] uppercase tracking-widest text-[--color-ink]/50">
+									<div
+										class="font-mono text-[10px] tracking-widest text-[--color-ink]/50 uppercase"
+									>
 										{metric.label}
 									</div>
 								</div>
@@ -185,18 +193,16 @@
 					<!-- CTA Button -->
 					<div class="pt-4">
 						<a
-							href={href}
-							class="group inline-flex items-center gap-4 px-8 py-4 rounded-full
-								   border border-[--color-ink] transition-all duration-300
-								   hover:bg-[--color-ink] hover:text-[--color-base] text-[--color-ink]"
+							{href}
+							class="group inline-flex items-center gap-4 rounded-full border border-[--color-ink]
+								   px-8 py-4 text-[--color-ink] transition-all
+								   duration-300 hover:bg-[--color-ink] hover:text-[--color-base]"
 							use:magnetic={{ strength: 0.3, duration: 0.5 }}
 							data-cursor-hover
 						>
-							<span class="font-mono text-xs uppercase tracking-widest">
-								View Project
-							</span>
+							<span class="font-mono text-xs tracking-widest uppercase"> View Project </span>
 							<svg
-								class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
+								class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="currentColor"
@@ -215,7 +221,7 @@
 					{:else}
 						<!-- Media or fallback visual -->
 						<div
-							class="aspect-[4/3] rounded-2xl overflow-hidden relative"
+							class="relative aspect-[4/3] overflow-hidden rounded-2xl"
 							class:is-hovered={isHovered}
 						>
 							{#if video && !mediaError}
@@ -265,13 +271,19 @@
 									<div class="circle circle-1" style="border-color: var(--accent)"></div>
 									<div class="circle circle-2" style="border-color: var(--accent)"></div>
 									<div class="circle circle-3" style="border-color: var(--accent)"></div>
-									<div class="line line-1" style="background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%)"></div>
-									<div class="line line-2" style="background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%)"></div>
+									<div
+										class="line line-1"
+										style="background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%)"
+									></div>
+									<div
+										class="line line-2"
+										style="background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%)"
+									></div>
 								</div>
 
 								<!-- Index number -->
 								<span
-									class="absolute bottom-8 right-8 font-serif text-8xl font-light opacity-10 text-[--color-ink]"
+									class="absolute right-8 bottom-8 font-serif text-8xl font-light text-[--color-ink] opacity-10"
 									style="font-family: var(--font-headline)"
 								>
 									{displayIndex}
@@ -279,7 +291,13 @@
 
 								<!-- Animated icon -->
 								<div class="fallback-icon" class:is-hovered={isHovered}>
-									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--accent)">
+									<svg
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="1"
+										style="color: var(--accent)"
+									>
 										<path d="M12 2L12 22M2 12L22 12" class="cross" />
 										<circle cx="12" cy="12" r="8" class="orbit" />
 									</svg>
@@ -295,7 +313,7 @@
 
 							<!-- Grain overlay -->
 							<div
-								class="absolute inset-0 pointer-events-none opacity-20"
+								class="pointer-events-none absolute inset-0 opacity-20"
 								style="background-image: var(--glass-grain); background-repeat: repeat"
 							></div>
 						</div>
@@ -307,7 +325,7 @@
 
 	<!-- Bottom edge shadow (paper stack effect) -->
 	<div
-		class="absolute bottom-0 left-0 right-0 h-px"
+		class="absolute right-0 bottom-0 left-0 h-px"
 		style="background: linear-gradient(
 			90deg,
 			transparent 0%,
@@ -333,7 +351,9 @@
 		height: 100%;
 		object-fit: cover;
 		opacity: 0;
-		transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+		transition:
+			opacity 0.4s ease,
+			transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
 	.media-element.is-loaded {
@@ -419,7 +439,9 @@
 		width: 64px;
 		height: 64px;
 		opacity: 0.4;
-		transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+		transition:
+			opacity 0.3s ease,
+			transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
 	.fallback-icon.is-hovered {
@@ -454,7 +476,8 @@
 
 	/* Animations */
 	@keyframes pulse {
-		0%, 100% {
+		0%,
+		100% {
 			transform: translate(-50%, -50%) scale(1);
 			opacity: 0.15;
 		}

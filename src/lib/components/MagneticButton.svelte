@@ -49,16 +49,13 @@
 		lg: 'px-8 py-4 text-xs'
 	};
 
-	const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+	let classes = $derived(
+		`${baseClasses} ${variantClasses[variant as keyof typeof variantClasses]} ${sizeClasses[size as keyof typeof sizeClasses]} ${className}`
+	);
 </script>
 
 {#if href}
-	<a
-		{href}
-		class={classes}
-		use:magnetic={{ strength, duration: 0.5 }}
-		data-cursor-hover
-	>
+	<a {href} class={classes} use:magnetic={{ strength, duration: 0.5 }} data-cursor-hover>
 		{@render children()}
 	</a>
 {:else}
@@ -72,4 +69,3 @@
 		{@render children()}
 	</button>
 {/if}
-

@@ -14,10 +14,7 @@ interface MagneticOptions {
  * @example
  * <button use:magnetic={{ strength: 0.5, duration: 0.6 }}>Hover me</button>
  */
-export const magnetic: Action<HTMLElement, MagneticOptions | undefined> = (
-	node,
-	options = {}
-) => {
+export const magnetic: Action<HTMLElement, MagneticOptions | undefined> = (node, options = {}) => {
 	const { strength = 0.5, duration = 0.6 } = options;
 
 	let xTo: gsap.QuickToFunc;
@@ -71,4 +68,3 @@ export const magnetic: Action<HTMLElement, MagneticOptions | undefined> = (
 		}
 	};
 };
-

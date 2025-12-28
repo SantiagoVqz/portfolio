@@ -4,7 +4,6 @@
 	import { cssVariables } from '$lib/theme';
 	import { gsap } from 'gsap';
 	import { ScrollTrigger } from 'gsap/ScrollTrigger';
-	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
@@ -35,12 +34,16 @@
 		sunlightXTo = gsap.quickTo(sunlightProxy, 'x', {
 			duration: 1.5,
 			ease: 'power2.out',
-			onUpdate: () => (sunlightX = sunlightProxy.x)
+			onUpdate: () => {
+				sunlightX = sunlightProxy.x;
+			}
 		});
 		sunlightYTo = gsap.quickTo(sunlightProxy, 'y', {
 			duration: 1.5,
 			ease: 'power2.out',
-			onUpdate: () => (sunlightY = sunlightProxy.y)
+			onUpdate: () => {
+				sunlightY = sunlightProxy.y;
+			}
 		});
 
 		// Initialize cursor follower with snappy movement
@@ -48,12 +51,16 @@
 		cursorXTo = gsap.quickTo(cursorProxy, 'x', {
 			duration: 0.4,
 			ease: 'power4.out',
-			onUpdate: () => (cursorX = cursorProxy.x)
+			onUpdate: () => {
+				cursorX = cursorProxy.x;
+			}
 		});
 		cursorYTo = gsap.quickTo(cursorProxy, 'y', {
 			duration: 0.4,
 			ease: 'power4.out',
-			onUpdate: () => (cursorY = cursorProxy.y)
+			onUpdate: () => {
+				cursorY = cursorProxy.y;
+			}
 		});
 
 		// Mouse move handler
@@ -143,10 +150,7 @@
 ></div>
 
 <!-- Global grain overlay -->
-<div
-	class="grain-overlay pointer-events-none fixed inset-0 z-[9991]"
-	aria-hidden="true"
-></div>
+<div class="grain-overlay pointer-events-none fixed inset-0 z-[9991]" aria-hidden="true"></div>
 
 <!-- Custom cursor -->
 <div
@@ -161,7 +165,7 @@
 	aria-hidden="true"
 >
 	<div
-		class="w-3 h-3 rounded-full border transition-all duration-300"
+		class="h-3 w-3 rounded-full border transition-all duration-300"
 		class:border-[--color-accent]={!isHovering}
 		class:border-[--color-tension]={isHovering}
 		class:bg-[--color-tension]={isHovering}

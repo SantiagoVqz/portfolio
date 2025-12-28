@@ -16,7 +16,6 @@ function createScrollState() {
 	let isScrolling = $state(false);
 
 	let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
-	let lastScrollTop = 0;
 	let scrollTriggerInstance: ScrollTrigger | null = null;
 
 	function init() {
@@ -42,8 +41,6 @@ function createScrollState() {
 				}, 150);
 			}
 		});
-
-		lastScrollTop = window.scrollY;
 	}
 
 	function destroy() {
@@ -87,7 +84,6 @@ function createCursorState() {
 	let smoothX = $state(0);
 	let smoothY = $state(0);
 
-	let rafId: number | null = null;
 	let xTo: gsap.QuickToFunc | null = null;
 	let yTo: gsap.QuickToFunc | null = null;
 
@@ -185,8 +181,6 @@ function createCursorState() {
 		window.removeEventListener('mouseenter', handleMouseEnter);
 		document.removeEventListener('mouseover', handleMouseOver);
 		document.removeEventListener('mouseout', handleMouseOut);
-
-		if (rafId) cancelAnimationFrame(rafId);
 	}
 
 	return {
@@ -220,4 +214,3 @@ function createCursorState() {
 }
 
 export const cursorState = createCursorState();
-

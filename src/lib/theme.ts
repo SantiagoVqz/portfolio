@@ -24,7 +24,8 @@ export const theme = {
 	},
 	material: {
 		shadows: {
-			diffused: 'inset 0px 2px 8px -2px rgba(54, 50, 47, 0.08), 0px 8px 24px -6px rgba(54, 50, 47, 0.04)',
+			diffused:
+				'inset 0px 2px 8px -2px rgba(54, 50, 47, 0.08), 0px 8px 24px -6px rgba(54, 50, 47, 0.04)',
 			deep: 'inset 0px 4px 16px -4px rgba(54, 50, 47, 0.12), 0px 12px 32px -8px rgba(54, 50, 47, 0.08)'
 		},
 		glass: {
@@ -60,4 +61,3 @@ export const cssVariables = `
 		--glass-grain: ${theme.material.glass.grain};
 	}
 `;
-

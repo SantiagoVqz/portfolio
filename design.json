@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Santiago Vazquez Portfolio Design Profile",
+  "version": "1.0.0",
+  "lastUpdated": "2024-12-28",
+
+  "brand": {
+    "name": "Santiago Vazquez",
+    "fullName": "Santiago Vázquez Villarreal",
+    "title": "Full-Stack Engineer",
+    "tagline": "Building products that scale — from municipal AI systems to IoT solutions",
+    "location": {
+      "city": "Monterrey",
+      "country": "Mexico",
+      "timezone": "CST (UTC-6)"
+    },
+    "availability": "Open for remote work"
+  },
+
+  "identity": {
+    "personality": [
+      "Technical excellence with product mindset",
+      "Calm, professional, approachable",
+      "Detail-oriented but pragmatic",
+      "Innovation-focused but grounded in fundamentals"
+    ],
+    "values": [
+      "Product-First Engineering",
+      "Serverless by Default",
+      "Quality at Scale"
+    ]
+  },
+
+  "aestheticPhilosophy": {
+    "overview": "A tactile, pastel-forward design system inspired by ceramic studio aesthetics. The visual language balances warmth and professionalism, creating an inviting yet sophisticated atmosphere.",
+    
+    "colorPhilosophy": {
+      "base": {
+        "value": "#fdfcf8",
+        "name": "Cream",
+        "rationale": "Warm off-white that feels like quality paper or ceramic, avoiding sterile pure white"
+      },
+      "surface": {
+        "value": "#f2f0e9",
+        "name": "Parchment",
+        "rationale": "Subtle elevation for cards and sections, maintaining warmth while creating depth"
+      },
+      "accent": {
+        "value": "#cc8b65",
+        "name": "Terracotta",
+        "rationale": "Warm, earthy tone that conveys craftsmanship and human touch. Primary action color."
+      },
+      "tension": {
+        "value": "#7d9c8b",
+        "name": "Sage",
+        "rationale": "Complementary cool tone for balance. Used for tags, secondary highlights, and status indicators."
+      },
+      "ink": {
+        "value": "#36322f",
+        "name": "Charcoal",
+        "rationale": "Soft black that's easier on eyes than pure black, maintaining the warm aesthetic"
+      }
+    },
+
+    "typographyPhilosophy": {
+      "headline": {
+        "family": "Fraunces",
+        "category": "serif",
+        "rationale": "Variable serif with optical sizing. Adds personality and warmth to headlines while maintaining readability. The slight quirkiness reflects innovation."
+      },
+      "data": {
+        "family": "DM Mono",
+        "category": "monospace",
+        "rationale": "Clean monospace for technical credibility. Used for labels, metadata, and code references. Creates visual contrast with the serif headlines."
+      }
+    },
+
+    "textureAndDepth": {
+      "grain": "Subtle noise texture overlay adds tactile, handcrafted quality",
+      "shadows": "Diffused, warm-tinted shadows that feel natural rather than harsh",
+      "glassMorphism": "Subtle backdrop blur for elevated elements, maintaining depth without distraction"
+    }
+  },
+
+  "voiceAndTone": {
+    "writing": {
+      "style": "Conversational yet professional",
+      "avoid": ["Jargon without context", "Overly casual language", "Buzzwords"],
+      "embrace": ["Clear technical explanations", "Impact-focused descriptions", "Personal but professional tone"]
+    },
+    "microcopy": {
+      "labels": "Concise, uppercase, widely tracked (e.g., 'THE ARTIFACTS')",
+      "descriptions": "Friendly, benefit-focused",
+      "cta": "Action-oriented but not pushy"
+    }
+  },
+
+  "motionPhilosophy": {
+    "principles": [
+      "Motion should feel natural and purposeful",
+      "Animations enhance understanding, never distract",
+      "Respect user preferences (prefers-reduced-motion)",
+      "Consistent easing creates cohesive feel"
+    ],
+    "signature": {
+      "easing": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "rationale": "Smooth out-expo curve that feels organic and satisfying"
+    }
+  },
+
+  "uxPrinciples": {
+    "accessibility": [
+      "WCAG 2.1 AA compliance minimum",
+      "Keyboard navigable throughout",
+      "Screen reader friendly with proper ARIA",
+      "Sufficient color contrast"
+    ],
+    "performance": [
+      "Core Web Vitals optimized",
+      "Progressive enhancement",
+      "Lazy loading for images and heavy components",
+      "Minimal JavaScript for core content"
+    ],
+    "responsiveness": [
+      "Mobile-first approach",
+      "Touch-friendly targets (44px minimum)",
+      "Fluid typography and spacing",
+      "Adaptive layouts, not just responsive"
+    ]
+  }
+}
+

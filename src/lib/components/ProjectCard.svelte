@@ -62,7 +62,7 @@
 	});
 
 	// Determine if we should show fallback
-	const showFallback = $derived(!image && !video || mediaError);
+	const showFallback = $derived((!image && !video) || mediaError);
 
 	// Format index for display - use $derived for reactivity
 	const displayIndex = $derived(String(index + 1).padStart(2, '0'));
@@ -193,7 +193,14 @@
 
 		<!-- Arrow indicator -->
 		<div class="card-arrow" class:is-hovered={isHovered}>
-			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+			<svg
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+			>
 				<path d="M7 17L17 7M17 7H7M17 7V17" />
 			</svg>
 		</div>
@@ -202,7 +209,7 @@
 
 <style>
 	.project-card {
-		--card-radius: 1.25rem;
+		--card-radius: var(--radius-xl);
 		position: relative;
 		animation-delay: var(--delay);
 	}
@@ -216,12 +223,14 @@
 		text-decoration: none;
 		color: inherit;
 		box-shadow: var(--shadow-diffused);
-		transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		transition:
+			box-shadow var(--duration-slow) var(--ease-smooth),
+			transform var(--duration-slow) var(--ease-smooth);
 	}
 
 	.card-link:hover {
 		box-shadow: var(--shadow-deep);
-		transform: translateY(-4px);
+		transform: translateY(var(--lift-card));
 	}
 
 	/* Media Section */
@@ -237,7 +246,10 @@
 		height: 100%;
 		object-fit: cover;
 		opacity: 0;
-		transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease;
+		transition:
+			opacity var(--duration-slow) ease,
+			transform var(--duration-slow) var(--ease-smooth),
+			filter var(--duration-slow) ease;
 	}
 
 	.card-media.is-loaded {
@@ -245,7 +257,7 @@
 	}
 
 	.card-media.is-hovered {
-		transform: scale(1.05);
+		transform: scale(var(--scale-medium));
 		filter: brightness(0.9);
 	}
 
@@ -264,7 +276,7 @@
 		);
 		opacity: 0;
 		pointer-events: none;
-		transition: opacity 0.4s ease;
+		transition: opacity var(--duration-slow) ease;
 	}
 
 	.card-fallback.visible {
@@ -371,12 +383,14 @@
 		height: 48px;
 		color: var(--accent);
 		opacity: 0.4;
-		transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+		transition:
+			opacity var(--duration-normal) ease,
+			transform var(--duration-slow) var(--ease-smooth);
 	}
 
 	.fallback-icon.is-hovered {
 		opacity: 0.6;
-		transform: rotate(45deg) scale(1.1);
+		transform: rotate(45deg) scale(var(--scale-emphasis));
 	}
 
 	.fallback-icon .cross {
@@ -436,7 +450,7 @@
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		opacity: 0;
-		transition: opacity 0.4s ease;
+		transition: opacity var(--duration-slow) ease;
 	}
 
 	.card-overlay.is-hovered {
@@ -451,8 +465,10 @@
 		color: var(--color-ink);
 		padding: 0.75rem 1.5rem;
 		border: 1px solid var(--color-ink);
-		border-radius: 2rem;
-		transition: background 0.3s ease, color 0.3s ease;
+		border-radius: var(--radius-full);
+		transition:
+			background var(--duration-normal) ease,
+			color var(--duration-normal) ease;
 	}
 
 	.view-text:hover {
@@ -570,7 +586,7 @@
 		padding: 0.375rem 0.75rem;
 		background: color-mix(in srgb, var(--color-tension) 15%, var(--color-surface));
 		color: var(--color-tension);
-		border-radius: 1rem;
+		border-radius: var(--radius-lg);
 	}
 
 	/* Arrow */
@@ -582,8 +598,8 @@
 		opacity: 0;
 		transform: translate(-8px, 8px);
 		transition:
-			opacity 0.3s ease,
-			transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+			opacity var(--duration-normal) ease,
+			transform var(--duration-normal) var(--ease-smooth);
 		z-index: 10;
 	}
 
@@ -594,7 +610,8 @@
 
 	/* Animations */
 	@keyframes pulse {
-		0%, 100% {
+		0%,
+		100% {
 			transform: translate(-50%, -50%) scale(1);
 			opacity: 0.15;
 		}
@@ -605,7 +622,8 @@
 	}
 
 	@keyframes float {
-		0%, 100% {
+		0%,
+		100% {
 			transform: translateY(0);
 		}
 		50% {

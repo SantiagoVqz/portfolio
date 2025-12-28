@@ -5,10 +5,8 @@
 			"args": ["-y", "@sveltejs/mcp"]
 		},
 		"playwright": {
-		"command": "npx",
-		"args": [
-		  "@playwright/mcp@latest"
-		]
-	  }
+			"command": "npx",
+			"args": ["@playwright/mcp@latest"]
+		}
 	}
 }

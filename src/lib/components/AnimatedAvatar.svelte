@@ -5,12 +5,20 @@
 	interface Props {
 		size?: number;
 		imageSrc?: string;
+		showStatus?: boolean;
+		class?: string;
 	}
 
-	let { size = 280, imageSrc }: Props = $props();
+	let { size = 280, imageSrc, showStatus = true, class: className = '' }: Props = $props();
 
 	let containerRef: HTMLDivElement;
 	let isHovered = $state(false);
+	let hasError = $state(false);
+
+	// Reset error state when image source changes
+	$effect(() => {
+		if (imageSrc) hasError = false;
+	});
 
 	// Initialize breathing animation
 	$effect(() => {
@@ -63,18 +71,22 @@
 
 <div
 	bind:this={containerRef}
-	class="animated-avatar relative"
-	style="--size: {size}px"
+	class="animated-avatar relative {className}"
+	style="--max-size: {size}px"
 	use:magnetic={{ strength: 0.15, duration: 0.8 }}
 	onmouseenter={() => (isHovered = true)}
 	onmouseleave={() => (isHovered = false)}
 	data-cursor-hover
+	role="img"
+	aria-label="Santiago Vazquez avatar"
 >
 	<!-- Pulse ring (radiates outward) -->
-	<div class="pulse-ring absolute inset-0 rounded-full border-2 border-[--color-accent] opacity-40"></div>
+	<div
+		class="pulse-ring absolute inset-0 rounded-full border-2 border-[--color-accent] opacity-40"
+	></div>
 
 	<!-- Outer orbit circles -->
-	<svg class="orbit-circle absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+	<svg class="orbit-circle absolute inset-0 h-full w-full" viewBox="0 0 100 100">
 		<circle
 			cx="50"
 			cy="50"
@@ -93,7 +105,7 @@
 		</defs>
 	</svg>
 
-	<svg class="orbit-circle absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+	<svg class="orbit-circle absolute inset-0 h-full w-full" viewBox="0 0 100 100">
 		<circle
 			cx="50"
 			cy="50"
@@ -112,7 +124,7 @@
 		</defs>
 	</svg>
 
-	<svg class="orbit-circle absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+	<svg class="orbit-circle absolute inset-0 h-full w-full" viewBox="0 0 100 100">
 		<circle
 			cx="50"
 			cy="50"
@@ -129,37 +141,42 @@
 	<div
 		class="inner-glow absolute rounded-full"
 		style="
-			inset: 15%;
+			inset: 12%;
 			background: radial-gradient(
-				circle at 30% 30%,
-				color-mix(in srgb, var(--color-accent) 20%, var(--color-surface)) 0%,
-				color-mix(in srgb, var(--color-tension) 10%, var(--color-surface)) 60%,
+				circle at 50% 60%,
+				color-mix(in srgb, var(--color-surface) 95%, var(--color-accent)) 0%,
+				color-mix(in srgb, var(--color-surface) 90%, var(--color-tension)) 70%,
 				var(--color-surface) 100%
 			);
 			box-shadow:
-				inset 0 0 40px rgba(204, 139, 101, 0.15),
-				0 20px 60px -20px rgba(54, 50, 47, 0.2);
+				inset 0 -20px 40px -10px rgba(204, 139, 101, 0.12),
+				0 25px 50px -15px rgba(54, 50, 47, 0.25);
 		"
 	></div>
 
 	<!-- Avatar content area -->
 	<div
-		class="avatar-content absolute rounded-full overflow-hidden flex items-center justify-center"
-		style="inset: 18%"
+		class="avatar-content absolute flex items-end justify-center overflow-hidden rounded-full"
+		style="inset: 12%"
 	>
-		{#if imageSrc}
+		{#if imageSrc && !hasError}
 			<!-- Actual memoji/avatar image -->
 			<img
 				src={imageSrc}
 				alt="Santiago Vazquez"
-				class="w-full h-full object-cover"
-				class:scale-105={isHovered}
-				style="transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+				class="h-auto w-[115%] object-contain"
+				class:memoji-hover={isHovered}
+				style="
+					transition: transform var(--duration-slow) var(--ease-smooth);
+					transform: translateY(8%);
+					filter: drop-shadow(0 8px 16px rgba(54, 50, 47, 0.15));
+				"
+				onerror={() => (hasError = true)}
 			/>
 		{:else}
 			<!-- Placeholder: Stylized initials -->
 			<div
-				class="w-full h-full flex items-center justify-center"
+				class="flex h-full w-full items-center justify-center"
 				style="
 					background: linear-gradient(
 						135deg,
@@ -186,7 +203,7 @@
 
 	<!-- Floating accent dots -->
 	<div
-		class="accent-dot absolute w-2 h-2 rounded-full"
+		class="accent-dot absolute h-2 w-2 rounded-full"
 		style="
 			top: 10%;
 			right: 20%;
@@ -196,7 +213,7 @@
 		"
 	></div>
 	<div
-		class="accent-dot absolute w-1.5 h-1.5 rounded-full"
+		class="accent-dot absolute h-1.5 w-1.5 rounded-full"
 		style="
 			bottom: 15%;
 			left: 15%;
@@ -206,7 +223,7 @@
 		"
 	></div>
 	<div
-		class="accent-dot absolute w-1 h-1 rounded-full"
+		class="accent-dot absolute h-1 w-1 rounded-full"
 		style="
 			top: 25%;
 			left: 10%;
@@ -217,20 +234,23 @@
 	></div>
 
 	<!-- Status indicator -->
-	<div
-		class="status-indicator absolute bottom-[18%] right-[18%] flex items-center gap-2 px-3 py-1.5
-			   rounded-full bg-[--color-surface] border border-[--color-tension] border-opacity-30"
-		style="box-shadow: 0 4px 12px -4px rgba(54, 50, 47, 0.15)"
-	>
-		<span class="w-2 h-2 rounded-full bg-[--color-tension] animate-pulse"></span>
-		<span class="font-mono text-[9px] uppercase tracking-widest opacity-60">Available</span>
-	</div>
+	{#if showStatus}
+		<div
+			class="status-indicator absolute right-[12%] bottom-[8%] flex items-center gap-2 rounded-full border
+				border-[--color-ink]/10 bg-[--color-base] px-3 py-1.5"
+			style="box-shadow: 0 4px 16px -4px rgba(54, 50, 47, 0.2)"
+		>
+			<span class="h-2 w-2 animate-pulse rounded-full bg-green-500"></span>
+		</div>
+	{/if}
 </div>
 
 <style>
 	.animated-avatar {
-		width: var(--size);
-		height: var(--size);
+		width: 100%;
+		max-width: var(--max-size);
+		aspect-ratio: 1 / 1;
+		height: auto;
 	}
 
 	@keyframes float-dot {
@@ -244,7 +264,10 @@
 	}
 
 	.avatar-content span {
-		transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		transition: transform var(--duration-slow) var(--ease-smooth);
+	}
+
+	.avatar-content img.memoji-hover {
+		transform: translateY(8%) scale(var(--scale-medium));
 	}
 </style>
-

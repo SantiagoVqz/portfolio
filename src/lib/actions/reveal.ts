@@ -176,7 +176,10 @@ interface RevealWithExitOptions extends RevealOptions {
 	persist?: boolean; // If true, elements stay visible after reveal (no exit animation)
 }
 
-export const revealWithExit: Action<HTMLElement, RevealWithExitOptions | undefined> = (node, options = {}) => {
+export const revealWithExit: Action<HTMLElement, RevealWithExitOptions | undefined> = (
+	node,
+	options = {}
+) => {
 	const {
 		blur = 20,
 		y = 60,
@@ -234,7 +237,8 @@ export const revealWithExit: Action<HTMLElement, RevealWithExitOptions | undefin
 		targets.forEach((target, i) => {
 			const v = stagger > 0 ? getVariation(i) : { durationOffset: 0 };
 			const elementDuration = duration + v.durationOffset;
-			const delay = stagger > 0 ? i * stagger * (1 + Math.sin((i / targets.length) * Math.PI) * 0.3) : 0;
+			const delay =
+				stagger > 0 ? i * stagger * (1 + Math.sin((i / targets.length) * Math.PI) * 0.3) : 0;
 
 			gsap.to(target, {
 				opacity: 1,
@@ -341,7 +345,7 @@ export const revealWithExit: Action<HTMLElement, RevealWithExitOptions | undefin
 	return {
 		destroy() {
 			scrollTriggerInstance?.kill();
-			targets.forEach(target => gsap.killTweensOf(target));
+			targets.forEach((target) => gsap.killTweensOf(target));
 		}
 	};
 };
@@ -427,7 +431,7 @@ export const revealBatch: Action<HTMLElement, RevealOptions | undefined> = (node
 	const children = node.querySelectorAll('[data-reveal]');
 
 	Array.from(children).forEach((child, i) => {
-		const rotationOffset = ((i * 7) % 11 - 5) / 5 * 1.5;
+		const rotationOffset = ((((i * 7) % 11) - 5) / 5) * 1.5;
 		gsap.set(child, {
 			opacity: 0,
 			y,

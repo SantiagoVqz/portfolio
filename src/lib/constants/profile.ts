@@ -44,7 +44,16 @@ export const professionalProfile = {
 
 export interface Skill {
 	name: string;
-	category: 'Framework' | 'Language' | 'Cloud' | 'Backend' | 'Mobile' | 'Testing' | 'Motion' | 'DevOps' | 'Database';
+	category:
+		| 'Framework'
+		| 'Language'
+		| 'Cloud'
+		| 'Backend'
+		| 'Mobile'
+		| 'Testing'
+		| 'Motion'
+		| 'DevOps'
+		| 'Database';
 	size: 'large' | 'medium' | 'small';
 }
 
@@ -63,7 +72,16 @@ export const technicalSkills: Skill[] = [
 ];
 
 export const skillCategories = {
-	frontend: ['React.js', 'Next.js', 'SvelteKit', 'React Native', 'TypeScript', 'Tailwind CSS', 'Shadow DOM', 'GSAP'],
+	frontend: [
+		'React.js',
+		'Next.js',
+		'SvelteKit',
+		'React Native',
+		'TypeScript',
+		'Tailwind CSS',
+		'Shadow DOM',
+		'GSAP'
+	],
 	backend: ['Python (FastAPI)', 'Node.js', 'C++', 'AWS (Lambda, DynamoDB, AppSync)', 'PostgreSQL'],
 	tools: ['Vite', 'Playwright', 'pnpm', 'Docker', 'Git/GitHub', 'CI/CD Pipelines'],
 	methodologies: ['Agile (SCRUM)', 'Domain-Driven Design (DDD)', 'Product Lifecycle Management']
@@ -353,4 +371,3 @@ export const meta = {
 		'Cloud Native'
 	]
 } as const;
-
