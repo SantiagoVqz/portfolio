@@ -17,9 +17,7 @@
 
 	// Track scroll state for navbar appearance
 	let isScrolled = $state(false);
-	let isHidden = $state(false);
 	let isMobileMenuOpen = $state(false);
-	let lastScrollY = 0;
 
 	// Close mobile menu when clicking a link
 	function handleLinkClick() {
@@ -42,20 +40,8 @@
 		scrollState.init();
 
 		const handleScroll = () => {
-			const currentScrollY = window.scrollY;
-
-			// Show/hide based on scroll direction (but not when menu is open)
-			if (!isMobileMenuOpen) {
-				if (currentScrollY > lastScrollY && currentScrollY > 100) {
-					isHidden = true;
-				} else {
-					isHidden = false;
-				}
-			}
-
 			// Add background when scrolled
-			isScrolled = currentScrollY > 50;
-			lastScrollY = currentScrollY;
+			isScrolled = window.scrollY > 50;
 		};
 
 		window.addEventListener('scroll', handleScroll, { passive: true });
@@ -72,7 +58,6 @@
 <nav 
 	class="navbar" 
 	class:is-scrolled={isScrolled} 
-	class:is-hidden={isHidden}
 	class:menu-open={isMobileMenuOpen}
 	aria-label="Main navigation"
 >
@@ -192,9 +177,9 @@
 		z-index: 1000;
 		padding: 1.25rem 2rem;
 		transition:
-			transform var(--duration-slow) var(--ease-smooth),
 			background var(--duration-normal) ease,
-			backdrop-filter var(--duration-normal) ease;
+			backdrop-filter var(--duration-normal) ease,
+			padding var(--duration-normal) ease;
 	}
 
 	.navbar.is-scrolled {
@@ -204,12 +189,7 @@
 		padding: 1rem 2rem;
 	}
 
-	.navbar.is-hidden {
-		transform: translateY(-100%);
-	}
-
 	.navbar.menu-open {
-		transform: translateY(0);
 		background: rgba(253, 252, 248, 0.95);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);

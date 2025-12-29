@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { magnetic } from '$lib/actions/magnetic';
 	import { revealWithExit } from '$lib/actions/reveal';
+	import { tilt3d } from '$lib/actions/tilt3d';
+	import { countUp } from '$lib/actions/countUp';
 
 	interface Metric {
 		label: string;
@@ -75,7 +77,7 @@
 	onmouseenter={() => (isHovered = true)}
 	onmouseleave={() => (isHovered = false)}
 >
-	<a {href} class="card-link block h-full" data-cursor-hover>
+	<a {href} class="card-link block h-full" data-cursor-hover use:tilt3d={{ maxRotation: 8, glare: true, glareOpacity: 0.1, scale: 1.01 }}>
 		<!-- Image/Video container with fallback -->
 		<div class="card-media-container">
 			{#if video && !mediaError}
@@ -175,7 +177,7 @@
 				<div class="card-metrics">
 					{#each metrics as metric (metric.label)}
 						<div class="metric">
-							<span class="metric-value">{metric.value}</span>
+							<span class="metric-value" use:countUp={{ duration: 2, delay: 0.2 }}>{metric.value}</span>
 							<span class="metric-label">{metric.label}</span>
 						</div>
 					{/each}

@@ -3,6 +3,9 @@
 	import { browser } from '$app/environment';
 	import { magnetic } from '$lib/actions/magnetic';
 	import { revealWithExit } from '$lib/actions/reveal';
+	import { textReveal } from '$lib/actions/textReveal';
+	import { parallax, parallaxScale } from '$lib/actions/parallax';
+	import { pageLoad } from '$lib/actions/pageLoad';
 	import AnimatedAvatar from '$lib/components/AnimatedAvatar.svelte';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import ProjectCard from '$lib/components/ProjectCard.svelte';
@@ -27,6 +30,7 @@
 	let horizontalSection = $state<HTMLElement | null>(null);
 	let horizontalTrack = $state<HTMLElement | null>(null);
 	let isMobile = $state(false);
+	let isTouchDevice = $state(false);
 	let sectionHeight = $state<string>('100vh');
 	let resizeTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -36,10 +40,20 @@
 	let gsapInstance: GSAPInstance | null = null;
 	let ScrollTriggerInstance: ScrollTriggerType | null = null;
 
+	// Detect touch devices - horizontal scroll with pinning causes issues
+	function detectTouchDevice(): boolean {
+		return (
+			'ontouchstart' in window ||
+			navigator.maxTouchPoints > 0 ||
+			window.matchMedia('(hover: none) and (pointer: coarse)').matches
+		);
+	}
+
 	onMount(() => {
-		// Check if mobile
+		// Check if mobile or touch device
 		const checkMobile = () => {
 			isMobile = window.innerWidth < 1024;
+			isTouchDevice = detectTouchDevice();
 		};
 		checkMobile();
 		window.addEventListener('resize', checkMobile);
@@ -48,7 +62,8 @@
 		let ctx: gsap.Context | null = null;
 
 		const initHorizontalScroll = () => {
-			if (isMobile || !horizontalSection || !horizontalTrack || !gsapInstance) return;
+			// Skip on mobile, touch devices, or if elements not ready
+			if (isMobile || isTouchDevice || !horizontalSection || !horizontalTrack || !gsapInstance) return;
 
 			// Ensure context is clean before creating a new one
 			if (ctx) {
@@ -57,8 +72,6 @@
 			}
 
 			const cards = horizontalTrack.querySelectorAll('.project-card-wrapper');
-			// Force a recalculation of widths by temporarily resetting transforms if needed,
-			// but ctx.revert() above should handle it.
 			const totalWidth = horizontalTrack.scrollWidth;
 			const viewportWidth = window.innerWidth;
 			const scrollDistance = Math.max(0, totalWidth - viewportWidth);
@@ -115,14 +128,19 @@
 				ctx = null;
 			}
 
+			// Reset track position when switching to mobile
+			if ((isMobile || isTouchDevice) && horizontalTrack) {
+				horizontalTrack.style.transform = '';
+			}
+
 			// Debounce re-initialization
 			resizeTimer = setTimeout(() => {
-				if (!isMobile && horizontalTrack && horizontalSection) {
+				if (!isMobile && !isTouchDevice && horizontalTrack && horizontalSection) {
 					sectionHeight = '100vh';
 					requestAnimationFrame(initHorizontalScroll);
 				}
 				ScrollTriggerInstance?.refresh();
-			}, 200);
+			}, 250);
 		};
 
 		// Load GSAP dynamically and initialize
@@ -282,16 +300,21 @@
 	Skip to main content
 </a>
 
+<!-- Page Load Animation Wrapper -->
+<div use:pageLoad={{ delay: 0.1, duration: 0.8 }}>
+
 <!-- Navigation -->
-<Navbar
-	brand={personalInfo.shortName}
-	links={[
-		{ label: 'Artifacts', href: '#artifacts' },
-		{ label: 'Process', href: '#process' },
-		{ label: 'Archive', href: '#archive' },
-		{ label: 'Contact', href: '#contact' }
-	]}
-/>
+<div data-load="navbar">
+	<Navbar
+		brand={personalInfo.shortName}
+		links={[
+			{ label: 'Artifacts', href: '#artifacts' },
+			{ label: 'Process', href: '#process' },
+			{ label: 'Archive', href: '#archive' },
+			{ label: 'Contact', href: '#contact' }
+		]}
+	/>
+</div>
 
 <!-- Main Content Wrapper -->
 <main id="main-content">
@@ -305,26 +328,35 @@
 	class="hero relative flex min-h-screen items-center justify-center overflow-hidden px-6 md:px-12 lg:px-20"
 	aria-label="Introduction"
 >
-	<!-- Ambient background elements -->
-	<div class="pointer-events-none absolute inset-0">
+	<!-- Ambient background elements with parallax -->
+	<div class="pointer-events-none absolute inset-0 overflow-hidden">
 		<div
-			class="absolute top-1/4 left-1/4 h-96 w-96 rounded-full opacity-20"
+			class="ambient-blob absolute top-1/4 left-1/4 h-96 w-96 rounded-full opacity-20"
 			style="background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%); filter: blur(80px);"
+			use:parallax={{ speed: -0.15 }}
 		></div>
 		<div
-			class="absolute right-1/4 bottom-1/3 h-64 w-64 rounded-full opacity-15"
+			class="ambient-blob absolute right-1/4 bottom-1/3 h-64 w-64 rounded-full opacity-15"
 			style="background: radial-gradient(circle, var(--color-tension) 0%, transparent 70%); filter: blur(60px);"
+			use:parallax={{ speed: -0.25 }}
+		></div>
+		<!-- Additional decorative element for more depth -->
+		<div
+			class="absolute top-1/2 right-1/3 h-48 w-48 rounded-full opacity-10"
+			style="background: radial-gradient(circle, var(--color-ink) 0%, transparent 70%); filter: blur(60px);"
+			use:parallax={{ speed: -0.1 }}
 		></div>
 	</div>
 
-	<!-- Main content - horizontal layout -->
+	<!-- Main content - horizontal layout with parallax fade -->
 	<div
 		class="relative z-10 mx-auto flex w-full max-w-6xl flex-col-reverse items-center justify-between gap-12 lg:flex-row lg:gap-16"
+		use:parallaxScale={{ scaleStart: 1, scaleEnd: 0.95, opacityStart: 1, opacityEnd: 0.3, start: 'top top', end: '80% top' }}
 	>
 		<!-- Left side: Text content -->
-		<div class="flex-1 text-center lg:text-left">
+		<div class="flex-1 text-center lg:text-left" data-load="hero-content">
 			<!-- Subtle greeting badge -->
-			<div use:revealWithExit={{ blur: 10, y: 20, duration: 1, persist: true }} class="mb-6">
+			<div data-load="hero-badge" class="mb-6">
 				<span
 					class="inline-flex items-center gap-3 rounded-full px-4 py-2"
 					style="background: color-mix(in srgb, var(--color-surface) 80%, transparent); border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);"
@@ -340,7 +372,6 @@
 			<h1
 				class="mb-6 font-serif leading-none tracking-tight"
 				style="font-family: var(--font-headline)"
-				use:revealWithExit={{ blur: 25, y: 50, duration: 1.4, persist: true }}
 			>
 				<span
 					class="mb-3 block text-lg font-normal text-[--color-ink]/40 md:text-xl"
@@ -349,15 +380,17 @@
 					Hi, I'm
 				</span>
 				<span
-					class="block text-5xl font-medium text-[--color-ink] md:text-7xl lg:text-8xl"
+					class="hero-name block text-5xl font-medium text-[--color-ink] md:text-7xl lg:text-8xl"
 					style="line-height: 0.95;"
+					data-load="hero-name"
+					use:textReveal={{ stagger: 0.025, duration: 1, y: 80, rotationX: -60, delay: 0.3 }}
 				>
 					Santiago Vazquez
 				</span>
 			</h1>
 
 			<!-- Subtle role description -->
-			<div use:revealWithExit={{ blur: 15, y: 30, duration: 1.2, persist: true }} class="mb-8">
+			<div data-load="hero-subtitle" class="mb-8">
 				<p
 					class="max-w-lg leading-relaxed font-light text-[--color-ink]/50 text-base md:text-lg lg:text-xl"
 					style="font-family: var(--font-headline); font-style: italic;"
@@ -367,7 +400,7 @@
 			</div>
 
 			<!-- Single elegant CTA -->
-			<div use:revealWithExit={{ blur: 10, y: 25, duration: 1, persist: true }}>
+			<div data-load="hero-cta">
 				<a
 					href="#artifacts"
 					class="group inline-flex items-center gap-4 font-mono text-xs tracking-widest text-[--color-ink]/60 uppercase transition-colors duration-500 hover:text-[--color-accent]"
@@ -384,7 +417,7 @@
 		<!-- Right side: Animated Avatar -->
 		<div
 			class="mx-auto w-full max-w-[280px] flex-shrink-0 md:max-w-[360px] lg:mx-0 lg:max-w-[480px]"
-			use:revealWithExit={{ blur: 15, y: 30, duration: 1.2, persist: true }}
+			data-load="hero-avatar"
 		>
 			<AnimatedAvatar size={500} imageSrc={Memoji} showStatus={true} />
 		</div>
@@ -427,8 +460,8 @@
 		</div>
 	</div>
 
-	<!-- Horizontal scroll container (desktop) / Vertical stack (mobile) -->
-	{#if isMobile}
+	<!-- Horizontal scroll container (desktop) / Vertical stack (mobile/touch) -->
+	{#if isMobile || isTouchDevice}
 		<div class="space-y-8 px-6 pb-24">
 			{#each projects as project, i (project.id)}
 				<div class="project-card-wrapper" style="--card-index: {i}">
@@ -783,6 +816,9 @@
 		</span>
 	</div>
 </footer>
+
+</div>
+<!-- End Page Load Animation Wrapper -->
 
 <style>
 	/* Horizontal scroll section */

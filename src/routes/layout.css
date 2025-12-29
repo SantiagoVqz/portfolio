@@ -82,6 +82,8 @@ html {
 	scroll-behavior: smooth;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	/* Prevent scroll chaining on mobile */
+	overscroll-behavior: none;
 }
 
 body {
@@ -91,6 +93,20 @@ body {
 	line-height: var(--leading-relaxed);
 	min-height: 100vh;
 	overflow-x: hidden;
+	/* Prevent scroll chaining */
+	overscroll-behavior-y: contain;
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+	html {
+		/* Fix for 100vh issue on iOS Safari */
+		height: -webkit-fill-available;
+	}
+	
+	body {
+		min-height: -webkit-fill-available;
+	}
 }
 
 /* Headline typography */
@@ -558,6 +574,30 @@ button:focus-visible,
 		flex-direction: column !important;
 		padding: 0 !important;
 		gap: 2rem !important;
+		transform: none !important;
+	}
+
+	.project-card-wrapper {
+		width: 100% !important;
+	}
+}
+
+/* Touch devices: Disable horizontal scroll even on larger screens */
+@media (hover: none) and (pointer: coarse) {
+	.horizontal-scroll-section {
+		height: auto !important;
+	}
+
+	.horizontal-scroll-section .sticky {
+		position: relative !important;
+		height: auto !important;
+	}
+
+	.horizontal-track {
+		flex-direction: column !important;
+		padding: 0 1.5rem !important;
+		gap: 2rem !important;
+		transform: none !important;
 	}
 
 	.project-card-wrapper {
@@ -566,7 +606,7 @@ button:focus-visible,
 }
 
 /* Desktop: Enable smooth horizontal scroll */
-@media (min-width: 1024px) {
+@media (min-width: 1024px) and (hover: hover) {
 	.horizontal-scroll-section {
 		overflow: hidden;
 	}

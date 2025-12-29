@@ -19,10 +19,26 @@
 	let smoother: import('gsap/ScrollSmoother').ScrollSmoother | null = null;
 	let useNativeSmooth = $state(true);
 
+	// Detect touch/mobile devices - ScrollSmoother causes issues on these
+	function isTouchDevice(): boolean {
+		if (!browser) return true;
+		return (
+			'ontouchstart' in window ||
+			navigator.maxTouchPoints > 0 ||
+			window.matchMedia('(hover: none) and (pointer: coarse)').matches
+		);
+	}
+
 	// Use $effect to initialize when elements are available
 	$effect(() => {
 		// Only try to initialize ScrollSmoother when elements are available
 		if (!wrapper || !content || !browser) return;
+
+		// Skip ScrollSmoother on touch devices - causes scroll locking issues
+		if (isTouchDevice()) {
+			useNativeSmooth = true;
+			return;
+		}
 
 		let cleanupFn: (() => void) | undefined;
 

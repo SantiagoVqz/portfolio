@@ -15,6 +15,9 @@
 	let isHovering = $state(false);
 	let isVisible = $state(false);
 
+	// Page load animation state
+	let pageLoaded = $state(false);
+
 	$effect(() => {
 		// Only run on client
 		if (!browser) return;
@@ -26,6 +29,58 @@
 
 			// Register GSAP plugins
 			gsap.registerPlugin(ScrollTrigger);
+
+			// Page load animation sequence
+			const runPageLoadAnimation = () => {
+				if (pageLoaded) return;
+				pageLoaded = true;
+
+				const tl = gsap.timeline({
+					defaults: { ease: 'power4.out' }
+				});
+
+				// Animate navbar
+				const navbar = document.querySelector('.navbar');
+				if (navbar) {
+					gsap.set(navbar, { y: -100, opacity: 0 });
+					tl.to(navbar, {
+						y: 0,
+						opacity: 1,
+						duration: 0.8
+					});
+				}
+
+				// Animate ambient blobs
+				const blobs = document.querySelectorAll('.ambient-blob');
+				if (blobs.length > 0) {
+					gsap.set(blobs, { scale: 0.5, opacity: 0 });
+					tl.to(
+						blobs,
+						{
+							scale: 1,
+							opacity: (i) => (i === 0 ? 0.2 : 0.15),
+							duration: 1.2,
+							stagger: 0.15,
+							ease: 'power2.out'
+						},
+						'-=0.4'
+					);
+				}
+
+				// Animate scroll progress indicator with a subtle pulse
+				const scrollProgress = document.querySelector('.scroll-progress');
+				if (scrollProgress) {
+					tl.fromTo(
+						scrollProgress,
+						{ scaleX: 0, transformOrigin: 'left' },
+						{ scaleX: 1, duration: 0.6 },
+						'-=0.8'
+					);
+				}
+			};
+
+			// Run page load animation after a brief delay
+			setTimeout(runPageLoadAnimation, 100);
 
 			// Initialize sunlight follower with slower, dreamy movement
 			const sunlightProxy = { x: 0, y: 0 };

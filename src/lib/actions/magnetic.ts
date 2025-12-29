@@ -6,9 +6,21 @@ interface MagneticOptions {
 }
 
 /**
+ * Detect if the device is touch-only (no mouse/trackpad)
+ */
+function isTouchOnlyDevice(): boolean {
+	if (typeof window === 'undefined') return true;
+	return (
+		('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
+		window.matchMedia('(hover: none)').matches
+	);
+}
+
+/**
  * Magnetic Action
  * Creates a subtle magnetic pull effect where elements are attracted toward the cursor.
  * Uses GSAP's quickTo for 10x better performance than gsap.to for mouse-followers.
+ * Automatically disabled on touch-only devices where there's no mouse hover.
  *
  * @example
  * <button use:magnetic={{ strength: 0.5, duration: 0.6 }}>Hover me</button>
@@ -18,6 +30,11 @@ export const magnetic: Action<HTMLElement, MagneticOptions | undefined> = (node,
 
 	// Only run on client
 	if (typeof window === 'undefined') {
+		return { destroy() {} };
+	}
+
+	// Skip on touch-only devices - no mouse hover means magnetic effect doesn't make sense
+	if (isTouchOnlyDevice()) {
 		return { destroy() {} };
 	}
 
