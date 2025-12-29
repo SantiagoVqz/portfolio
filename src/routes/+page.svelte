@@ -382,7 +382,6 @@
 				<span
 					class="hero-name block text-5xl font-medium text-[--color-ink] md:text-7xl lg:text-8xl"
 					style="line-height: 0.95;"
-					data-load="hero-name"
 					use:textReveal={{ stagger: 0.025, duration: 1, y: 80, rotationX: -60, delay: 0.3 }}
 				>
 					Santiago Vazquez

@@ -39,11 +39,28 @@ export const countUp: Action<HTMLElement, CountUpOptions | undefined> = (node, o
 	let scrollTriggerInstance: import('gsap/ScrollTrigger').ScrollTrigger | null = null;
 	const originalText = node.textContent || '';
 
+	// Check if value is primarily numeric (should be animated)
+	// Returns false for text-heavy values like "Multiple U.S. Cities" or "Sprayers & Planters"
+	const isNumericValue = (text: string): boolean => {
+		// Remove common numeric formatting characters
+		const cleaned = text.replace(/[$€£¥₹%+<>~]/g, '').replace(/[,\s]/g, '').trim();
+		// Check if starts with a number or is mostly numeric
+		const numMatch = cleaned.match(/^[\d.]+/);
+		if (!numMatch) return false;
+		// If number portion is at least 30% of the cleaned string, treat as numeric
+		return numMatch[0].length >= cleaned.length * 0.3;
+	};
+
+	// Skip animation for non-numeric values - just display original text
+	if (!isNumericValue(originalText)) {
+		return { destroy() {} };
+	}
+
 	// Parse the target number from the element's text content
 	const parseNumber = (text: string): number => {
 		// Remove common formatting characters
 		const cleaned = text
-			.replace(/[$€£¥₹%+]/g, '')
+			.replace(/[$€£¥₹%+<>~]/g, '')
 			.replace(/[,\s]/g, '')
 			.replace(/[kK]$/, '000')
 			.replace(/[mM]$/, '000000')
@@ -61,13 +78,20 @@ export const countUp: Action<HTMLElement, CountUpOptions | undefined> = (node, o
 
 	const targetNumber = parseNumber(originalText);
 
-	// Detect suffix from original text
+	// Detect suffix from original text (including < and > symbols)
 	const detectSuffix = (): string => {
 		const match = originalText.match(/[kKmMbB%+]$/);
 		return match ? match[0] : suffix;
 	};
 
+	// Detect prefix from original text (like < or ~)
+	const detectPrefix = (): string => {
+		const match = originalText.match(/^[<>~]/);
+		return match ? match[0] : prefix;
+	};
+
 	const detectedSuffix = detectSuffix() || suffix;
+	const detectedPrefix = detectPrefix() || prefix;
 
 	const init = async () => {
 		const { gsap } = await import('gsap');
@@ -90,9 +114,11 @@ export const countUp: Action<HTMLElement, CountUpOptions | undefined> = (node, o
 				delay,
 				ease: 'power2.out',
 				onUpdate: () => {
-					// Keep detected suffix if present
+					// Build final text with detected prefix and suffix
 					const formatted = formatNumber(counter.value);
-					node.textContent = formatted.replace(suffix, '') + detectedSuffix;
+					// Remove default prefix/suffix and add detected ones
+					const baseNumber = formatted.replace(prefix, '').replace(suffix, '');
+					node.textContent = detectedPrefix + baseNumber + detectedSuffix;
 				}
 			});
 		};
