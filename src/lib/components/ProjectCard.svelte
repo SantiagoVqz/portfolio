@@ -68,7 +68,145 @@
 
 	// Format index for display - use $derived for reactivity
 	const displayIndex = $derived(String(index + 1).padStart(2, '0'));
+
+	// Check if the project has a valid link
+	const hasValidLink = $derived(href && href !== '#' && href.trim() !== '');
 </script>
+
+{#snippet cardContent()}
+	<!-- Image/Video container with fallback -->
+	<div class="card-media-container">
+		{#if video && !mediaError}
+			<video
+				bind:this={videoRef}
+				src={video}
+				class="card-media"
+				class:is-hovered={isHovered}
+				class:is-loaded={mediaLoaded}
+				muted
+				loop
+				playsinline
+				preload="metadata"
+				onloadeddata={handleMediaLoad}
+				onerror={handleMediaError}
+			>
+				<track kind="captions" />
+			</video>
+		{:else if image && !mediaError}
+			<img
+				src={image}
+				alt={title}
+				class="card-media"
+				class:is-hovered={isHovered}
+				class:is-loaded={mediaLoaded}
+				onload={handleMediaLoad}
+				onerror={handleMediaError}
+				loading="lazy"
+			/>
+		{/if}
+
+		<!-- Fallback visual (always rendered, shown when no media) -->
+		<div class="card-fallback" class:visible={showFallback}>
+			<!-- Decorative geometric patterns -->
+			<div class="fallback-pattern">
+				<!-- Concentric circles -->
+				<div class="circle circle-1"></div>
+				<div class="circle circle-2"></div>
+				<div class="circle circle-3"></div>
+
+				<!-- Diagonal lines -->
+				<div class="line line-1"></div>
+				<div class="line line-2"></div>
+
+				<!-- Floating dots -->
+				<div class="dot dot-1"></div>
+				<div class="dot dot-2"></div>
+				<div class="dot dot-3"></div>
+			</div>
+
+			<!-- Project number watermark -->
+			<span class="fallback-number">{displayIndex}</span>
+
+			<!-- Animated icon -->
+			<div class="fallback-icon" class:is-hovered={isHovered}>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+					<path d="M12 2L12 22M2 12L22 12" class="cross" />
+					<circle cx="12" cy="12" r="8" class="orbit" />
+				</svg>
+			</div>
+		</div>
+
+		<!-- Loading skeleton -->
+		{#if !mediaLoaded && !showFallback}
+			<div class="card-skeleton">
+				<div class="skeleton-shimmer"></div>
+			</div>
+		{/if}
+
+		<!-- Hover overlay - only show if project has a valid link -->
+		{#if hasValidLink}
+		<div class="card-overlay" class:is-hovered={isHovered}>
+			<span class="view-text" use:magnetic={{ strength: 0.3, duration: 0.4 }}>View Project</span>
+		</div>
+		{/if}
+
+		<!-- Grain texture -->
+		<div class="card-grain"></div>
+	</div>
+
+	<!-- Card content -->
+	<div class="card-content">
+		<header class="card-header">
+			<div class="card-header-left">
+				{#if subtitle}
+					<span class="card-subtitle">{subtitle}</span>
+				{/if}
+				<h3 class="card-title">{title}</h3>
+			</div>
+			{#if year}
+				<span class="card-year">{year}</span>
+			{/if}
+		</header>
+
+		<p class="card-description">{description}</p>
+
+		<!-- Metrics row -->
+		{#if metrics && metrics.length > 0}
+			<div class="card-metrics">
+				{#each metrics as metric (metric.label)}
+					<div class="metric">
+						<span class="metric-value" use:countUp={{ duration: 2, delay: 0.2 }}>{metric.value}</span>
+						<span class="metric-label">{metric.label}</span>
+					</div>
+				{/each}
+			</div>
+		{/if}
+
+		{#if tags.length > 0}
+			<ul class="card-tags">
+				{#each tags as tag (tag)}
+					<li class="tag">{tag}</li>
+				{/each}
+			</ul>
+		{/if}
+	</div>
+
+	<!-- Arrow indicator - only show if project has a valid link -->
+	{#if hasValidLink}
+	<div class="card-arrow" class:is-hovered={isHovered}>
+		<svg
+			width="20"
+			height="20"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.5"
+		>
+			<path d="M7 17L17 7M17 7H7M17 7V17" />
+		</svg>
+	</div>
+	{/if}
+{/snippet}
 
 <article
 	class="project-card h-full"
@@ -77,136 +215,15 @@
 	onmouseenter={() => (isHovered = true)}
 	onmouseleave={() => (isHovered = false)}
 >
-	<a {href} class="card-link block h-full" data-cursor-hover use:tilt3d={{ maxRotation: 8, glare: true, glareOpacity: 0.1, scale: 1.01 }}>
-		<!-- Image/Video container with fallback -->
-		<div class="card-media-container">
-			{#if video && !mediaError}
-				<video
-					bind:this={videoRef}
-					src={video}
-					class="card-media"
-					class:is-hovered={isHovered}
-					class:is-loaded={mediaLoaded}
-					muted
-					loop
-					playsinline
-					preload="metadata"
-					onloadeddata={handleMediaLoad}
-					onerror={handleMediaError}
-				>
-					<track kind="captions" />
-				</video>
-			{:else if image && !mediaError}
-				<img
-					src={image}
-					alt={title}
-					class="card-media"
-					class:is-hovered={isHovered}
-					class:is-loaded={mediaLoaded}
-					onload={handleMediaLoad}
-					onerror={handleMediaError}
-					loading="lazy"
-				/>
-			{/if}
-
-			<!-- Fallback visual (always rendered, shown when no media) -->
-			<div class="card-fallback" class:visible={showFallback}>
-				<!-- Decorative geometric patterns -->
-				<div class="fallback-pattern">
-					<!-- Concentric circles -->
-					<div class="circle circle-1"></div>
-					<div class="circle circle-2"></div>
-					<div class="circle circle-3"></div>
-
-					<!-- Diagonal lines -->
-					<div class="line line-1"></div>
-					<div class="line line-2"></div>
-
-					<!-- Floating dots -->
-					<div class="dot dot-1"></div>
-					<div class="dot dot-2"></div>
-					<div class="dot dot-3"></div>
-				</div>
-
-				<!-- Project number watermark -->
-				<span class="fallback-number">{displayIndex}</span>
-
-				<!-- Animated icon -->
-				<div class="fallback-icon" class:is-hovered={isHovered}>
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-						<path d="M12 2L12 22M2 12L22 12" class="cross" />
-						<circle cx="12" cy="12" r="8" class="orbit" />
-					</svg>
-				</div>
-			</div>
-
-			<!-- Loading skeleton -->
-			{#if !mediaLoaded && !showFallback}
-				<div class="card-skeleton">
-					<div class="skeleton-shimmer"></div>
-				</div>
-			{/if}
-
-			<!-- Hover overlay -->
-			<div class="card-overlay" class:is-hovered={isHovered}>
-				<span class="view-text" use:magnetic={{ strength: 0.3, duration: 0.4 }}>View Project</span>
-			</div>
-
-			<!-- Grain texture -->
-			<div class="card-grain"></div>
+	{#if hasValidLink}
+		<a {href} class="card-link block h-full" data-cursor-hover use:tilt3d={{ maxRotation: 8, glare: true, glareOpacity: 0.1, scale: 1.01 }}>
+			{@render cardContent()}
+		</a>
+	{:else}
+		<div class="card-link card-link--static block h-full" use:tilt3d={{ maxRotation: 8, glare: true, glareOpacity: 0.1, scale: 1.01 }}>
+			{@render cardContent()}
 		</div>
-
-		<!-- Card content -->
-		<div class="card-content">
-			<header class="card-header">
-				<div class="card-header-left">
-					{#if subtitle}
-						<span class="card-subtitle">{subtitle}</span>
-					{/if}
-					<h3 class="card-title">{title}</h3>
-				</div>
-				{#if year}
-					<span class="card-year">{year}</span>
-				{/if}
-			</header>
-
-			<p class="card-description">{description}</p>
-
-			<!-- Metrics row -->
-			{#if metrics && metrics.length > 0}
-				<div class="card-metrics">
-					{#each metrics as metric (metric.label)}
-						<div class="metric">
-							<span class="metric-value" use:countUp={{ duration: 2, delay: 0.2 }}>{metric.value}</span>
-							<span class="metric-label">{metric.label}</span>
-						</div>
-					{/each}
-				</div>
-			{/if}
-
-			{#if tags.length > 0}
-				<ul class="card-tags">
-					{#each tags as tag (tag)}
-						<li class="tag">{tag}</li>
-					{/each}
-				</ul>
-			{/if}
-		</div>
-
-		<!-- Arrow indicator -->
-		<div class="card-arrow" class:is-hovered={isHovered}>
-			<svg
-				width="20"
-				height="20"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.5"
-			>
-				<path d="M7 17L17 7M17 7H7M17 7V17" />
-			</svg>
-		</div>
-	</a>
+	{/if}
 </article>
 
 <style>
@@ -233,6 +250,16 @@
 	.card-link:hover {
 		box-shadow: var(--shadow-deep);
 		transform: translateY(var(--lift-card));
+	}
+
+	/* Static card (no link) - disable pointer cursor */
+	.card-link--static {
+		cursor: default;
+	}
+
+	.card-link--static:hover {
+		box-shadow: var(--shadow-diffused);
+		transform: none;
 	}
 
 	/* Media Section */

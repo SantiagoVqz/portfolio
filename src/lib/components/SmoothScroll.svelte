@@ -1,25 +1,17 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import type { Snippet } from 'svelte';
-
-	// Note: ScrollSmoother requires GSAP Club membership
-	// If not available, we'll use a CSS-based smooth scroll fallback
+	import Lenis from 'lenis';
 
 	interface Props {
 		smooth?: number;
-		effects?: boolean;
-		normalizeScroll?: boolean;
 		children: Snippet;
 	}
 
-	let { smooth = 1.2, effects = true, normalizeScroll = true, children }: Props = $props();
+	let { smooth = 1.2, children }: Props = $props();
+	let lenis: Lenis | null = null;
 
-	let wrapper = $state<HTMLDivElement | null>(null);
-	let content = $state<HTMLDivElement | null>(null);
-	let smoother: import('gsap/ScrollSmoother').ScrollSmoother | null = null;
-	let useNativeSmooth = $state(true);
-
-	// Detect touch/mobile devices - ScrollSmoother causes issues on these
+	// Detect touch/mobile devices - smooth scroll can cause issues on these
 	function isTouchDevice(): boolean {
 		if (!browser) return true;
 		return (
@@ -29,110 +21,110 @@
 		);
 	}
 
-	// Use $effect to initialize when elements are available
 	$effect(() => {
-		// Only try to initialize ScrollSmoother when elements are available
-		if (!wrapper || !content || !browser) return;
+		if (!browser) return;
 
-		// Skip ScrollSmoother on touch devices - causes scroll locking issues
-		if (isTouchDevice()) {
-			useNativeSmooth = true;
-			return;
+		// Skip on touch devices
+		if (isTouchDevice()) return;
+
+		// Check for reduced motion preference
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		// Initialize Lenis
+		lenis = new Lenis({
+			duration: smooth,
+			easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+			orientation: 'vertical',
+			gestureOrientation: 'vertical',
+			smoothWheel: true,
+			touchMultiplier: 2
+		});
+
+		// Animation frame loop
+		function raf(time: number) {
+			lenis?.raf(time);
+			requestAnimationFrame(raf);
 		}
+		requestAnimationFrame(raf);
 
-		let cleanupFn: (() => void) | undefined;
-
-		const initSmoother = async () => {
+		// Integrate with GSAP ScrollTrigger if available
+		const integrateWithGSAP = async () => {
 			try {
 				const { gsap } = await import('gsap');
 				const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-				const { ScrollSmoother } = await import('gsap/ScrollSmoother');
+				
+				gsap.registerPlugin(ScrollTrigger);
 
-				gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+				// Sync Lenis scroll with ScrollTrigger
+				lenis?.on('scroll', ScrollTrigger.update);
 
-				smoother = ScrollSmoother.create({
-					wrapper,
-					content,
-					smooth,
-					effects,
-					normalizeScroll
+				gsap.ticker.add((time) => {
+					lenis?.raf(time * 1000);
 				});
 
-				useNativeSmooth = false;
-
-				cleanupFn = () => {
-					smoother?.kill();
-				};
+				gsap.ticker.lagSmoothing(0);
 			} catch {
-				// ScrollSmoother not available, use native smooth scroll
-				useNativeSmooth = true;
+				// GSAP not available, that's fine
 			}
 		};
 
-		initSmoother();
+		integrateWithGSAP();
 
 		return () => {
-			cleanupFn?.();
+			lenis?.destroy();
+			lenis = null;
 		};
 	});
 
 	// Expose scroll methods
-	export function scrollTo(target: string | HTMLElement) {
-		if (smoother) {
-			smoother.scrollTo(target, true);
+	export function scrollTo(target: string | HTMLElement, options?: { offset?: number; duration?: number }) {
+		if (lenis) {
+			lenis.scrollTo(target, {
+				offset: options?.offset ?? 0,
+				duration: options?.duration ?? 1.2
+			});
 		} else {
 			const element = typeof target === 'string' ? document.querySelector(target) : target;
 			element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		}
 	}
 
-	export function pause() {
-		smoother?.paused(true);
+	export function stop() {
+		lenis?.stop();
 	}
 
-	export function resume() {
-		smoother?.paused(false);
+	export function start() {
+		lenis?.start();
 	}
 </script>
 
-{#if useNativeSmooth}
-	<!-- Native CSS smooth scroll fallback -->
-	<div class="smooth-scroll-native">
-		{@render children()}
-	</div>
-{:else}
-	<!-- GSAP ScrollSmoother wrapper -->
-	<div bind:this={wrapper} id="smooth-wrapper" class="smooth-wrapper">
-		<div bind:this={content} id="smooth-content" class="smooth-content">
-			{@render children()}
-		</div>
-	</div>
-{/if}
+<div class="lenis-wrapper">
+	{@render children()}
+</div>
 
 <style>
-	.smooth-scroll-native {
+	.lenis-wrapper {
 		display: contents;
 	}
 
-	.smooth-wrapper {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
+	/* Lenis recommended styles */
+	:global(html.lenis, html.lenis body) {
+		height: auto;
+	}
+
+	:global(.lenis.lenis-smooth) {
+		scroll-behavior: auto !important;
+	}
+
+	:global(.lenis.lenis-smooth [data-lenis-prevent]) {
+		overscroll-behavior: contain;
+	}
+
+	:global(.lenis.lenis-stopped) {
 		overflow: hidden;
 	}
 
-	.smooth-content {
-		display: contents;
-	}
-
-	/* Data-speed effects for ScrollSmoother */
-	:global([data-speed]) {
-		will-change: transform;
-	}
-
-	:global([data-lag]) {
-		will-change: transform;
+	:global(.lenis.lenis-smooth iframe) {
+		pointer-events: none;
 	}
 </style>

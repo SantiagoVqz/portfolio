@@ -7,6 +7,10 @@
 // PERSONAL INFORMATION
 // ============================================
 
+import AskEchoImage from '$lib/assets/projects/AskEcho.png';
+import JohnDeereImage from '$lib/assets/projects/JohnDeere.webp';
+import CoppelImage from '$lib/assets/projects/Coppel.jpg';
+
 export const personalInfo = {
 	name: 'Santiago Vázquez Villarreal',
 	shortName: 'Santiago Vazquez',
@@ -17,8 +21,8 @@ export const personalInfo = {
 	phone: '+52 81 1778 7532',
 	email: 'santiago.vqz@gmail.com',
 	social: {
-		github: 'https://github.com/SantiagoVqzV',
-		linkedin: 'https://linkedin.com/in/SantivqzV'
+		github: 'https://github.com/SantiagoVqz',
+		linkedin: 'https://www.linkedin.com/in/santiagovqzv/'
 	}
 } as const;
 
@@ -45,15 +49,15 @@ export const professionalProfile = {
 export interface Skill {
 	name: string;
 	category:
-		| 'Framework'
-		| 'Language'
-		| 'Cloud'
-		| 'Backend'
-		| 'Mobile'
-		| 'Testing'
-		| 'Motion'
-		| 'DevOps'
-		| 'Database';
+	| 'Framework'
+	| 'Language'
+	| 'Cloud'
+	| 'Backend'
+	| 'Mobile'
+	| 'Testing'
+	| 'Motion'
+	| 'DevOps'
+	| 'Database';
 	size: 'large' | 'medium' | 'small';
 }
 
@@ -187,7 +191,8 @@ export const projects: Project[] = [
 			{ label: 'Onboarding Time', value: '<72hrs' },
 			{ label: 'Test Coverage', value: '98%+' },
 			{ label: 'Clients Served', value: 'Multiple U.S. Cities' }
-		]
+		],
+		image: AskEchoImage
 	},
 	{
 		id: 'command-center',
@@ -203,7 +208,8 @@ export const projects: Project[] = [
 		metrics: [
 			{ label: 'Release Bundles', value: '13' },
 			{ label: 'Machine Types', value: 'Sprayers & Planters' }
-		]
+		],
+		image: JohnDeereImage
 	},
 	{
 		id: 'pick-to-light',
@@ -220,7 +226,8 @@ export const projects: Project[] = [
 			{ label: 'Cost Reduction', value: '70%' },
 			{ label: 'Maintenance Savings', value: '90%' },
 			{ label: 'Efficiency Gain', value: '40%' }
-		]
+		],
+		image: CoppelImage
 	}
 ];
 

@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { cssVariables } from '$lib/theme';
 	import { browser } from '$app/environment';
+	import SmoothScroll from '$lib/components/SmoothScroll.svelte';
 
 	let { children } = $props();
 
@@ -237,10 +238,12 @@
 	></div>
 </div>
 
-<!-- Main content -->
-<div class="app-wrapper min-h-screen bg-[--color-base] text-[--color-ink]">
-	{@render children()}
-</div>
+<!-- Main content with smooth scrolling -->
+<SmoothScroll smooth={1.2}>
+	<div class="app-wrapper min-h-screen bg-[--color-base] text-[--color-ink]">
+		{@render children()}
+	</div>
+</SmoothScroll>
 
 <style>
 	.grain-overlay {
