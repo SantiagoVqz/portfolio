@@ -138,52 +138,48 @@
 			const height = rect.height;
 			const time = Date.now() * 0.001; // Time for gentle floating
 
-			physicsNodes = physicsNodes.map((node, index) => {
-				if (draggedNode === node.id) return node;
-
-				let { x, y, vx, vy, radius } = node;
+			// Mutate nodes in-place to avoid GC pressure from .map() + spread
+			for (let index = 0; index < physicsNodes.length; index++) {
+				const node = physicsNodes[index];
+				if (draggedNode === node.id) continue;
 
 				// Gentle ambient floating like on water (unique per node)
-				const floatOffsetX = Math.sin(time * 0.5 + index * 1.5) * floatStrength;
-				const floatOffsetY = Math.cos(time * 0.4 + index * 1.2) * floatStrength;
-
-				vx += floatOffsetX;
-				vy += floatOffsetY;
+				node.vx += Math.sin(time * 0.5 + index * 1.5) * floatStrength;
+				node.vy += Math.cos(time * 0.4 + index * 1.2) * floatStrength;
 
 				// Apply water-like friction (slows down smoothly)
-				vx *= friction;
-				vy *= friction;
+				node.vx *= friction;
+				node.vy *= friction;
 
 				// Stop very small movements
-				if (Math.abs(vx) < 0.01) vx = 0;
-				if (Math.abs(vy) < 0.01) vy = 0;
+				if (Math.abs(node.vx) < 0.01) node.vx = 0;
+				if (Math.abs(node.vy) < 0.01) node.vy = 0;
 
 				// Update position
-				x += vx;
-				y += vy;
+				node.x += node.vx;
+				node.y += node.vy;
 
 				// Soft bounce off walls
-				if (x - radius < 0) {
-					x = radius;
-					vx = -vx * bounce;
+				const r = node.radius;
+				if (node.x - r < 0) {
+					node.x = r;
+					node.vx = -node.vx * bounce;
 				}
-				if (x + radius > width) {
-					x = width - radius;
-					vx = -vx * bounce;
+				if (node.x + r > width) {
+					node.x = width - r;
+					node.vx = -node.vx * bounce;
 				}
-				if (y - radius < 0) {
-					y = radius;
-					vy = -vy * bounce;
+				if (node.y - r < 0) {
+					node.y = r;
+					node.vy = -node.vy * bounce;
 				}
-				if (y + radius > height) {
-					y = height - radius;
-					vy = -vy * bounce;
+				if (node.y + r > height) {
+					node.y = height - r;
+					node.vy = -node.vy * bounce;
 				}
+			}
 
-				return { ...node, x, y, vx, vy };
-			});
-
-			// Node-to-node collision (gentle push apart)
+			// Node-to-node collision (gentle push apart) — uses squared distance to avoid sqrt
 			for (let i = 0; i < physicsNodes.length; i++) {
 				for (let j = i + 1; j < physicsNodes.length; j++) {
 					const a = physicsNodes[i];
@@ -191,10 +187,12 @@
 
 					const dx = b.x - a.x;
 					const dy = b.y - a.y;
-					const dist = Math.sqrt(dx * dx + dy * dy);
+					const distSq = dx * dx + dy * dy;
 					const minDist = a.radius + b.radius + 4; // Small gap between bubbles
+					const minDistSq = minDist * minDist;
 
-					if (dist < minDist && dist > 0) {
+					if (distSq < minDistSq && distSq > 0) {
+						const dist = Math.sqrt(distSq);
 						const nx = dx / dist;
 						const ny = dy / dist;
 						const overlap = minDist - dist;
@@ -218,6 +216,9 @@
 					}
 				}
 			}
+
+			// Trigger Svelte reactivity after in-place mutation
+			physicsNodes = physicsNodes;
 
 			animationFrame = requestAnimationFrame(update);
 		}
@@ -411,8 +412,14 @@
 						--node-color: {node.color};
 					"
 					onpointerdown={(e) => handlePointerDown(e, node.id)}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+						}
+					}}
 					role="button"
 					tabindex="0"
+					aria-label="{node.skill.name} - {node.skill.size === 'large' ? 'Expert' : node.skill.size === 'medium' ? 'Proficient' : 'Familiar'}"
 				>
 					<span class="node-icon">{node.icon}</span>
 					<span class="node-label">{node.skill.name}</span>

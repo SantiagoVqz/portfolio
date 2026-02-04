@@ -1,5 +1,5 @@
 // Theme tokens
-export { theme, cssVariables, type Theme } from './theme';
+export { theme } from './theme';
 
 // Actions
 export { magnetic } from './actions/magnetic';

@@ -185,6 +185,10 @@ function createCursorState() {
 		window.removeEventListener('mouseenter', handleMouseEnter);
 		document.removeEventListener('mouseover', handleMouseOver);
 		document.removeEventListener('mouseout', handleMouseOut);
+
+		// Release quickTo instances to prevent orphaned tweens
+		xTo = null;
+		yTo = null;
 	}
 
 	return {

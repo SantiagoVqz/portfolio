@@ -7,7 +7,11 @@
 		cursorState.init();
 		scrollState.init();
 
+		// Signal that custom cursor is active (hides default cursor via CSS)
+		document.body.classList.add('custom-cursor-active');
+
 		return () => {
+			document.body.classList.remove('custom-cursor-active');
 			cursorState.destroy();
 			scrollState.destroy();
 		};
@@ -102,17 +106,23 @@
 		transform: translate(calc(var(--x) - 3px), calc(var(--y) - 3px)) scale(0.5);
 	}
 
-	/* Hide default cursor when custom cursor is active */
-	:global(body) {
-		cursor: none;
-	}
-
-	:global(a, button, [data-cursor-hover]) {
-		cursor: none;
-	}
-
 	/* Fallback for touch devices */
 	@media (hover: none) and (pointer: coarse) {
+		.custom-cursor-ring,
+		.custom-cursor-dot {
+			display: none;
+		}
+
+		:global(body),
+		:global(a),
+		:global(button),
+		:global([data-cursor-hover]) {
+			cursor: auto;
+		}
+	}
+
+	/* Respect reduced motion preference */
+	@media (prefers-reduced-motion: reduce) {
 		.custom-cursor-ring,
 		.custom-cursor-dot {
 			display: none;

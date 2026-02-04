@@ -37,6 +37,7 @@ export const countUp: Action<HTMLElement, CountUpOptions | undefined> = (node, o
 
 	let gsapInstance: typeof import('gsap').gsap | null = null;
 	let scrollTriggerInstance: import('gsap/ScrollTrigger').ScrollTrigger | null = null;
+	let counterTween: gsap.core.Tween | null = null;
 	const originalText = node.textContent || '';
 
 	// Check if value is primarily numeric (should be animated)
@@ -108,7 +109,7 @@ export const countUp: Action<HTMLElement, CountUpOptions | undefined> = (node, o
 		const isAlreadyVisible = rect.top < window.innerHeight * 0.85 && rect.bottom > 0;
 
 		const animate = () => {
-			gsap.to(counter, {
+			counterTween = gsap.to(counter, {
 				value: targetNumber,
 				duration,
 				delay,
@@ -139,12 +140,10 @@ export const countUp: Action<HTMLElement, CountUpOptions | undefined> = (node, o
 
 	return {
 		destroy() {
+			counterTween?.kill();
 			scrollTriggerInstance?.kill();
 			// Restore original text
 			node.textContent = originalText;
-			if (gsapInstance) {
-				gsapInstance.killTweensOf(node);
-			}
 		}
 	};
 };

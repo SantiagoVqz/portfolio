@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
 /* ========================================
@@ -188,15 +187,17 @@ button:focus-visible,
 }
 
 /* ========================================
-   CUSTOM CURSOR - Global Hide
+   CUSTOM CURSOR - JS-driven hide
+   Class added by CustomCursor component on mount
    ======================================== */
-*,
-*::before,
-*::after {
+:global(body.custom-cursor-active),
+:global(body.custom-cursor-active) *,
+:global(body.custom-cursor-active) *::before,
+:global(body.custom-cursor-active) *::after {
 	cursor: none !important;
 }
 
-/* Restore cursor only on touch devices */
+/* Restore cursor on touch devices regardless */
 @media (hover: none) and (pointer: coarse) {
 	*,
 	*::before,

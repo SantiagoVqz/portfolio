@@ -1,7 +1,6 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import { cssVariables } from '$lib/theme';
 	import { browser } from '$app/environment';
 	import SmoothScroll from '$lib/components/SmoothScroll.svelte';
 
@@ -177,11 +176,17 @@
 		};
 
 		let cleanup: (() => void) | undefined;
+		let destroyed = false;
 		initGSAP().then((cleanupFn) => {
-			cleanup = cleanupFn;
+			if (destroyed) {
+				cleanupFn();
+			} else {
+				cleanup = cleanupFn;
+			}
 		});
 
 		return () => {
+			destroyed = true;
 			cleanup?.();
 		};
 	});
@@ -189,8 +194,6 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<!-- Inject CSS variables -->
-	{@html `<style>${cssVariables}</style>`}
 	<!-- Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
@@ -256,15 +259,6 @@
 		transition:
 			opacity 0.3s ease,
 			transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-	}
-
-	/* Hide default cursor globally */
-	:global(body) {
-		cursor: none;
-	}
-
-	:global(a, button, [data-cursor-hover]) {
-		cursor: none;
 	}
 
 	/* Restore cursor on touch devices */
