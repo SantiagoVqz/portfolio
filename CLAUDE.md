@@ -1,23 +1,144 @@
-You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:
+# CLAUDE.md — Portfolio Codebase Guide
 
-## Available MCP Tools:
+## Project Overview
 
-### 1. list-sections
+A modern, highly-animated personal portfolio website built with **Svelte 5 + SvelteKit 2**. Single-page design with anchor-based navigation, scroll-driven animations, and a tactile design system.
 
-Use this FIRST to discover all available documentation sections. Returns a structured list with titles, use_cases, and paths.
-When asked about Svelte or SvelteKit topics, ALWAYS use this tool at the start of the chat to find relevant sections.
+## Tech Stack
 
-### 2. get-documentation
+- **Framework:** SvelteKit 2.49 / Svelte 5 (runes mode)
+- **Build Tool:** Vite 7
+- **Language:** TypeScript (strict)
+- **Styling:** Tailwind CSS 4 + component-scoped `<style>` blocks
+- **Animations:** GSAP 3.14 (ScrollTrigger, quickTo) + Lenis (smooth scroll)
+- **Package Manager:** pnpm
 
-Retrieves full documentation content for specific sections. Accepts single or multiple sections.
-After calling the list-sections tool, you MUST analyze the returned documentation sections (especially the use_cases field) and then use the get-documentation tool to fetch ALL documentation sections that are relevant for the user's task.
+## Directory Structure
 
-### 3. svelte-autofixer
+```
+src/
+├── lib/
+│   ├── actions/        # 7 Svelte action directives (countUp, magnetic, parallax, reveal, textReveal, tilt3d, pageLoad)
+│   ├── assets/         # Images and project screenshots
+│   ├── components/     # 11 Svelte components (PascalCase)
+│   ├── constants/      # Centralized portfolio data (profile.ts)
+│   ├── stores/         # Svelte 5 rune-based stores (scroll.svelte.ts)
+│   ├── index.ts        # Library barrel exports
+│   └── theme.ts        # Design tokens
+├── routes/
+│   ├── +layout.svelte  # Root layout (cursor, smooth scroll, global setup)
+│   ├── +page.svelte    # Single home page with all sections
+│   └── layout.css      # Global styles, Tailwind config, CSS variables
+└── app.d.ts            # TypeScript ambient declarations
+static/                 # Static assets served at root
+```
 
-Analyzes Svelte code and returns issues and suggestions.
-You MUST use this tool whenever writing Svelte code before sending it to the user. Keep calling it until no issues or suggestions are returned.
+## Commands
 
-### 4. playground-link
+```bash
+pnpm dev          # Start dev server with HMR
+pnpm build        # Production build
+pnpm preview      # Preview production build
+pnpm check        # Type-check with svelte-check
+pnpm check:watch  # Type-check in watch mode
+pnpm lint         # Prettier + ESLint check
+pnpm format       # Auto-format with Prettier
+```
 
-Generates a Svelte Playground link with the provided code.
-After completing the code, ask the user if they want a playground link. Only call this tool after user confirmation and NEVER if code was written to files in their project.
+## Key Conventions
+
+### Svelte 5 Runes
+
+All components use Svelte 5 runes — **never** use legacy `$:`, `export let`, or Svelte 4 patterns:
+
+- `$state()` for reactive state
+- `$derived()` for computed values
+- `$effect()` for side effects
+- `$props()` with typed interfaces for component props
+- `{#snippet}` for reusable template blocks
+
+### Props Pattern
+
+```svelte
+<script lang="ts">
+  interface Props {
+    title: string;
+    count?: number;
+  }
+  let { title, count = 0 }: Props = $props();
+</script>
+```
+
+### SSR Safety
+
+GSAP and browser APIs must be dynamically imported or guarded:
+
+```ts
+// Dynamic import pattern for GSAP (avoids SSR 500 errors)
+const { gsap } = await import('gsap');
+const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+
+// Browser guard
+import { browser } from '$app/environment';
+if (browser) { /* DOM access here */ }
+```
+
+### File Naming
+
+- Components: `PascalCase.svelte` (e.g., `ProjectCard.svelte`)
+- Actions/utilities: `camelCase.ts` (e.g., `reveal.ts`)
+- Stores: `name.svelte.ts` (e.g., `scroll.svelte.ts`)
+- Constants: `camelCase.ts`
+
+### Styling
+
+- **Design tokens** defined as CSS variables in `layout.css` (`--color-base`, `--color-accent`, etc.)
+- **Color palette:** Sun-bleached Paper (#FDFCF8), Raw Ceramic (#F2F0E9), Baked Clay (#CC8B65), Dried Sage (#7D9C8B), Soft Charcoal (#36322F)
+- **Fonts:** Fraunces (serif headlines), DM Mono (monospace data)
+- **Transitions:** `--transition-fast` (150ms), `--transition-normal` (300ms), `--transition-slow` (500ms)
+- Prefer Tailwind utilities; use scoped `<style>` for keyframes and complex selectors
+
+### Animations
+
+- Custom Svelte actions in `src/lib/actions/` handle all scroll/interaction animations
+- GSAP ScrollTrigger for scroll-linked effects
+- Actions must clean up in their `destroy` hook (remove listeners, kill tweens)
+- Disable magnetic/cursor/tilt effects on touch devices
+- Use hardware-accelerated transforms (`translate`, `scale`, `rotate`)
+
+### Data & Content
+
+All portfolio content lives in `src/lib/constants/profile.ts`. To update projects, skills, experience, or personal info, edit this single file. Components receive data via props.
+
+### Accessibility
+
+- Semantic HTML (`nav`, `main`, `article`, `section`, `footer`)
+- ARIA attributes on interactive elements
+- Keyboard navigation support (Escape closes mobile menu)
+- `loading="lazy"` on images
+- Proper heading hierarchy
+
+### Routing
+
+Single-page with anchor sections: `#hero`, `#artifacts`, `#process`, `#archive`, `#contact`. No nested routes.
+
+### Performance
+
+- Lazy-load images with `loading="lazy"`
+- Dynamic GSAP imports (no SSR bundle)
+- `$derived()` over recalculating in templates
+- `requestAnimationFrame` for resize debouncing
+- Touch device detection to skip heavy mouse-follow effects
+
+## Deployment
+
+Uses `@sveltejs/adapter-auto` — auto-detects platform (Vercel, Netlify, Cloudflare, Node). No special deploy config needed.
+
+## MCP Tools (Svelte Documentation Server)
+
+When a Svelte MCP server is available, use these tools:
+
+1. **list-sections** — Discover documentation sections. Call first when working on Svelte/SvelteKit topics.
+2. **get-documentation** — Fetch full docs for relevant sections found via list-sections.
+3. **svelte-autofixer** — Validate Svelte code before finalizing. Run until no issues remain.
+4. **playground-link** — Generate a Svelte Playground link. Only offer after code is complete; never use if code was written to project files.
