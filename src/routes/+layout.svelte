@@ -30,7 +30,7 @@
 			// Register GSAP plugins
 			gsap.registerPlugin(ScrollTrigger);
 
-			// Page load animation sequence
+			// Cinematic page load animation sequence (~1.5s)
 			const runPageLoadAnimation = () => {
 				if (pageLoaded) return;
 				pageLoaded = true;
@@ -39,7 +39,7 @@
 					defaults: { ease: 'power4.out' }
 				});
 
-				// Animate navbar
+				// Phase 2: Navbar slides down (0.3-0.6s)
 				const navbar = document.querySelector('.navbar');
 				if (navbar) {
 					gsap.set(navbar, { y: -100, opacity: 0 });
@@ -47,34 +47,17 @@
 						y: 0,
 						opacity: 1,
 						duration: 0.8
-					});
+					}, 0.3);
 				}
 
-				// Animate ambient blobs
-				const blobs = document.querySelectorAll('.ambient-blob');
-				if (blobs.length > 0) {
-					gsap.set(blobs, { scale: 0.5, opacity: 0 });
-					tl.to(
-						blobs,
-						{
-							scale: 1,
-							opacity: (i) => (i === 0 ? 0.2 : 0.15),
-							duration: 1.2,
-							stagger: 0.15,
-							ease: 'power2.out'
-						},
-						'-=0.4'
-					);
-				}
-
-				// Animate scroll progress indicator with a subtle pulse
+				// Phase 5: Scroll progress indicator
 				const scrollProgress = document.querySelector('.scroll-progress');
 				if (scrollProgress) {
 					tl.fromTo(
 						scrollProgress,
 						{ scaleX: 0, transformOrigin: 'left' },
 						{ scaleX: 1, duration: 0.6 },
-						'-=0.8'
+						1.0
 					);
 				}
 			};
@@ -162,11 +145,13 @@
 			document.addEventListener('mouseenter', handleMouseEnter);
 			document.addEventListener('mouseleave', handleMouseLeave);
 
-			// Trigger visibility
+			// Hide default cursor and trigger visibility
+			document.body.classList.add('custom-cursor-active');
 			isVisible = true;
 
 			// Return cleanup function
 			return () => {
+				document.body.classList.remove('custom-cursor-active');
 				window.removeEventListener('mousemove', handleMouseMove);
 				document.removeEventListener('mouseover', handleMouseOver);
 				document.removeEventListener('mouseout', handleMouseOut);
@@ -217,9 +202,6 @@
 	aria-hidden="true"
 ></div>
 
-<!-- Global grain overlay -->
-<div class="grain-overlay pointer-events-none fixed inset-0 z-[9991]" aria-hidden="true"></div>
-
 <!-- Custom cursor -->
 <div
 	class="custom-cursor pointer-events-none fixed z-[9999] mix-blend-difference"
@@ -249,12 +231,6 @@
 </SmoothScroll>
 
 <style>
-	.grain-overlay {
-		background-image: var(--glass-grain);
-		background-repeat: repeat;
-		opacity: 0.4;
-	}
-
 	.custom-cursor {
 		transition:
 			opacity 0.3s ease,

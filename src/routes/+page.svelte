@@ -4,16 +4,19 @@
 	import { magnetic } from '$lib/actions/magnetic';
 	import { revealWithExit } from '$lib/actions/reveal';
 	import { textReveal } from '$lib/actions/textReveal';
-	import { parallax, parallaxScale } from '$lib/actions/parallax';
+	import { parallaxScale } from '$lib/actions/parallax';
 	import { pageLoad } from '$lib/actions/pageLoad';
-	import AnimatedAvatar from '$lib/components/AnimatedAvatar.svelte';
 	import Navbar from '$lib/components/Navbar.svelte';
-	import ProjectCard from '$lib/components/ProjectCard.svelte';
-	import TechStack from '$lib/components/TechStack.svelte';
-	import StudioJournal from '$lib/components/StudioJournal.svelte';
-	import Memoji from '$lib/assets/memoji.png';
+	import GenerativeMesh from '$lib/components/GenerativeMesh.svelte';
+	import ProjectEditorial from '$lib/components/ProjectEditorial.svelte';
+	import ProjectData from '$lib/components/ProjectData.svelte';
+	import ProjectImmersive from '$lib/components/ProjectImmersive.svelte';
+	import CaseStudyModal from '$lib/components/CaseStudyModal.svelte';
+	import DisplayCabinet from '$lib/components/DisplayCabinet.svelte';
+	import Constellation from '$lib/components/Constellation.svelte';
+	import CommandPalette from '$lib/components/CommandPalette.svelte';
+	import SectionIndicators from '$lib/components/SectionIndicators.svelte';
 
-	// Import all data from constants
 	import {
 		personalInfo,
 		professionalProfile,
@@ -26,147 +29,59 @@
 		timelineData
 	} from '$lib/constants';
 
-	// Refs for horizontal scroll
-	let horizontalSection = $state<HTMLElement | null>(null);
-	let horizontalTrack = $state<HTMLElement | null>(null);
-	let isMobile = $state(false);
-	let isTouchDevice = $state(false);
-	let sectionHeight = $state<string>('100vh');
-	let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+	import type { Project } from '$lib/constants/profile';
 
-	// GSAP instances (loaded dynamically)
-	type GSAPInstance = typeof import('gsap').gsap;
-	type ScrollTriggerType = typeof import('gsap/ScrollTrigger').ScrollTrigger;
-	let gsapInstance: GSAPInstance | null = null;
-	let ScrollTriggerInstance: ScrollTriggerType | null = null;
+	// Case study modal state
+	let caseStudyProject = $state<Project | null>(null);
+	let caseStudyOpen = $state(false);
 
-	// Detect touch devices - horizontal scroll with pinning causes issues
-	function detectTouchDevice(): boolean {
-		return (
-			'ontouchstart' in window ||
-			navigator.maxTouchPoints > 0 ||
-			window.matchMedia('(hover: none) and (pointer: coarse)').matches
-		);
+	function openCaseStudy(project: Project) {
+		caseStudyProject = project;
+		caseStudyOpen = true;
 	}
 
-	onMount(() => {
-		// Check if mobile or touch device
-		const checkMobile = () => {
-			isMobile = window.innerWidth < 1024;
-			isTouchDevice = detectTouchDevice();
-		};
-		checkMobile();
-		window.addEventListener('resize', checkMobile);
+	function closeCaseStudy() {
+		caseStudyOpen = false;
+		caseStudyProject = null;
+	}
 
-		// Initialize horizontal scroll for desktop only
+	// Section morph — scroll-driven background color transitions
+	onMount(() => {
+		if (!browser) return;
+
 		let ctx: gsap.Context | null = null;
 
-		const initHorizontalScroll = () => {
-			// Skip on mobile, touch devices, or if elements not ready
-			if (isMobile || isTouchDevice || !horizontalSection || !horizontalTrack || !gsapInstance) return;
+		const initScrollMorphs = async () => {
+			const { gsap } = await import('gsap');
+			const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+			gsap.registerPlugin(ScrollTrigger);
 
-			// Ensure context is clean before creating a new one
-			if (ctx) {
-				ctx.revert();
-				ctx = null;
-			}
-
-			const cards = horizontalTrack.querySelectorAll('.project-card-wrapper');
-			const totalWidth = horizontalTrack.scrollWidth;
-			const viewportWidth = window.innerWidth;
-			const scrollDistance = Math.max(0, totalWidth - viewportWidth);
-
-			sectionHeight = '100vh';
-
-			const gsap = gsapInstance;
-
-			requestAnimationFrame(() => {
-				ctx = gsap.context(() => {
-					gsap.to(horizontalTrack, {
-						x: -scrollDistance,
-						ease: 'none',
-						id: 'horizontal-scroll',
-						scrollTrigger: {
-							trigger: horizontalSection,
-							start: 'top top',
-							end: () => `+=${scrollDistance}`,
-							pin: true,
-							scrub: 0.5,
-							invalidateOnRefresh: true,
-							anticipatePin: 1
-						}
-					});
-
-					cards.forEach((card) => {
-						gsap.fromTo(
-							card,
-							{ opacity: 0.3, scale: 0.95 },
-							{
-								opacity: 1,
-								scale: 1,
-								scrollTrigger: {
-									trigger: card,
-									containerAnimation: gsap.getById('horizontal-scroll') as gsap.core.Animation,
-									start: 'left 80%',
-									end: 'left 20%',
-									scrub: true
-								}
+			ctx = gsap.context(() => {
+				// Reveal each project on scroll
+				const projectItems = document.querySelectorAll('.project-item');
+				projectItems.forEach((item, i) => {
+					gsap.fromTo(
+						item,
+						{ opacity: 0, y: 60 },
+						{
+							opacity: 1,
+							y: 0,
+							duration: 0.8,
+							ease: 'power3.out',
+							scrollTrigger: {
+								trigger: item,
+								start: 'top 85%',
+								toggleActions: 'play none none reverse'
 							}
-						);
-					});
+						}
+					);
 				});
 			});
 		};
 
-		const handleResize = () => {
-			clearTimeout(resizeTimer);
-			checkMobile();
+		initScrollMorphs();
 
-			// Immediate cleanup to prevent visual artifacts during resize
-			if (ctx) {
-				ctx.revert();
-				ctx = null;
-			}
-
-			// Reset track position when switching to mobile
-			if ((isMobile || isTouchDevice) && horizontalTrack) {
-				horizontalTrack.style.transform = '';
-			}
-
-			// Debounce re-initialization
-			resizeTimer = setTimeout(() => {
-				if (!isMobile && !isTouchDevice && horizontalTrack && horizontalSection) {
-					sectionHeight = '100vh';
-					requestAnimationFrame(initHorizontalScroll);
-				}
-				ScrollTriggerInstance?.refresh();
-			}, 250);
-		};
-
-		// Load GSAP dynamically and initialize
-		const loadGSAP = async () => {
-			const { gsap } = await import('gsap');
-			const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-			gsap.registerPlugin(ScrollTrigger);
-			gsapInstance = gsap;
-			ScrollTriggerInstance = ScrollTrigger;
-
-			// Initial start after GSAP is loaded
-			setTimeout(() => {
-				initHorizontalScroll();
-			}, 100);
-		};
-
-		loadGSAP();
-
-		window.addEventListener('resize', handleResize);
-
-		return () => {
-			clearTimeout(resizeTimer);
-			window.removeEventListener('resize', checkMobile);
-			window.removeEventListener('resize', handleResize);
-			ctx?.revert();
-		};
+		return () => ctx?.revert();
 	});
 </script>
 
@@ -202,10 +117,6 @@
 	<!-- Theme & Mobile -->
 	<meta name="theme-color" content="#fdfcf8" />
 	<meta name="msapplication-TileColor" content="#fdfcf8" />
-
-	<!-- Preconnect for fonts -->
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 
 	<!-- JSON-LD Structured Data -->
 	{@html `<script type="application/ld+json">
@@ -316,46 +227,42 @@
 	/>
 </div>
 
+<!-- Section Indicators (right side dots) -->
+<SectionIndicators />
+
+<!-- Command Palette -->
+<CommandPalette />
+
+<!-- Case Study Modal -->
+<CaseStudyModal
+	project={caseStudyProject}
+	open={caseStudyOpen}
+	onClose={closeCaseStudy}
+/>
+
 <!-- Main Content Wrapper -->
 <main id="main-content">
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      THE ARRIVAL (HERO)
-     Large, serene typography with avatar on the right
+     Full-bleed Canvas 2D generative mesh background, text floats on top
      ═══════════════════════════════════════════════════════════════════════════ -->
 <section
 	id="hero"
 	class="hero relative flex min-h-screen items-center justify-center overflow-hidden px-6 md:px-12 lg:px-20"
 	aria-label="Introduction"
 >
-	<!-- Ambient background elements with parallax -->
-	<div class="pointer-events-none absolute inset-0 overflow-hidden">
-		<div
-			class="ambient-blob absolute top-1/4 left-1/4 h-96 w-96 rounded-full opacity-20"
-			style="background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%); filter: blur(80px);"
-			use:parallax={{ speed: -0.15 }}
-		></div>
-		<div
-			class="ambient-blob absolute right-1/4 bottom-1/3 h-64 w-64 rounded-full opacity-15"
-			style="background: radial-gradient(circle, var(--color-tension) 0%, transparent 70%); filter: blur(60px);"
-			use:parallax={{ speed: -0.25 }}
-		></div>
-		<!-- Additional decorative element for more depth -->
-		<div
-			class="absolute top-1/2 right-1/3 h-48 w-48 rounded-full opacity-10"
-			style="background: radial-gradient(circle, var(--color-ink) 0%, transparent 70%); filter: blur(60px);"
-			use:parallax={{ speed: -0.1 }}
-		></div>
-	</div>
+	<!-- Generative Mesh Background -->
+	<GenerativeMesh />
 
-	<!-- Main content - horizontal layout with parallax fade -->
+	<!-- Main content floating on top -->
 	<div
-		class="relative z-10 mx-auto flex w-full max-w-6xl flex-col-reverse items-center justify-between gap-12 lg:flex-row lg:gap-16"
+		class="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center justify-center text-center"
 		use:parallaxScale={{ scaleStart: 1, scaleEnd: 0.95, opacityStart: 1, opacityEnd: 0.3, start: 'top top', end: '80% top' }}
 	>
-		<!-- Left side: Text content -->
-		<div class="flex-1 text-center lg:text-left" data-load="hero-content">
-			<!-- Subtle greeting badge -->
+		<!-- Text content -->
+		<div class="flex-1" data-load="hero-content">
+			<!-- Availability badge -->
 			<div data-load="hero-badge" class="mb-6">
 				<span
 					class="inline-flex items-center gap-3 rounded-full px-4 py-2"
@@ -368,7 +275,7 @@
 				</span>
 			</div>
 
-			<!-- Large, serene name -->
+			<!-- Large name -->
 			<h1
 				class="mb-6 font-serif leading-none tracking-tight"
 				style="font-family: var(--font-headline)"
@@ -388,17 +295,17 @@
 				</span>
 			</h1>
 
-			<!-- Subtle role description -->
+			<!-- Tagline -->
 			<div data-load="hero-subtitle" class="mb-8">
 				<p
-					class="max-w-lg leading-relaxed font-light text-[--color-ink]/50 text-base md:text-lg lg:text-xl"
+					class="mx-auto max-w-lg leading-relaxed font-light text-[--color-ink]/50 text-base md:text-lg lg:text-xl"
 					style="font-family: var(--font-headline); font-style: italic;"
 				>
 					Building products that scale — from municipal AI systems to IoT solutions
 				</p>
 			</div>
 
-			<!-- Single elegant CTA -->
+			<!-- CTA -->
 			<div data-load="hero-cta">
 				<a
 					href="#artifacts"
@@ -412,29 +319,19 @@
 				</a>
 			</div>
 		</div>
-
-		<!-- Right side: Animated Avatar -->
-		<div
-			class="mx-auto w-full max-w-[280px] flex-shrink-0 md:max-w-[360px] lg:mx-0 lg:max-w-[480px]"
-			data-load="hero-avatar"
-		>
-			<AnimatedAvatar size={500} imageSrc={Memoji} showStatus={true} />
-		</div>
 	</div>
 
 	<!-- Bottom decoration -->
 	<div class="absolute bottom-8 left-1/2 hidden -translate-x-1/2 md:block">
 		<div class="flex flex-col items-center gap-2 opacity-20">
-			<div
-				class="h-16 w-[1px] bg-gradient-to-b from-transparent via-[--color-ink] to-transparent"
-			></div>
+			<div class="h-16 w-[1px] bg-gradient-to-b from-transparent via-[--color-ink] to-transparent"></div>
 		</div>
 	</div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      THE ARTIFACTS (PROJECTS)
-     Horizontal scroll gallery of work
+     Varied layouts — editorial, data, immersive
      ═══════════════════════════════════════════════════════════════════════════ -->
 <section id="artifacts" class="relative" aria-label="Selected Work">
 	<!-- Section header -->
@@ -459,74 +356,39 @@
 		</div>
 	</div>
 
-	<!-- Horizontal scroll container (desktop) / Vertical stack (mobile/touch) -->
-	{#if isMobile || isTouchDevice}
-		<div class="space-y-8 px-6 pb-24">
-			{#each projects as project, i (project.id)}
-				<div class="project-card-wrapper" style="--card-index: {i}">
-					<ProjectCard
-						title={project.title}
-						subtitle={project.subtitle}
-						description={project.description}
-						year={project.year}
-						tags={project.tags}
-						image={project.image}
-						accentColor={project.color}
-						href={project.href}
+	<!-- Varied project layouts -->
+	<div class="space-y-16 px-6 pb-24 md:px-12 lg:px-20">
+		{#each projects as project, i (project.id)}
+			<div class="project-item mx-auto max-w-6xl">
+				{#if project.layoutType === 'editorial'}
+					<ProjectEditorial
+						{project}
 						index={i}
-						metrics={project.metrics}
+						onViewCaseStudy={() => openCaseStudy(project)}
 					/>
-				</div>
-			{/each}
-		</div>
-	{:else}
-		<div
-			bind:this={horizontalSection}
-			class="horizontal-scroll-section relative overflow-hidden"
-			style="height: {sectionHeight}"
-		>
-			<div class="sticky top-0 flex h-screen items-center overflow-hidden">
-				<div
-					bind:this={horizontalTrack}
-					class="horizontal-track flex gap-8 pr-[50vw] pl-20"
-					style="will-change: transform"
-				>
-					{#each projects as project, i (project.id)}
-						<div
-							class="project-card-wrapper flex-shrink-0"
-							style="--card-index: {i}; width: min(600px, 80vw)"
-						>
-							<ProjectCard
-								title={project.title}
-								subtitle={project.subtitle}
-								description={project.description}
-								year={project.year}
-								tags={project.tags}
-								image={project.image}
-								accentColor={project.color}
-								href={project.href}
-								index={i}
-								metrics={project.metrics}
-							/>
-						</div>
-					{/each}
-				</div>
+				{:else if project.layoutType === 'data'}
+					<ProjectData
+						{project}
+						index={i}
+						onViewCaseStudy={() => openCaseStudy(project)}
+					/>
+				{:else if project.layoutType === 'immersive'}
+					<ProjectImmersive
+						{project}
+						index={i}
+						onViewCaseStudy={() => openCaseStudy(project)}
+					/>
+				{/if}
 			</div>
-		</div>
-	{/if}
+		{/each}
+	</div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      THE PROCESS (TECH STACK)
-     Interactive "Toolbox" drawer system
+     Display cabinet with glass compartments
      ═══════════════════════════════════════════════════════════════════════════ -->
 <section id="process" class="relative bg-[--color-surface] px-6 py-24 md:py-32" aria-label="Technical Skills">
-	<!-- Grain overlay -->
-	<div
-		class="pointer-events-none absolute inset-0 opacity-30"
-		style="background-image: var(--glass-grain); background-repeat: repeat"
-	></div>
-
 	<div class="relative z-10 mx-auto max-w-4xl">
 		<div
 			class="mb-12 text-center"
@@ -547,7 +409,7 @@
 			</p>
 		</div>
 
-		<TechStack skills={technicalSkills} />
+		<DisplayCabinet skills={technicalSkills} />
 
 		<!-- Languages as small badges -->
 		<div
@@ -578,7 +440,7 @@
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      THE ARCHIVE (JOURNEY & ABOUT)
-     A combined timeline that feels like a journal
+     Warm constellation timeline
      ═══════════════════════════════════════════════════════════════════════════ -->
 <section id="archive" class="relative px-6 py-24 md:py-32" aria-label="Career Journey">
 	<div class="mx-auto max-w-4xl">
@@ -598,7 +460,7 @@
 			</h2>
 		</div>
 
-		<StudioJournal
+		<Constellation
 			timeline={timelineData}
 			{education}
 			{philosophies}
@@ -608,8 +470,8 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
-     THE CONTACT (OUTRO)
-     Bento-box style with quote and distinct social blocks
+     THE CONTACT
+     Email-first + social hub + playful exit + resume download
      ═══════════════════════════════════════════════════════════════════════════ -->
 <section id="contact" class="relative bg-[--color-surface] px-6 py-24 md:py-32" aria-label="Contact Information">
 	<!-- Ambient background -->
@@ -624,14 +486,8 @@
 		></div>
 	</div>
 
-	<!-- Grain overlay -->
-	<div
-		class="pointer-events-none absolute inset-0 opacity-30"
-		style="background-image: var(--glass-grain); background-repeat: repeat"
-	></div>
-
 	<div class="relative z-10 mx-auto max-w-5xl">
-		<!-- Section Header -->
+		<!-- Hero email area -->
 		<div
 			class="mb-16 text-center"
 			use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}
@@ -644,26 +500,25 @@
 				class="font-serif text-4xl font-medium tracking-tight text-[--color-ink] md:text-5xl"
 				style="font-family: var(--font-headline)"
 			>
-				Let's Connect
+				Let's build something together
 			</h2>
 			<p class="mx-auto mt-4 max-w-md text-[--color-ink]/50 text-base">
 				Have a project in mind? I'd love to hear from you.
 			</p>
 		</div>
 
-		<!-- Bento Grid -->
+		<!-- Email hero + social hub -->
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" use:revealWithExit={{ blur: 15, y: 30, duration: 1, persist: true }}>
-			
-		<!-- Email Card (Large - spans 2 cols on lg) -->
-		<a
-			href="mailto:{personalInfo.email}"
-			class="card group relative flex flex-col justify-between overflow-hidden p-8 md:col-span-2 lg:col-span-2 lg:row-span-2"
-			use:magnetic={{ strength: 0.15, duration: 0.5 }}
-			data-cursor-hover
-			aria-label="Send email to {personalInfo.email}"
-		>
-				<!-- Hover glow -->
-				<div 
+
+			<!-- Email Card (Large) -->
+			<a
+				href="mailto:{personalInfo.email}"
+				class="card group relative flex flex-col justify-between overflow-hidden p-8 md:col-span-2 lg:col-span-2 lg:row-span-2"
+				use:magnetic={{ strength: 0.15, duration: 0.5 }}
+				data-cursor-hover
+				aria-label="Send email to {personalInfo.email}"
+			>
+				<div
 					class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 					style="background: radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 60%);"
 				></div>
@@ -678,8 +533,8 @@
 							Available for projects
 						</span>
 					</div>
-					
-					<h3 
+
+					<h3
 						class="mb-4 font-serif text-2xl font-medium text-[--color-ink] md:text-3xl"
 						style="font-family: var(--font-headline)"
 					>
@@ -697,26 +552,26 @@
 					>
 						{personalInfo.email}
 					</span>
-				<span class="flex h-12 w-12 items-center justify-center rounded-full bg-[--color-accent] text-xl text-[--color-ink] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-45">
-					→
-				</span>
+					<span class="flex h-12 w-12 items-center justify-center rounded-full bg-[--color-accent] text-xl text-[--color-ink] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-45">
+						→
+					</span>
 				</div>
 			</a>
 
-		<!-- GitHub Card -->
-		<a
-			href={personalInfo.social.github}
-			target="_blank"
-			rel="noopener noreferrer"
-			class="card group relative flex flex-col justify-between overflow-hidden p-6"
-			use:magnetic={{ strength: 0.25, duration: 0.4 }}
-			data-cursor-hover
-			aria-label="View GitHub profile (opens in new tab)"
-		>
+			<!-- GitHub Card -->
+			<a
+				href={personalInfo.social.github}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="card group relative flex flex-col justify-between overflow-hidden p-6"
+				use:magnetic={{ strength: 0.25, duration: 0.4 }}
+				data-cursor-hover
+				aria-label="View GitHub profile (opens in new tab)"
+			>
 				<div>
-				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-ink] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
-					⌘
-				</div>
+					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-ink] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
+						⌘
+					</div>
 					<h3 class="mb-2 font-serif text-lg font-medium text-[--color-ink]" style="font-family: var(--font-headline)">
 						GitHub
 					</h3>
@@ -730,20 +585,20 @@
 				</div>
 			</a>
 
-		<!-- LinkedIn Card -->
-		<a
-			href={personalInfo.social.linkedin}
-			target="_blank"
-			rel="noopener noreferrer"
-			class="card group relative flex flex-col justify-between overflow-hidden p-6"
-			use:magnetic={{ strength: 0.25, duration: 0.4 }}
-			data-cursor-hover
-			aria-label="Connect on LinkedIn (opens in new tab)"
-		>
+			<!-- LinkedIn Card -->
+			<a
+				href={personalInfo.social.linkedin}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="card group relative flex flex-col justify-between overflow-hidden p-6"
+				use:magnetic={{ strength: 0.25, duration: 0.4 }}
+				data-cursor-hover
+				aria-label="Connect on LinkedIn (opens in new tab)"
+			>
 				<div>
-				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-tension] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
-					◎
-				</div>
+					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-tension] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
+						◎
+					</div>
 					<h3 class="mb-2 font-serif text-lg font-medium text-[--color-ink]" style="font-family: var(--font-headline)">
 						LinkedIn
 					</h3>
@@ -757,37 +612,87 @@
 				</div>
 			</a>
 
-		<!-- Quote Card -->
+			<!-- Resume Download Card -->
+			<a
+				href="/resume.pdf"
+				download="Santiago_Vazquez_Resume.pdf"
+				class="card group relative flex flex-col justify-between overflow-hidden p-6"
+				use:magnetic={{ strength: 0.25, duration: 0.4 }}
+				data-cursor-hover
+				aria-label="Download resume as PDF"
+			>
+				<div>
+					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-gold] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
+						↓
+					</div>
+					<h3 class="mb-2 font-serif text-lg font-medium text-[--color-ink]" style="font-family: var(--font-headline)">
+						Resume
+					</h3>
+					<p class="text-[--color-ink]/50 text-sm">
+						Download my full CV
+					</p>
+				</div>
+				<div class="mt-4 flex items-center gap-2 font-mono text-xs text-[--color-ink]/40 uppercase">
+					<span>Download PDF</span>
+					<span class="transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
+				</div>
+			</a>
+
+			<!-- Phone Card -->
+			<a
+				href="tel:{personalInfo.phone}"
+				class="card group relative flex flex-col justify-between overflow-hidden p-6"
+				use:magnetic={{ strength: 0.25, duration: 0.4 }}
+				data-cursor-hover
+				aria-label="Call {personalInfo.phone}"
+			>
+				<div>
+					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-accent] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
+						☎
+					</div>
+					<h3 class="mb-2 font-serif text-lg font-medium text-[--color-ink]" style="font-family: var(--font-headline)">
+						Phone
+					</h3>
+					<p class="text-[--color-ink]/50 text-sm">
+						{personalInfo.phone}
+					</p>
+				</div>
+				<div class="mt-4 flex items-center gap-2 font-mono text-xs text-[--color-ink]/40 uppercase">
+					<span>Call</span>
+					<span class="transition-transform duration-300 group-hover:translate-x-1">↗</span>
+				</div>
+			</a>
+
+			<!-- Playful exit card -->
 			<div
 				class="card group relative flex flex-col justify-between overflow-hidden p-6 md:col-span-2 lg:col-span-3"
 			>
 				<div>
 					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-accent] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
-						❝
+						✦
 					</div>
-					<blockquote 
+					<blockquote
 						class="font-serif text-lg italic text-[--color-ink]/80 leading-relaxed"
 						style="font-family: var(--font-headline)"
 					>
-						The next great idea is just one conversation away.
+						Fun fact: This portfolio has 0 npm packages with security vulnerabilities. I checked.
 					</blockquote>
 				</div>
 				<div class="mt-4 flex items-center gap-2 font-mono text-xs text-[--color-ink]/40 uppercase">
-					<span>— Let's talk</span>
+					<span>— Built with obsessive attention to detail</span>
 				</div>
 			</div>
-
 		</div>
 
 		<!-- Location & Footer info -->
-		<div 
+		<div
 			class="mt-12 flex flex-col items-center gap-6 text-center"
 			use:revealWithExit={{ blur: 8, y: 15, duration: 0.8, persist: true }}
 		>
 			<div class="flex items-center gap-4 text-[--color-ink]/30">
-				<span class="font-mono text-xs">📍 {personalInfo.locationShort}</span>
+				<span class="font-mono text-xs">Monterrey, MX</span>
 				<span class="h-1 w-1 rounded-full bg-current"></span>
-				<span class="font-mono text-xs">🕐 CST (UTC-6)</span>
+				<span class="font-mono text-xs">CST (UTC-6)</span>
 			</div>
 			<div class="inline-flex items-center gap-4 text-[--color-ink]/20">
 				<span class="h-[1px] w-8 bg-current"></span>
@@ -818,32 +723,3 @@
 
 </div>
 <!-- End Page Load Animation Wrapper -->
-
-<style>
-	/* Horizontal scroll section */
-	.horizontal-scroll-section {
-		isolation: isolate;
-	}
-
-	.horizontal-track {
-		height: 100%;
-		display: flex;
-		align-items: center;
-	}
-
-	.project-card-wrapper {
-		height: fit-content;
-	}
-
-	/* Floating animation */
-	@keyframes float {
-		0%, 100% { transform: translateY(0) rotate(0deg); }
-		50% { transform: translateY(-20px) rotate(5deg); }
-	}
-
-	/* Pulse animation for cards */
-	@keyframes pulse-glow {
-		0%, 100% { opacity: 0.05; }
-		50% { opacity: 0.15; }
-	}
-</style>
