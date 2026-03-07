@@ -31,6 +31,11 @@
           "value": "#36322f",
           "css": "var(--color-ink)",
           "usage": "Primary text, borders, dark backgrounds"
+        },
+        "gold": {
+          "value": "#d4a843",
+          "css": "var(--color-gold)",
+          "usage": "Warm gold accent for highlights, constellation glow, special emphasis"
         }
       },
       "opacity": {

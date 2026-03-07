@@ -39,12 +39,15 @@ export const textReveal: Action<HTMLElement, TextRevealOptions | undefined> = (
 
 	let gsapInstance: typeof import('gsap').gsap | null = null;
 	let scrollTriggerInstance: import('gsap/ScrollTrigger').ScrollTrigger | null = null;
+	let destroyed = false;
 	const originalHTML = node.innerHTML;
 	const originalStyle = node.style.cssText;
 
 	const init = async () => {
 		const { gsap } = await import('gsap');
+		if (destroyed) return;
 		const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+		if (destroyed) return;
 		gsap.registerPlugin(ScrollTrigger);
 		gsapInstance = gsap;
 
@@ -144,13 +147,14 @@ export const textReveal: Action<HTMLElement, TextRevealOptions | undefined> = (
 
 	return {
 		destroy() {
-			scrollTriggerInstance?.kill();
-			// Restore original content
-			node.innerHTML = originalHTML;
-			node.style.cssText = originalStyle;
+			destroyed = true;
 			if (gsapInstance) {
 				gsapInstance.killTweensOf(node.children);
 			}
+			scrollTriggerInstance?.kill();
+			// Restore original content after killing tweens
+			node.innerHTML = originalHTML;
+			node.style.cssText = originalStyle;
 		}
 	};
 };

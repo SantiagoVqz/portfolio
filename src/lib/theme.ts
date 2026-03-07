@@ -9,7 +9,7 @@ export const theme = {
 	typography: {
 		fonts: {
 			headline: '"Fraunces", "Times New Roman", serif',
-			data: '"Input Mono", "DM Mono", "Courier New", monospace'
+			data: '"DM Mono", "Input Mono", "Courier New", monospace'
 		},
 		tokens: {
 			letterSpacing: {
@@ -35,29 +35,3 @@ export const theme = {
 	}
 } as const;
 
-export type Theme = typeof theme;
-
-// Helper to inject CSS variables
-export const cssVariables = `
-	:root {
-		--color-base: ${theme.colors.base};
-		--color-surface: ${theme.colors.surface};
-		--color-accent: ${theme.colors.accent};
-		--color-tension: ${theme.colors.tension};
-		--color-ink: ${theme.colors.ink};
-
-		--font-headline: ${theme.typography.fonts.headline};
-		--font-data: ${theme.typography.fonts.data};
-
-		--tracking-tight: ${theme.typography.tokens.letterSpacing.tight};
-		--tracking-wide: ${theme.typography.tokens.letterSpacing.wide};
-
-		--leading-tight: ${theme.typography.tokens.lineHeight.tight};
-		--leading-relaxed: ${theme.typography.tokens.lineHeight.relaxed};
-
-		--shadow-diffused: ${theme.material.shadows.diffused};
-		--shadow-deep: ${theme.material.shadows.deep};
-		
-		--glass-grain: ${theme.material.glass.grain};
-	}
-`;

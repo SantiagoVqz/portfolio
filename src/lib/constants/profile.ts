@@ -59,20 +59,22 @@ export interface Skill {
 	| 'DevOps'
 	| 'Database';
 	size: 'large' | 'medium' | 'small';
+	icon: string;
+	color: string;
 }
 
 export const technicalSkills: Skill[] = [
 	// Large - Primary expertise
-	{ name: 'SvelteKit', category: 'Framework', size: 'large' },
-	{ name: 'Next.js', category: 'Framework', size: 'large' },
+	{ name: 'SvelteKit', category: 'Framework', size: 'large', icon: '⚡', color: '#FF3E00' },
+	{ name: 'Next.js', category: 'Framework', size: 'large', icon: '▲', color: '#000000' },
 	// Medium - Strong proficiency
-	{ name: 'AWS', category: 'Cloud', size: 'medium' },
-	{ name: 'TypeScript', category: 'Language', size: 'medium' },
+	{ name: 'AWS', category: 'Cloud', size: 'medium', icon: '☁', color: '#FF9900' },
+	{ name: 'TypeScript', category: 'Language', size: 'medium', icon: 'TS', color: '#3178C6' },
 	// Small - Supporting skills
-	{ name: 'FastAPI', category: 'Backend', size: 'small' },
-	{ name: 'React Native', category: 'Mobile', size: 'small' },
-	{ name: 'Playwright', category: 'Testing', size: 'small' },
-	{ name: 'GSAP', category: 'Motion', size: 'small' }
+	{ name: 'FastAPI', category: 'Backend', size: 'small', icon: '⚙', color: '#009688' },
+	{ name: 'React Native', category: 'Mobile', size: 'small', icon: '📱', color: '#61DAFB' },
+	{ name: 'Playwright', category: 'Testing', size: 'small', icon: '🎭', color: '#2EAD33' },
+	{ name: 'GSAP', category: 'Motion', size: 'small', icon: '◐', color: '#88CE02' }
 ];
 
 export const skillCategories = {
@@ -157,8 +159,23 @@ export const experiences: Experience[] = [
 ];
 
 // ============================================
+// CASE STUDIES
+// ============================================
+
+export interface CaseStudy {
+	problem: string;
+	approach: string;
+	solution: string;
+	outcome: string;
+	screenshots: string[];
+	codeSnippets: string[];
+}
+
+// ============================================
 // PROJECTS
 // ============================================
+
+export type ProjectLayoutType = 'editorial' | 'data' | 'immersive';
 
 export interface Project {
 	id: string;
@@ -173,6 +190,8 @@ export interface Project {
 	video?: string;
 	href?: string;
 	metrics?: { label: string; value: string }[];
+	layoutType: ProjectLayoutType;
+	caseStudy: CaseStudy;
 }
 
 export const projects: Project[] = [
@@ -192,7 +211,16 @@ export const projects: Project[] = [
 			{ label: 'Test Coverage', value: '98%+' },
 			{ label: 'Clients Served', value: 'Multiple U.S. Cities' }
 		],
-		image: AskEchoImage
+		image: AskEchoImage,
+		layoutType: 'editorial',
+		caseStudy: {
+			problem: 'Municipal clients needed a branded AI chat widget that could be embedded on any website without CSS conflicts, with rapid deployment for each new city.',
+			approach: 'Designed a multi-tenant architecture using Shadow DOM for complete style isolation, with a configuration-driven onboarding system that eliminates manual setup.',
+			solution: 'Built AskEcho from scratch with SvelteKit, Shadow DOM encapsulation, and automated deployment pipelines. Each client gets a unique configuration that controls branding, behavior, and AI model settings.',
+			outcome: 'Reduced client onboarding from 2 weeks to under 72 hours. Achieved 98%+ test coverage with Playwright E2E tests. Now serving multiple U.S. cities with zero CSS conflicts.',
+			screenshots: [],
+			codeSnippets: []
+		}
 	},
 	{
 		id: 'command-center',
@@ -209,7 +237,16 @@ export const projects: Project[] = [
 			{ label: 'Release Bundles', value: '13' },
 			{ label: 'Machine Types', value: 'Sprayers & Planters' }
 		],
-		image: JohnDeereImage
+		image: JohnDeereImage,
+		layoutType: 'data',
+		caseStudy: {
+			problem: 'Tractor Command Center displays needed modernized UI and critical diagnostic systems to improve operator safety in the field.',
+			approach: 'Worked within memory-constrained C++ embedded environments, implementing new icon sets and diagnostic alert systems that detect machine failure before damage occurs.',
+			solution: 'Developed and tested onboard diagnostic alerts, created new UI layout configurations, and optimized C++ code for embedded environments across sprayer and planting machines.',
+			outcome: 'Contributed to 13 software release bundles. Improved operator usability and safety through enhanced UI and preventative diagnostic systems.',
+			screenshots: [],
+			codeSnippets: []
+		}
 	},
 	{
 		id: 'pick-to-light',
@@ -227,7 +264,16 @@ export const projects: Project[] = [
 			{ label: 'Maintenance Savings', value: '90%' },
 			{ label: 'Efficiency Gain', value: '40%' }
 		],
-		image: CoppelImage
+		image: CoppelImage,
+		layoutType: 'immersive',
+		caseStudy: {
+			problem: 'Coppel distribution centers relied on expensive wired Pick-to-Light systems from 3rd-party vendors, with high maintenance costs and limited flexibility.',
+			approach: 'Designed a custom wireless architecture using ESP32 microcontrollers and MQTT protocol, with a FastAPI backend and PostgreSQL database for order management.',
+			solution: 'Built a complete wireless Pick-to-Light prototype optimized for 196+ LED modules, featuring real-time order routing, visual pick confirmations, and a web dashboard for warehouse managers.',
+			outcome: 'Projected 70% cost reduction vs. wired solutions, 90% maintenance savings, and 40% efficiency improvement in pick operations.',
+			screenshots: [],
+			codeSnippets: []
+		}
 	}
 ];
 

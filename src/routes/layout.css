@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
 /* ========================================
@@ -15,6 +14,7 @@
 	--color-accent: #cc8b65;
 	--color-tension: #7d9c8b;
 	--color-ink: #36322f;
+	--color-gold: #d4a843;
 
 	/* ========================================
 	   TYPOGRAPHY
@@ -68,10 +68,6 @@
 	--scale-emphasis: 1.1;
 	--lift-card: -4px;
 
-	/* ========================================
-	   TEXTURES
-	   ======================================== */
-	--glass-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
 }
 
 /* ========================================
@@ -188,15 +184,17 @@ button:focus-visible,
 }
 
 /* ========================================
-   CUSTOM CURSOR - Global Hide
+   CUSTOM CURSOR - JS-driven hide
+   Class added by CustomCursor component on mount
    ======================================== */
-*,
-*::before,
-*::after {
+body.custom-cursor-active,
+body.custom-cursor-active *,
+body.custom-cursor-active *::before,
+body.custom-cursor-active *::after {
 	cursor: none !important;
 }
 
-/* Restore cursor only on touch devices */
+/* Restore cursor on touch devices regardless */
 @media (hover: none) and (pointer: coarse) {
 	*,
 	*::before,
@@ -235,12 +233,6 @@ button:focus-visible,
 
 .surface-card:hover {
 	box-shadow: var(--shadow-deep);
-}
-
-/* Grain texture overlay */
-.grain-texture {
-	background-image: var(--glass-grain);
-	background-repeat: repeat;
 }
 
 /* ========================================
@@ -553,63 +545,6 @@ button:focus-visible,
 
 .animate-slide-out {
 	animation: slideOutLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* ========================================
-   HORIZONTAL SCROLL SECTION
-   ======================================== */
-
-/* Mobile: Disable horizontal scroll behavior */
-@media (max-width: 1023px) {
-	.horizontal-scroll-section {
-		height: auto !important;
-	}
-
-	.horizontal-scroll-section .sticky {
-		position: relative !important;
-		height: auto !important;
-	}
-
-	.horizontal-track {
-		flex-direction: column !important;
-		padding: 0 !important;
-		gap: 2rem !important;
-		transform: none !important;
-	}
-
-	.project-card-wrapper {
-		width: 100% !important;
-	}
-}
-
-/* Touch devices: Disable horizontal scroll even on larger screens */
-@media (hover: none) and (pointer: coarse) {
-	.horizontal-scroll-section {
-		height: auto !important;
-	}
-
-	.horizontal-scroll-section .sticky {
-		position: relative !important;
-		height: auto !important;
-	}
-
-	.horizontal-track {
-		flex-direction: column !important;
-		padding: 0 1.5rem !important;
-		gap: 2rem !important;
-		transform: none !important;
-	}
-
-	.project-card-wrapper {
-		width: 100% !important;
-	}
-}
-
-/* Desktop: Enable smooth horizontal scroll */
-@media (min-width: 1024px) and (hover: hover) {
-	.horizontal-scroll-section {
-		overflow: hidden;
-	}
 }
 
 /* ========================================

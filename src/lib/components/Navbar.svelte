@@ -18,21 +18,45 @@
 	// Track scroll state for navbar appearance
 	let isScrolled = $state(false);
 	let isMobileMenuOpen = $state(false);
+	let menuBtnRef = $state<HTMLButtonElement>();
+	let mobileMenuRef = $state<HTMLElement>();
+
+	// Manage inert attribute on main content when menu opens/closes
+	$effect(() => {
+		const mainContent = document.getElementById('main-content');
+		if (!mainContent) return;
+
+		if (isMobileMenuOpen) {
+			mainContent.setAttribute('inert', '');
+			// Focus first menu link after transition
+			setTimeout(() => {
+				const firstLink = mobileMenuRef?.querySelector<HTMLElement>('a, button');
+				firstLink?.focus();
+			}, 100);
+		} else {
+			mainContent.removeAttribute('inert');
+		}
+	});
 
 	// Close mobile menu when clicking a link
 	function handleLinkClick() {
 		isMobileMenuOpen = false;
+		menuBtnRef?.focus();
 	}
 
 	// Toggle mobile menu
 	function toggleMobileMenu() {
 		isMobileMenuOpen = !isMobileMenuOpen;
+		if (!isMobileMenuOpen) {
+			menuBtnRef?.focus();
+		}
 	}
 
 	// Close menu on escape key
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape' && isMobileMenuOpen) {
 			isMobileMenuOpen = false;
+			menuBtnRef?.focus();
 		}
 	}
 
@@ -105,6 +129,7 @@
 
 		<!-- Mobile Menu Button -->
 		<button
+			bind:this={menuBtnRef}
 			class="mobile-menu-btn"
 			onclick={toggleMobileMenu}
 			aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -133,7 +158,8 @@
 	{/if}
 
 	<!-- Mobile Menu -->
-	<div 
+	<div
+		bind:this={mobileMenuRef}
 		id="mobile-menu"
 		class="mobile-menu"
 		class:open={isMobileMenuOpen}

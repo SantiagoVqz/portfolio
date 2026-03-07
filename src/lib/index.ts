@@ -1,5 +1,5 @@
 // Theme tokens
-export { theme, cssVariables, type Theme } from './theme';
+export { theme } from './theme';
 
 // Actions
 export { magnetic } from './actions/magnetic';
@@ -16,3 +16,12 @@ export { default as SmoothScroll } from './components/SmoothScroll.svelte';
 export { default as ProjectSheet } from './components/ProjectSheet.svelte';
 export { default as MagneticButton } from './components/MagneticButton.svelte';
 export { default as AnimatedAvatar } from './components/AnimatedAvatar.svelte';
+export { default as GenerativeMesh } from './components/GenerativeMesh.svelte';
+export { default as ProjectEditorial } from './components/ProjectEditorial.svelte';
+export { default as ProjectData } from './components/ProjectData.svelte';
+export { default as ProjectImmersive } from './components/ProjectImmersive.svelte';
+export { default as CaseStudyModal } from './components/CaseStudyModal.svelte';
+export { default as DisplayCabinet } from './components/DisplayCabinet.svelte';
+export { default as Constellation } from './components/Constellation.svelte';
+export { default as CommandPalette } from './components/CommandPalette.svelte';
+export { default as SectionIndicators } from './components/SectionIndicators.svelte';

@@ -20,13 +20,23 @@
 	let journalRef = $state<HTMLElement>();
 	let activeEntry = $state<number | null>(null);
 
+	// Stable random timestamps cached by index (avoids re-randomizing on reactivity cycles)
+	const timestampCache = new Map<number, string>();
+	const hours = ['09:14', '14:32', '16:45', '11:08', '20:15'];
+	function getStableTimestamp(index: number): string {
+		if (!timestampCache.has(index)) {
+			timestampCache.set(index, hours[Math.floor(Math.random() * hours.length)]);
+		}
+		return timestampCache.get(index)!;
+	}
+
 	// Combine timeline into journal entries with more narrative feel
 	const journalEntries = $derived.by(() => {
 		return timeline.map((item, index) => ({
 			...item,
 			entryNumber: String(index + 1).padStart(3, '0'),
 			mood: getMood(item.type),
-			timestamp: getTimestamp()
+			timestamp: getStableTimestamp(index)
 		}));
 	});
 
@@ -43,11 +53,6 @@
 		}
 	}
 
-	function getTimestamp(): string {
-		// Add a random time for aesthetic
-		const hours = ['09:14', '14:32', '16:45', '11:08', '20:15'];
-		return hours[Math.floor(Math.random() * hours.length)];
-	}
 
 	onMount(() => {
 		if (!journalRef || !browser) return;
@@ -126,8 +131,10 @@
 				class:expanded={activeEntry === i}
 				role="button"
 				tabindex="0"
+				aria-expanded={activeEntry === i}
+				aria-label="Toggle {entry.company} details"
 				onclick={() => (activeEntry = activeEntry === i ? null : i)}
-				onkeydown={(e) => e.key === 'Enter' && (activeEntry = activeEntry === i ? null : i)}
+				onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), activeEntry = activeEntry === i ? null : i)}
 			>
 				<!-- Entry header -->
 				<div class="entry-header">

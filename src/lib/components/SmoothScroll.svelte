@@ -40,37 +40,50 @@
 			touchMultiplier: 2
 		});
 
-		// Animation frame loop
+		// Animation frame loop (fallback if GSAP unavailable)
+		let rafId: number;
 		function raf(time: number) {
 			lenis?.raf(time);
-			requestAnimationFrame(raf);
+			rafId = requestAnimationFrame(raf);
 		}
-		requestAnimationFrame(raf);
+		rafId = requestAnimationFrame(raf);
 
 		// Integrate with GSAP ScrollTrigger if available
+		let tickerFn: ((time: number) => void) | null = null;
+		let gsapRef: typeof import('gsap').gsap | null = null;
+
 		const integrateWithGSAP = async () => {
 			try {
 				const { gsap } = await import('gsap');
 				const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-				
+
 				gsap.registerPlugin(ScrollTrigger);
+				gsapRef = gsap;
+
+				// Stop the manual RAF loop — GSAP ticker takes over
+				cancelAnimationFrame(rafId);
 
 				// Sync Lenis scroll with ScrollTrigger
 				lenis?.on('scroll', ScrollTrigger.update);
 
-				gsap.ticker.add((time) => {
+				tickerFn = (time) => {
 					lenis?.raf(time * 1000);
-				});
+				};
+				gsap.ticker.add(tickerFn);
 
 				gsap.ticker.lagSmoothing(0);
 			} catch {
-				// GSAP not available, that's fine
+				// GSAP not available, RAF loop continues as fallback
 			}
 		};
 
 		integrateWithGSAP();
 
 		return () => {
+			cancelAnimationFrame(rafId);
+			if (tickerFn && gsapRef) {
+				gsapRef.ticker.remove(tickerFn);
+			}
 			lenis?.destroy();
 			lenis = null;
 		};
