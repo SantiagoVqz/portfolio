@@ -78,7 +78,7 @@ export const pageLoad: Action<HTMLElement, PageLoadOptions | undefined> = (node,
 		timeline = gsap.timeline({
 			delay,
 			onComplete: () => {
-				// Clean up will-change properties after animation
+				// Clean up will-change and transforms after animation
 				[navbar, heroContent, heroAvatar, heroBadge, heroCta, heroName, heroSubtitle].forEach(
 					(el) => {
 						if (el instanceof HTMLElement) {
@@ -86,6 +86,14 @@ export const pageLoad: Action<HTMLElement, PageLoadOptions | undefined> = (node,
 						}
 					}
 				);
+				// Clear GSAP transforms on navbar and its wrapper to restore
+				// position:fixed behavior (transforms on ancestors break fixed positioning)
+				if (navbar) {
+					gsap.set(navbar, { clearProps: 'transform' });
+					if (navbar instanceof HTMLElement && navbar.parentElement) {
+						navbar.parentElement.style.transform = '';
+					}
+				}
 				onComplete?.();
 			}
 		});

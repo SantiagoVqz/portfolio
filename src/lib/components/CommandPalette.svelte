@@ -205,6 +205,8 @@
 		background: transparent;
 		z-index: 2000;
 		display: none;
+		visibility: hidden;
+		pointer-events: none;
 		align-items: flex-start;
 		justify-content: center;
 		padding-top: 20vh;
@@ -212,6 +214,8 @@
 
 	.palette-dialog[open] {
 		display: flex;
+		visibility: visible;
+		pointer-events: auto;
 	}
 
 	.palette-dialog::backdrop {

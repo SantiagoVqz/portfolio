@@ -46,7 +46,16 @@
 					tl.to(navbar, {
 						y: 0,
 						opacity: 1,
-						duration: 0.8
+						duration: 0.8,
+						onComplete: () => {
+							// Clear transforms to restore position:fixed behavior
+							// (transforms on ancestors break fixed positioning)
+							gsap.set(navbar, { clearProps: 'transform' });
+							const wrapper = navbar.closest('[data-load="navbar"]');
+							if (wrapper instanceof HTMLElement) {
+								wrapper.style.transform = '';
+							}
+						}
 					}, 0.3);
 				}
 
@@ -231,6 +240,12 @@
 </SmoothScroll>
 
 <style>
+	/* Keep visual cursor layers from ever intercepting clicks */
+	.sunlight-glow,
+	.custom-cursor {
+		pointer-events: none !important;
+	}
+
 	.custom-cursor {
 		transition:
 			opacity 0.3s ease,

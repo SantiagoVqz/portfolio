@@ -229,13 +229,13 @@
 {#if !isTouchDevice}
 	<canvas
 		bind:this={canvasRef}
-		class="absolute inset-0 z-0"
+		class="pointer-events-none absolute inset-0 z-0"
 		aria-hidden="true"
 	></canvas>
 {:else}
 	<!-- Mobile fallback: subtle gradient -->
 	<div
-		class="absolute inset-0 z-0"
+		class="pointer-events-none absolute inset-0 z-0"
 		style="background: radial-gradient(ellipse at 30% 40%, rgba(204,139,101,0.08) 0%, transparent 50%),
 		       radial-gradient(ellipse at 70% 60%, rgba(125,156,139,0.06) 0%, transparent 50%),
 		       radial-gradient(ellipse at 50% 80%, rgba(212,168,67,0.04) 0%, transparent 50%);"

@@ -201,6 +201,7 @@
 		background: transparent;
 		z-index: 1000;
 		display: none;
+		visibility: hidden;
 		pointer-events: none;
 		align-items: center;
 		justify-content: center;
@@ -209,6 +210,7 @@
 
 	.modal-dialog[open] {
 		display: flex;
+		visibility: visible;
 		pointer-events: auto;
 	}
 

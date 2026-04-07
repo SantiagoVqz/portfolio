@@ -18,6 +18,7 @@
 	// Track scroll state for navbar appearance
 	let isScrolled = $state(false);
 	let isMobileMenuOpen = $state(false);
+	let isMobileViewport = $state(false);
 	let menuBtnRef = $state<HTMLButtonElement>();
 	let mobileMenuRef = $state<HTMLElement>();
 
@@ -62,18 +63,29 @@
 
 	onMount(() => {
 		scrollState.init();
+		isMobileViewport = window.innerWidth <= 768;
 
 		const handleScroll = () => {
 			// Add background when scrolled
 			isScrolled = window.scrollY > 50;
 		};
 
+		const handleResize = () => {
+			isMobileViewport = window.innerWidth <= 768;
+			// Prevent stale mobile overlays from blocking desktop nav
+			if (!isMobileViewport && isMobileMenuOpen) {
+				isMobileMenuOpen = false;
+			}
+		};
+
 		window.addEventListener('scroll', handleScroll, { passive: true });
 		window.addEventListener('keydown', handleKeydown);
+		window.addEventListener('resize', handleResize);
 
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
 			window.removeEventListener('keydown', handleKeydown);
+			window.removeEventListener('resize', handleResize);
 			scrollState.destroy();
 		};
 	});
@@ -149,7 +161,7 @@
 	<div class="scroll-progress" style="--progress: {scrollState.progress}"></div>
 
 	<!-- Mobile Menu Overlay -->
-	{#if isMobileMenuOpen}
+	{#if isMobileMenuOpen && isMobileViewport}
 		<div 
 			class="mobile-menu-overlay"
 			onclick={handleLinkClick}
@@ -201,6 +213,7 @@
 		left: 0;
 		right: 0;
 		z-index: 1000;
+		pointer-events: auto;
 		padding: 1.25rem 2rem;
 		transition:
 			background var(--duration-normal) ease,
@@ -378,6 +391,8 @@
 		z-index: 1000;
 		padding: 6rem 2rem 2rem;
 		transform: translateX(100%);
+		visibility: hidden;
+		pointer-events: none;
 		transition: transform var(--duration-slow) var(--ease-smooth);
 		display: flex;
 		flex-direction: column;
@@ -386,6 +401,8 @@
 
 	.mobile-menu.open {
 		transform: translateX(0);
+		visibility: visible;
+		pointer-events: auto;
 	}
 
 	.mobile-menu-links {
