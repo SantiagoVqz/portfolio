@@ -355,6 +355,8 @@ export const philosophies: Philosophy[] = [
 
 export interface TimelineItem {
 	year: string;
+	endYear?: string;
+	current?: boolean;
 	title: string;
 	company: string;
 	description: string;
@@ -364,6 +366,7 @@ export interface TimelineItem {
 export const timelineData: TimelineItem[] = [
 	{
 		year: '2021',
+		endYear: '2025',
 		title: 'Started University',
 		company: 'Tecnológico de Monterrey',
 		description: 'Began B.S. in Innovation and Development Engineering.',
@@ -371,6 +374,7 @@ export const timelineData: TimelineItem[] = [
 	},
 	{
 		year: 'Feb 2024',
+		endYear: 'Aug 2024',
 		title: 'Embedded Software Intern',
 		company: 'John Deere',
 		description: 'Modernized tractor UI and developed C++ diagnostic systems.',
@@ -378,6 +382,7 @@ export const timelineData: TimelineItem[] = [
 	},
 	{
 		year: 'Aug 2024',
+		endYear: 'Dec 2024',
 		title: 'Exchange Program',
 		company: 'IÉSEG School of Management',
 		description: 'Studied Business & Innovation in Lille, France.',
@@ -385,16 +390,40 @@ export const timelineData: TimelineItem[] = [
 	},
 	{
 		year: 'Jan 2025',
+		current: true,
 		title: 'Full Stack Developer',
 		company: 'CityFront AI',
 		description: 'Leading development of municipal apps and AskEcho chat solution.',
 		type: 'work'
 	},
 	{
+		year: 'June 2025',
+		title: 'Pick-to-Light System',
+		company: 'Coppel',
+		description: 'Capstone project — designed and built an IoT pick-to-light fulfillment system for one of Mexico\'s largest retailers.',
+		type: 'milestone'
+	},
+	{
 		year: 'July 2025',
 		title: 'Graduated',
 		company: 'Tecnológico de Monterrey',
 		description: 'Completed degree with 4.0 GPA.',
+		type: 'milestone'
+	},
+	{
+		year: 'Late 2025',
+		endYear: 'Early 2026',
+		title: 'Co-founded Piggy',
+		company: 'Piggy',
+		description: 'Built a personal finance mobile app with React Native — transactions, budgets, savings goals, and group splits.',
+		type: 'milestone'
+	},
+	{
+		year: '2026',
+		current: true,
+		title: 'Co-founded KNOT',
+		company: 'KNOT',
+		description: 'Building a bilingual wedding planning SaaS — guest management, RSVP tracking, WhatsApp notifications, and Stripe billing.',
 		type: 'milestone'
 	}
 ];

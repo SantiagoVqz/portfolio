@@ -25,7 +25,10 @@
 			animateIn();
 		} else {
 			document.body.style.overflow = '';
-			dialogRef.close();
+			// Only close if the dialog is currently open
+			if (dialogRef.open) {
+				dialogRef.close();
+			}
 		}
 	});
 

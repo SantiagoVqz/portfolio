@@ -440,12 +440,12 @@
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      THE ARCHIVE (JOURNEY & ABOUT)
-     Warm constellation timeline
+     Editorial timeline with alternating entries
      ═══════════════════════════════════════════════════════════════════════════ -->
 <section id="archive" class="relative px-6 py-24 md:py-32" aria-label="Career Journey">
 	<div class="mx-auto max-w-4xl">
 		<div
-			class="mb-8 text-center"
+			class="mb-12 text-center"
 			use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}
 		>
 			<div class="mb-4 flex items-center justify-center gap-4">
@@ -458,6 +458,9 @@
 			>
 				My Journey
 			</h2>
+			<p class="mt-4 mx-auto max-w-lg text-[--color-ink]/40 text-sm md:text-base" style="font-family: var(--font-data)">
+				From the classroom to the codebase — the milestones that shaped how I build.
+			</p>
 		</div>
 
 		<Constellation
@@ -715,8 +718,8 @@
 		>
 			{personalInfo.shortName}
 		</span>
-		<span class="font-mono text-[10px] text-[--color-ink]/30">
-			Built with SvelteKit + GSAP · © {new Date().getFullYear()}
+		<span class="font-mono text-[10px] text-[--color-ink]/30" style="font-family: var(--font-data); letter-spacing: 0.06em;">
+			Designed & crafted in Monterrey · © {new Date().getFullYear()}
 		</span>
 	</div>
 </footer>

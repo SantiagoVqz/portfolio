@@ -204,10 +204,14 @@
 		border: none;
 		background: transparent;
 		z-index: 2000;
-		display: flex;
+		display: none;
 		align-items: flex-start;
 		justify-content: center;
 		padding-top: 20vh;
+	}
+
+	.palette-dialog[open] {
+		display: flex;
 	}
 
 	.palette-dialog::backdrop {
