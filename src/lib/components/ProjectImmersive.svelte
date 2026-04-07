@@ -252,7 +252,7 @@
 		border: 1px solid rgba(253, 252, 248, 0.3);
 		padding: 0.875rem 1.5rem;
 		border-radius: var(--radius-full);
-		cursor: none;
+		cursor: pointer;
 		transition: all var(--duration-normal) var(--ease-smooth);
 		width: fit-content;
 	}

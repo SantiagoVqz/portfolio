@@ -98,6 +98,16 @@ if (browser) { /* DOM access here */ }
 - **Transitions:** `--transition-fast` (150ms), `--transition-normal` (300ms), `--transition-slow` (500ms)
 - Prefer Tailwind utilities; use scoped `<style>` for keyframes and complex selectors
 
+### Overlay / Dialog Safety
+
+- Any fullscreen overlay, modal, or `dialog` must be non-interactive when closed
+- Use default closed state like `display: none; pointer-events: none;` and enable only on `[open]`
+- For dialogs, prefer explicit rules:
+  - `.component-dialog { display: none; pointer-events: none; }`
+  - `.component-dialog[open] { display: flex; pointer-events: auto; }`
+- Never leave fixed `inset: 0` layers visible/interactable without an open state guard
+- Hidden cursor styles (`cursor: none`) must never be used as a click-blocking mechanism
+
 ### Animations
 
 - Custom Svelte actions in `src/lib/actions/` handle all scroll/interaction animations

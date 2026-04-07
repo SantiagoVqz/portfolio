@@ -109,12 +109,15 @@
 		overflow: hidden;
 		aspect-ratio: 4 / 3;
 		background: var(--color-surface);
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.image {
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
+		object-fit: contain;
 		transition: transform var(--duration-slow) var(--ease-smooth);
 	}
 
@@ -261,7 +264,7 @@
 		border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
 		padding: 0.875rem 1.5rem;
 		border-radius: var(--radius-full);
-		cursor: none;
+		cursor: pointer;
 		transition: all var(--duration-normal) var(--ease-smooth);
 		width: fit-content;
 	}
