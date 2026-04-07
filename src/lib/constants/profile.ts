@@ -7,7 +7,14 @@
 // PERSONAL INFORMATION
 // ============================================
 
-import AskEchoImage from '$lib/assets/projects/AskEcho.png';
+import AskEchoImage from '$lib/assets/projects/askEcho/Screenshot 2026-04-06 at 21.34.06.png';
+import KnotImage from '$lib/assets/projects/Knot/Knot.jpeg';
+import PiggySlice1 from '$lib/assets/projects/piggy/slice-1.png';
+import PiggySlice2 from '$lib/assets/projects/piggy/slice-2.png';
+import PiggySlice3 from '$lib/assets/projects/piggy/slice-3.png';
+import PiggySlice4 from '$lib/assets/projects/piggy/slice-4.png';
+import PiggySlice5 from '$lib/assets/projects/piggy/slice-5.png';
+import PiggySlice6 from '$lib/assets/projects/piggy/slice-6.png';
 
 export const personalInfo = {
 	name: 'Santiago Vázquez Villarreal',
@@ -185,6 +192,7 @@ export interface Project {
 	tags: string[];
 	color: string;
 	image?: string;
+	images?: string[];
 	video?: string;
 	href?: string;
 	metrics?: { label: string; value: string }[];
@@ -193,6 +201,59 @@ export interface Project {
 }
 
 export const projects: Project[] = [
+	{
+		id: 'knot',
+		title: 'KNOT',
+		subtitle: 'Co-founded',
+		description:
+			'A bilingual wedding planning SaaS platform with guest management, RSVP tracking, WhatsApp notifications, billing tiers, and role-based access control.',
+		longDescription:
+			'Co-founded and built a full-stack wedding planning platform that helps couples manage their entire wedding digitally. Features include guest list management with RSVP tracking, automated WhatsApp notifications, tiered billing via Stripe, and RBAC for collaborative planning between couples and coordinators.',
+		year: '2025',
+		tags: ['SvelteKit', 'FastAPI', 'PostgreSQL', 'Stripe', 'WhatsApp API'],
+		color: '#C9A84C',
+		image: KnotImage,
+		layoutType: 'data',
+		caseStudy: {
+			problem:
+				'Wedding planning in Mexico is fragmented—couples juggle spreadsheets, WhatsApp groups, and manual follow-ups to manage guest lists, RSVPs, and vendor coordination.',
+			approach:
+				'Built a bilingual (ES/EN) SaaS platform with real-time guest management, automated WhatsApp notifications for RSVPs and updates, and tiered pricing to serve different wedding sizes.',
+			solution:
+				'Developed with SvelteKit and FastAPI, integrated Stripe for subscription billing, WhatsApp Business API for automated guest communication, and PostgreSQL with row-level security for multi-tenant data isolation.',
+			outcome:
+				'Launched MVP with active users planning weddings. Automated RSVP follow-ups reduced manual coordination by 70%. Platform supports multiple billing tiers with seamless upgrade paths.',
+			screenshots: [],
+			codeSnippets: []
+		}
+	},
+	{
+		id: 'piggy',
+		title: 'Piggy',
+		subtitle: 'Co-founded',
+		description:
+			'A personal finance mobile app for tracking transactions, managing budgets, setting savings goals, monitoring investments, and splitting expenses with friends.',
+		longDescription:
+			'Co-founded and developed a comprehensive personal finance mobile app. Piggy helps users take control of their money with transaction tracking, budget categories, savings goals with progress visualization, investment portfolio monitoring, group expense splitting, and multi-currency support.',
+		year: '2025',
+		tags: ['React Native', 'Expo', 'FastAPI', 'PostgreSQL', 'Zustand'],
+		color: '#A8D5BA',
+		image: PiggySlice1,
+		images: [PiggySlice1, PiggySlice2, PiggySlice3, PiggySlice4, PiggySlice5, PiggySlice6],
+		layoutType: 'immersive',
+		caseStudy: {
+			problem:
+				'Existing finance apps are either too complex for casual users or too simple for meaningful financial planning. Young professionals need a tool that balances simplicity with powerful budgeting and savings features.',
+			approach:
+				'Designed a mobile-first experience with intuitive transaction entry, visual budget breakdowns, and gamified savings goals. Built for the Latin American market with multi-currency support and group splitting for shared expenses.',
+			solution:
+				'Built with React Native and Expo for cross-platform deployment, FastAPI backend with PostgreSQL for reliable financial data storage, and Zustand for performant client-side state management. Features include automated categorization, recurring transaction detection, and real-time budget alerts.',
+			outcome:
+				'Launched on both iOS and Android. Users report improved spending awareness and consistent savings habit formation through goal tracking and visual progress indicators.',
+			screenshots: [],
+			codeSnippets: []
+		}
+	},
 	{
 		id: 'askecho',
 		title: 'AskEcho',

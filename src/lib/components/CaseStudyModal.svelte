@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Project } from '$lib/constants/profile';
+	import ImageCarousel from './ImageCarousel.svelte';
 
 	interface Props {
 		project: Project | null;
@@ -82,6 +83,19 @@
 					{/each}
 				</div>
 			</header>
+
+			<!-- Image gallery or hero -->
+			{#if project.images && project.images.length > 1}
+				<ImageCarousel
+					images={project.images}
+					alt="{project.title} screenshot"
+					accentColor={project.color}
+				/>
+			{:else if project.image}
+				<div class="modal-hero">
+					<img src={project.image} alt={project.title} loading="lazy" />
+				</div>
+			{/if}
 
 			<!-- Metrics summary -->
 			{#if project.metrics}
@@ -254,6 +268,20 @@
 		background: color-mix(in srgb, var(--color-tension) 12%, var(--color-surface));
 		color: var(--color-tension);
 		border-radius: var(--radius-full);
+	}
+
+	.modal-hero {
+		margin-bottom: 2rem;
+		border-radius: var(--radius-lg);
+		overflow: hidden;
+		background: var(--color-surface);
+	}
+
+	.modal-hero img {
+		width: 100%;
+		height: auto;
+		display: block;
+		object-fit: cover;
 	}
 
 	.modal-metrics {
