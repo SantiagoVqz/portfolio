@@ -83,6 +83,8 @@
 		onpointermove={handlePointerMove}
 		onpointerup={handlePointerUp}
 		class:dragging={isDragging}
+		role="group"
+		aria-label="Scrollable image strip"
 	>
 		{#each images as image, i (i)}
 			<img

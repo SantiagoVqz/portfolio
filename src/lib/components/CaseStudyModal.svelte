@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Project } from '$lib/constants/profile';
 	import ImageCarousel from './ImageCarousel.svelte';
@@ -14,18 +13,24 @@
 
 	let dialogRef = $state<HTMLDialogElement>();
 	let contentRef = $state<HTMLDivElement>();
+	let hadCustomCursor = false;
 
-	// Open/close dialog reactively
 	$effect(() => {
 		if (!dialogRef) return;
 		if (open && project) {
 			dialogRef.showModal();
 			document.body.style.overflow = 'hidden';
-			// Animate in with GSAP
+			// Restore native cursor — custom cursor can't render in the top layer
+			hadCustomCursor = document.body.classList.contains('custom-cursor-active');
+			if (hadCustomCursor) {
+				document.body.classList.remove('custom-cursor-active');
+			}
 			animateIn();
 		} else {
 			document.body.style.overflow = '';
-			// Only close if the dialog is currently open
+			if (hadCustomCursor) {
+				document.body.classList.add('custom-cursor-active');
+			}
 			if (dialogRef.open) {
 				dialogRef.close();
 			}
@@ -71,7 +76,6 @@
 				class="close-button"
 				onclick={onClose}
 				aria-label="Close case study"
-				data-cursor-hover
 			>
 				<span>✕</span>
 			</button>
@@ -87,13 +91,15 @@
 				</div>
 			</header>
 
-			<!-- Image gallery or hero -->
+			<!-- Image gallery — full-bleed for multi-image, contained for single -->
 			{#if project.images && project.images.length > 1}
-				<ImageCarousel
-					images={project.images}
-					alt="{project.title} screenshot"
-					accentColor={project.color}
-				/>
+				<div class="gallery-bleed">
+					<ImageCarousel
+						images={project.images}
+						alt="{project.title} screenshot"
+						accentColor={project.color}
+					/>
+				</div>
 			{:else if project.image}
 				<div class="modal-hero">
 					<img src={project.image} alt={project.title} loading="lazy" />
@@ -112,7 +118,7 @@
 				</div>
 			{/if}
 
-			<!-- Case study sections -->
+			<!-- Case study sections — 2-column grid on desktop -->
 			<div class="case-study-body">
 				<section class="case-section">
 					<div class="section-label">
@@ -154,7 +160,6 @@
 					target="_blank"
 					rel="noopener noreferrer"
 					class="modal-link"
-					data-cursor-hover
 				>
 					<span>View Project</span>
 					<span>↗</span>
@@ -178,6 +183,7 @@
 		background: transparent;
 		z-index: 1000;
 		overflow-y: auto;
+		overflow-x: hidden;
 	}
 
 	.modal-dialog::backdrop {
@@ -189,7 +195,7 @@
 		min-height: 100vh;
 		background: var(--color-base);
 		padding: 3rem 2rem;
-		max-width: 800px;
+		max-width: 1100px;
 		margin: 0 auto;
 		position: relative;
 	}
@@ -197,6 +203,12 @@
 	@media (min-width: 768px) {
 		.modal-content {
 			padding: 4rem 3rem;
+		}
+	}
+
+	@media (min-width: 1200px) {
+		.modal-content {
+			padding: 4rem 4.5rem;
 		}
 	}
 
@@ -214,7 +226,7 @@
 		border-radius: var(--radius-full);
 		color: var(--color-ink);
 		font-size: 1rem;
-		cursor: none;
+		cursor: pointer;
 		z-index: 10;
 		transition: all var(--duration-normal) var(--ease-smooth);
 		box-shadow: var(--shadow-diffused);
@@ -273,8 +285,29 @@
 		border-radius: var(--radius-full);
 	}
 
+	/* Full-bleed gallery — breaks out of content padding */
+	.gallery-bleed {
+		margin-left: -2rem;
+		margin-right: -2rem;
+		margin-bottom: 2.5rem;
+	}
+
+	@media (min-width: 768px) {
+		.gallery-bleed {
+			margin-left: -3rem;
+			margin-right: -3rem;
+		}
+	}
+
+	@media (min-width: 1200px) {
+		.gallery-bleed {
+			margin-left: -4.5rem;
+			margin-right: -4.5rem;
+		}
+	}
+
 	.modal-hero {
-		margin-bottom: 2rem;
+		margin-bottom: 2.5rem;
 		border-radius: var(--radius-lg);
 		overflow: hidden;
 		background: var(--color-surface);
@@ -319,11 +352,19 @@
 		opacity: 0.5;
 	}
 
+	/* Case study body — 2-column grid on desktop */
 	.case-study-body {
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-columns: 1fr;
 		gap: 2.5rem;
 		margin-bottom: 3rem;
+	}
+
+	@media (min-width: 768px) {
+		.case-study-body {
+			grid-template-columns: 1fr 1fr;
+			gap: 2rem 3.5rem;
+		}
 	}
 
 	.case-section {
@@ -370,6 +411,7 @@
 		padding: 0.875rem 1.5rem;
 		border-radius: var(--radius-full);
 		text-decoration: none;
+		cursor: pointer;
 		transition: background var(--duration-normal) ease;
 	}
 
