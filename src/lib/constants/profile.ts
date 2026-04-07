@@ -8,8 +8,6 @@
 // ============================================
 
 import AskEchoImage from '$lib/assets/projects/AskEcho.png';
-import JohnDeereImage from '$lib/assets/projects/JohnDeere.webp';
-import CoppelImage from '$lib/assets/projects/Coppel.jpg';
 
 export const personalInfo = {
 	name: 'Santiago Vázquez Villarreal',
@@ -218,59 +216,6 @@ export const projects: Project[] = [
 			approach: 'Designed a multi-tenant architecture using Shadow DOM for complete style isolation, with a configuration-driven onboarding system that eliminates manual setup.',
 			solution: 'Built AskEcho from scratch with SvelteKit, Shadow DOM encapsulation, and automated deployment pipelines. Each client gets a unique configuration that controls branding, behavior, and AI model settings.',
 			outcome: 'Reduced client onboarding from 2 weeks to under 72 hours. Achieved 98%+ test coverage with Playwright E2E tests. Now serving multiple U.S. cities with zero CSS conflicts.',
-			screenshots: [],
-			codeSnippets: []
-		}
-	},
-	{
-		id: 'command-center',
-		title: 'Command Center',
-		subtitle: 'John Deere',
-		description:
-			'Modernized tractor Command Center UI with new icon sets and layout configurations. Developed onboard diagnostic alerts using C++ for memory-constrained embedded environments.',
-		longDescription:
-			'Contributed to the modernization of John Deere tractor displays, improving operator safety and usability through enhanced UI and critical diagnostic alert systems.',
-		year: '2024',
-		tags: ['C++', 'Embedded Systems', 'UI/UX', 'Diagnostics'],
-		color: '#E0D8D4',
-		metrics: [
-			{ label: 'Release Bundles', value: '13' },
-			{ label: 'Machine Types', value: 'Sprayers & Planters' }
-		],
-		image: JohnDeereImage,
-		layoutType: 'data',
-		caseStudy: {
-			problem: 'Tractor Command Center displays needed modernized UI and critical diagnostic systems to improve operator safety in the field.',
-			approach: 'Worked within memory-constrained C++ embedded environments, implementing new icon sets and diagnostic alert systems that detect machine failure before damage occurs.',
-			solution: 'Developed and tested onboard diagnostic alerts, created new UI layout configurations, and optimized C++ code for embedded environments across sprayer and planting machines.',
-			outcome: 'Contributed to 13 software release bundles. Improved operator usability and safety through enhanced UI and preventative diagnostic systems.',
-			screenshots: [],
-			codeSnippets: []
-		}
-	},
-	{
-		id: 'pick-to-light',
-		title: 'Pick-to-Light',
-		subtitle: 'Coppel (Capstone)',
-		description:
-			'Led end-to-end development of a wireless IoT fulfillment system for distribution centers. Projected 70% cost reduction and 40% efficiency improvement over legacy wired solutions.',
-		longDescription:
-			'Designed and built a wireless Pick-to-Light prototype for Coppel distribution centers, replacing expensive wired 3rd-party solutions with a custom ESP32/MQTT architecture optimized for 196+ LED modules.',
-		year: '2025',
-		tags: ['FastAPI', 'PostgreSQL', 'ESP32', 'MQTT'],
-		color: '#E8DDD4',
-		metrics: [
-			{ label: 'Cost Reduction', value: '70%' },
-			{ label: 'Maintenance Savings', value: '90%' },
-			{ label: 'Efficiency Gain', value: '40%' }
-		],
-		image: CoppelImage,
-		layoutType: 'immersive',
-		caseStudy: {
-			problem: 'Coppel distribution centers relied on expensive wired Pick-to-Light systems from 3rd-party vendors, with high maintenance costs and limited flexibility.',
-			approach: 'Designed a custom wireless architecture using ESP32 microcontrollers and MQTT protocol, with a FastAPI backend and PostgreSQL database for order management.',
-			solution: 'Built a complete wireless Pick-to-Light prototype optimized for 196+ LED modules, featuring real-time order routing, visual pick confirmations, and a web dashboard for warehouse managers.',
-			outcome: 'Projected 70% cost reduction vs. wired solutions, 90% maintenance savings, and 40% efficiency improvement in pick operations.',
 			screenshots: [],
 			codeSnippets: []
 		}
