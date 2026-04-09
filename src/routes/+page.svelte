@@ -11,6 +11,8 @@
 	import ProjectEditorial from '$lib/components/ProjectEditorial.svelte';
 	import ProjectData from '$lib/components/ProjectData.svelte';
 	import ProjectImmersive from '$lib/components/ProjectImmersive.svelte';
+	// ProjectCompact available for future /projects page
+	// import ProjectCompact from '$lib/components/ProjectCompact.svelte';
 	import CaseStudyModal from '$lib/components/CaseStudyModal.svelte';
 	import DisplayCabinet from '$lib/components/DisplayCabinet.svelte';
 	import Constellation from '$lib/components/Constellation.svelte';
