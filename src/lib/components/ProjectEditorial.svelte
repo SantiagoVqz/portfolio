@@ -107,7 +107,7 @@
 		position: relative;
 		border-radius: var(--radius-xl);
 		overflow: hidden;
-		aspect-ratio: 4 / 3;
+		aspect-ratio: 16 / 10;
 		background: var(--color-surface);
 		display: flex;
 		align-items: center;
@@ -117,7 +117,7 @@
 	.image {
 		width: 100%;
 		height: 100%;
-		object-fit: contain;
+		object-fit: cover;
 		transition: transform var(--duration-slow) var(--ease-smooth);
 	}
 

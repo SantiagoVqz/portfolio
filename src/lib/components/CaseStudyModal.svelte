@@ -14,10 +14,38 @@
 	let dialogRef = $state<HTMLDialogElement>();
 	let contentRef = $state<HTMLDivElement>();
 	let hadCustomCursor = false;
+	let animCtx: { revert: () => void } | null = null;
+	let entering = $state(false);
+
+	const imageMode = $derived(
+		project?.images && project.images.length > 2
+			? 'strip'
+			: project?.image || (project?.images && project.images.length > 0)
+				? 'single'
+				: 'none'
+	);
+
+	const singleImage = $derived(
+		imageMode === 'single'
+			? project?.images?.[0] ?? project?.image ?? null
+			: null
+	);
+
+	const sections = $derived(
+		project
+			? [
+					{ number: '01', name: 'The Problem', body: project.caseStudy.problem },
+					{ number: '02', name: 'The Approach', body: project.caseStudy.approach },
+					{ number: '03', name: 'The Solution', body: project.caseStudy.solution },
+					{ number: '04', name: 'The Outcome', body: project.caseStudy.outcome }
+				]
+			: []
+	);
 
 	$effect(() => {
 		if (!dialogRef) return;
 		if (open && project) {
+			entering = true;
 			dialogRef.showModal();
 			document.body.style.overflow = 'hidden';
 			hadCustomCursor = document.body.classList.contains('custom-cursor-active');
@@ -30,9 +58,14 @@
 			if (hadCustomCursor) {
 				document.body.classList.add('custom-cursor-active');
 			}
+			if (animCtx) {
+				animCtx.revert();
+				animCtx = null;
+			}
 			if (dialogRef.open) {
 				dialogRef.close();
 			}
+			entering = false;
 		}
 	});
 
@@ -51,134 +84,198 @@
 
 	async function animateIn() {
 		if (!browser || !contentRef) return;
+
+		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (prefersReducedMotion) {
+			entering = false;
+			return;
+		}
+
 		const { gsap } = await import('gsap');
+
+		// Card entrance
 		gsap.fromTo(
 			contentRef,
-			{ y: 40, opacity: 0, scale: 0.97 },
-			{ y: 0, opacity: 1, scale: 1, duration: 0.45, ease: 'power3.out' }
+			{ y: 30, opacity: 0, scale: 0.97 },
+			{ y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' }
 		);
+
+		animCtx = gsap.context(() => {
+			const tl = gsap.timeline({
+				delay: 0.12,
+				onComplete: () => {
+					entering = false;
+				}
+			});
+
+			// Eyebrow
+			tl.fromTo(
+				'.csm-eyebrow',
+				{ y: 14, opacity: 0 },
+				{ y: 0, opacity: 1, duration: 0.45, ease: 'power3.out' }
+			);
+
+			// Title
+			tl.fromTo(
+				'.csm-title',
+				{ y: 24, opacity: 0 },
+				{ y: 0, opacity: 1, duration: 0.55, ease: 'power3.out' },
+				'-=0.3'
+			);
+
+			// Tags
+			tl.fromTo(
+				'.csm-tag',
+				{ y: 8, opacity: 0 },
+				{ y: 0, opacity: 1, duration: 0.3, stagger: 0.04, ease: 'power2.out' },
+				'-=0.35'
+			);
+
+			// Divider
+			tl.fromTo(
+				'.csm-divider',
+				{ scaleX: 0 },
+				{ scaleX: 1, duration: 0.5, ease: 'power2.inOut' },
+				'-=0.15'
+			);
+
+			// Images
+			tl.fromTo(
+				'.csm-images',
+				{ y: 24, opacity: 0 },
+				{ y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' },
+				'-=0.25'
+			);
+
+			// Metrics
+			tl.fromTo(
+				'.csm-metric',
+				{ y: 16, opacity: 0 },
+				{ y: 0, opacity: 1, duration: 0.35, stagger: 0.07, ease: 'power2.out' },
+				'-=0.2'
+			);
+
+			// Case study sections
+			tl.fromTo(
+				'.csm-section',
+				{ y: 24, opacity: 0 },
+				{ y: 0, opacity: 1, duration: 0.45, stagger: 0.09, ease: 'power3.out' },
+				'-=0.15'
+			);
+
+			// Footer CTA
+			tl.fromTo(
+				'.csm-footer',
+				{ y: 12, opacity: 0 },
+				{ y: 0, opacity: 1, duration: 0.35, ease: 'power2.out' },
+				'-=0.1'
+			);
+		}, contentRef);
 	}
 </script>
 
 <dialog
 	bind:this={dialogRef}
-	class="modal-dialog"
+	class="csm-dialog"
 	onkeydown={handleKeydown}
 	onclick={handleBackdropClick}
 	aria-modal="true"
 	aria-label="{project?.title ?? 'Case Study'} case study"
 >
 	{#if project}
-		<div class="modal-content" bind:this={contentRef} role="document">
-			<!-- Grain texture overlay -->
-			<div class="grain-overlay"></div>
+		<div
+			class="csm-content"
+			class:csm-entering={entering}
+			bind:this={contentRef}
+			role="document"
+			style="--project-color: {project.color}"
+		>
+			<!-- Grain texture -->
+			<div class="csm-grain"></div>
+
+			<!-- Subtle top gradient tinted by project color -->
+			<div class="csm-hero-gradient"></div>
 
 			<!-- Close button -->
-			<button
-				class="close-button"
-				onclick={onClose}
-				aria-label="Close case study"
-			>
+			<button class="csm-close" onclick={onClose} aria-label="Close case study">
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<path d="M18 6L6 18M6 6l12 12" />
 				</svg>
 			</button>
 
-			<!-- Split layout -->
-			<div class="modal-split">
-				<!-- Left panel: case study content -->
-				<div class="modal-left">
-					<!-- Header -->
-					<header class="modal-header">
-						<span class="modal-subtitle">{project.subtitle} · {project.year}</span>
-						<h2 class="modal-title">{project.title}</h2>
-						<div class="modal-tags">
-							{#each project.tags as tag (tag)}
-								<span class="modal-tag">{tag}</span>
-							{/each}
-						</div>
-					</header>
-
-					<!-- Metrics -->
-					{#if project.metrics}
-						<div class="modal-metrics">
-							{#each project.metrics as metric (metric.label)}
-								<div class="metric-card">
-									<span class="metric-value">{metric.value}</span>
-									<span class="metric-label">{metric.label}</span>
-								</div>
-							{/each}
-						</div>
-					{/if}
-
-					<!-- Case study sections -->
-					<div class="case-study-body">
-						<section class="case-section">
-							<div class="section-label">
-								<span class="label-number">01</span>
-								<span>The Problem</span>
-							</div>
-							<p>{project.caseStudy.problem}</p>
-						</section>
-
-						<section class="case-section">
-							<div class="section-label">
-								<span class="label-number">02</span>
-								<span>The Approach</span>
-							</div>
-							<p>{project.caseStudy.approach}</p>
-						</section>
-
-						<section class="case-section">
-							<div class="section-label">
-								<span class="label-number">03</span>
-								<span>The Solution</span>
-							</div>
-							<p>{project.caseStudy.solution}</p>
-						</section>
-
-						<section class="case-section">
-							<div class="section-label">
-								<span class="label-number">04</span>
-								<span>The Outcome</span>
-							</div>
-							<p>{project.caseStudy.outcome}</p>
-						</section>
+			<!-- Scrollable interior -->
+			<div class="csm-scroll" data-lenis-prevent>
+				<!-- Header -->
+				<header class="csm-header">
+					<span class="csm-eyebrow">{project.subtitle} &middot; {project.year}</span>
+					<h2 class="csm-title">{project.title}</h2>
+					<div class="csm-tags">
+						{#each project.tags as tag (tag)}
+							<span class="csm-tag">{tag}</span>
+						{/each}
 					</div>
+				</header>
 
-					<!-- Project link -->
-					{#if project.href}
-						<a
-							href={project.href}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="modal-link"
-						>
-							<span>View Project</span>
-							<span>↗</span>
-						</a>
-					{/if}
-				</div>
+				<!-- Accent divider -->
+				<div class="csm-divider"></div>
 
-				<!-- Right panel: image gallery -->
-				<div class="modal-right">
-					{#if project.images && project.images.length > 1}
+				<!-- Image zone -->
+				{#if imageMode === 'strip' && project.images}
+					<div class="csm-images csm-images--strip">
 						<ImageCarousel
 							images={project.images}
 							alt="{project.title} screenshot"
 							accentColor={project.color}
+							variant="strip"
 						/>
-					{:else if project.image}
-						<div class="single-image">
-							<img src={project.image} alt={project.title} loading="lazy" />
-						</div>
-					{:else}
-						<!-- No image fallback -->
-						<div class="no-image">
-							<span class="no-image-label">No preview available</span>
-						</div>
-					{/if}
+					</div>
+				{:else if imageMode === 'single' && singleImage}
+					<figure class="csm-images csm-images--single">
+						<img src={singleImage} alt={project.title} loading="lazy" />
+					</figure>
+				{/if}
+
+				<!-- Metrics -->
+				{#if project.metrics && project.metrics.length > 0}
+					<div class="csm-metrics">
+						{#each project.metrics as metric (metric.label)}
+							<div class="csm-metric">
+								<span class="csm-metric-value">{metric.value}</span>
+								<span class="csm-metric-label">{metric.label}</span>
+							</div>
+						{/each}
+					</div>
+				{/if}
+
+				<!-- Case study sections -->
+				<div class="csm-body">
+					{#each sections as section (section.number)}
+						<section class="csm-section">
+							<div class="csm-section-header">
+								<span class="csm-section-number">{section.number}</span>
+								<span class="csm-section-name">{section.name}</span>
+							</div>
+							<p class="csm-section-text">{section.body}</p>
+						</section>
+					{/each}
 				</div>
+
+				<!-- Footer CTA -->
+				{#if project.href}
+					<footer class="csm-footer">
+						<a
+							href={project.href}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="csm-cta"
+						>
+							<span>View Project</span>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M7 17L17 7M17 7H7M17 7v10" />
+							</svg>
+						</a>
+					</footer>
+				{/if}
 			</div>
 		</div>
 	{/if}
@@ -188,7 +285,7 @@
 	/* ══════════════════════════════════════════
 	   DIALOG SHELL
 	   ══════════════════════════════════════════ */
-	.modal-dialog {
+	.csm-dialog {
 		position: fixed;
 		inset: 0;
 		width: 100%;
@@ -208,311 +305,416 @@
 		overflow: hidden;
 	}
 
-	.modal-dialog[open] {
+	.csm-dialog[open] {
 		display: flex;
 		visibility: visible;
 		pointer-events: auto;
 	}
 
-	.modal-dialog::backdrop {
-		background: rgba(54, 50, 47, 0.55);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
+	.csm-dialog::backdrop {
+		background: rgba(54, 50, 47, 0.6);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
 	}
 
 	/* ══════════════════════════════════════════
 	   GLASS CARD
 	   ══════════════════════════════════════════ */
-	.modal-content {
+	.csm-content {
 		position: relative;
-		max-width: 1100px;
-		width: 92vw;
-		max-height: 85vh;
+		max-width: 1060px;
+		width: 96vw;
+		max-height: 90vh;
 		border-radius: var(--radius-2xl, 1.5rem);
-		background: color-mix(in srgb, var(--color-base) 88%, transparent);
-		backdrop-filter: blur(20px);
-		-webkit-backdrop-filter: blur(20px);
-		border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+		background: color-mix(in srgb, var(--color-base) 92%, transparent);
+		backdrop-filter: blur(24px);
+		-webkit-backdrop-filter: blur(24px);
+		border: 1px solid color-mix(in srgb, var(--color-ink) 7%, transparent);
 		box-shadow:
-			0 25px 50px -12px rgba(54, 50, 47, 0.25),
-			0 0 0 1px rgba(253, 252, 248, 0.1) inset;
+			0 32px 64px -16px rgba(54, 50, 47, 0.2),
+			0 0 0 1px rgba(253, 252, 248, 0.08) inset;
 		overflow: hidden;
-		padding: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	@media (min-width: 768px) {
+		.csm-content {
+			width: 92vw;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.csm-content {
+			width: 92vw;
+		}
+	}
+
+	@media (min-width: 1200px) {
+		.csm-content {
+			width: 1060px;
+		}
 	}
 
 	/* Grain texture */
-	.grain-overlay {
+	.csm-grain {
 		position: absolute;
 		inset: 0;
 		background-image: var(--glass-grain);
 		background-repeat: repeat;
-		opacity: 0.15;
+		opacity: 0.12;
 		pointer-events: none;
 		z-index: 5;
 		border-radius: inherit;
 	}
 
+	/* Hero gradient — project-colored tint at top */
+	.csm-hero-gradient {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 260px;
+		background: linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--project-color) 7%, transparent) 0%,
+			transparent 100%
+		);
+		pointer-events: none;
+		z-index: 1;
+		border-radius: inherit;
+	}
+
+	/* ══════════════════════════════════════════
+	   ENTERING STATE (elements hidden before GSAP)
+	   ══════════════════════════════════════════ */
+	.csm-entering .csm-eyebrow,
+	.csm-entering .csm-title,
+	.csm-entering .csm-tag,
+	.csm-entering .csm-divider,
+	.csm-entering .csm-images,
+	.csm-entering .csm-metric,
+	.csm-entering .csm-section,
+	.csm-entering .csm-footer {
+		opacity: 0;
+	}
+
 	/* ══════════════════════════════════════════
 	   CLOSE BUTTON
 	   ══════════════════════════════════════════ */
-	.close-button {
+	.csm-close {
 		position: absolute;
-		top: 1rem;
-		right: 1rem;
+		top: 1.25rem;
+		right: 1.25rem;
 		width: 36px;
 		height: 36px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: color-mix(in srgb, var(--color-base) 90%, transparent);
-		border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+		background: color-mix(in srgb, var(--color-base) 85%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
 		border-radius: 50%;
 		color: var(--color-ink);
 		cursor: pointer;
 		z-index: 10;
-		transition: all 200ms ease;
+		transition: all 220ms ease;
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 	}
 
-	.close-button:hover {
+	.csm-close:hover {
 		background: var(--color-ink);
 		color: var(--color-base);
 		border-color: var(--color-ink);
+		transform: scale(1.05);
 	}
 
 	/* ══════════════════════════════════════════
-	   SPLIT LAYOUT
+	   SCROLLABLE INTERIOR
 	   ══════════════════════════════════════════ */
-	.modal-split {
-		display: grid;
-		grid-template-columns: 1fr;
-		height: 100%;
-		max-height: 85vh;
-	}
-
-	@media (min-width: 768px) {
-		.modal-split {
-			grid-template-columns: 1.1fr 1fr;
-		}
-	}
-
-	/* ── Left panel: content ── */
-	.modal-left {
+	.csm-scroll {
+		position: relative;
+		z-index: 2;
 		overflow-y: auto;
-		padding: 2.5rem 2rem;
+		overflow-x: hidden;
+		overscroll-behavior: contain;
+		padding: 2.5rem 1.75rem 2rem;
 		display: flex;
 		flex-direction: column;
-		gap: 2rem;
+		gap: 0;
 		scrollbar-width: thin;
-		scrollbar-color: color-mix(in srgb, var(--color-ink) 15%, transparent) transparent;
+		scrollbar-color: color-mix(in srgb, var(--project-color) 25%, transparent) transparent;
 	}
 
 	@media (min-width: 768px) {
-		.modal-left {
-			padding: 3rem;
+		.csm-scroll {
+			padding: 3rem 2.75rem 2.5rem;
 		}
 	}
 
-	.modal-left::-webkit-scrollbar {
+	@media (min-width: 1024px) {
+		.csm-scroll {
+			padding: 3.5rem 3.25rem 3rem;
+		}
+	}
+
+	.csm-scroll::-webkit-scrollbar {
 		width: 4px;
 	}
 
-	.modal-left::-webkit-scrollbar-track {
+	.csm-scroll::-webkit-scrollbar-track {
 		background: transparent;
 	}
 
-	.modal-left::-webkit-scrollbar-thumb {
-		background: color-mix(in srgb, var(--color-ink) 15%, transparent);
+	.csm-scroll::-webkit-scrollbar-thumb {
+		background: color-mix(in srgb, var(--project-color) 25%, transparent);
 		border-radius: 2px;
-	}
-
-	/* ── Right panel: images ── */
-	.modal-right {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: var(--color-surface);
-		overflow: hidden;
-		min-height: 280px;
-		order: -1;
-	}
-
-	@media (min-width: 768px) {
-		.modal-right {
-			order: 0;
-			border-left: 1px solid color-mix(in srgb, var(--color-ink) 6%, transparent);
-			min-height: unset;
-		}
-	}
-
-	/* Single image */
-	.single-image {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-		height: 100%;
-		padding: 1.5rem;
-	}
-
-	.single-image img {
-		max-width: 100%;
-		max-height: 100%;
-		object-fit: contain;
-		border-radius: var(--radius-md, 8px);
-		display: block;
-	}
-
-	/* No image fallback */
-	.no-image {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-		height: 100%;
-		padding: 2rem;
-	}
-
-	.no-image-label {
-		font-family: var(--font-data);
-		font-size: 11px;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--color-ink);
-		opacity: 0.25;
 	}
 
 	/* ══════════════════════════════════════════
 	   HEADER
 	   ══════════════════════════════════════════ */
-	.modal-header {
-		padding-top: 0.5rem;
+	.csm-header {
+		padding-top: 0.25rem;
+		margin-bottom: 1.75rem;
 	}
 
-	.modal-subtitle {
+	.csm-eyebrow {
 		font-family: var(--font-data);
-		font-size: 10px;
+		font-size: 11px;
 		letter-spacing: 0.15em;
 		text-transform: uppercase;
-		color: var(--color-accent);
+		color: color-mix(in srgb, var(--project-color) 55%, var(--color-ink));
 		display: block;
-		margin-bottom: 0.75rem;
+		margin-bottom: 1rem;
 	}
 
-	.modal-title {
+	.csm-title {
 		font-family: var(--font-headline);
-		font-size: 2rem;
-		font-weight: 500;
+		font-size: 2.5rem;
+		font-weight: 380;
 		color: var(--color-ink);
-		letter-spacing: var(--tracking-tight);
-		margin: 0 0 1rem;
-		line-height: 1.1;
+		letter-spacing: -0.03em;
+		line-height: 1.05;
+		margin: 0 0 1.25rem;
 	}
 
 	@media (min-width: 768px) {
-		.modal-title {
-			font-size: 2.5rem;
+		.csm-title {
+			font-size: 3rem;
 		}
 	}
 
-	.modal-tags {
+	@media (min-width: 1024px) {
+		.csm-title {
+			font-size: 3.5rem;
+		}
+	}
+
+	.csm-tags {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.375rem;
 	}
 
-	.modal-tag {
+	.csm-tag {
 		font-family: var(--font-data);
 		font-size: 9px;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.05em;
 		text-transform: uppercase;
-		padding: 0.3rem 0.625rem;
-		background: color-mix(in srgb, var(--color-tension) 12%, var(--color-surface));
-		color: var(--color-tension);
+		padding: 0.3rem 0.7rem;
+		background: color-mix(in srgb, var(--project-color) 10%, var(--color-surface));
+		color: color-mix(in srgb, var(--project-color) 50%, var(--color-ink));
 		border-radius: var(--radius-full);
+		border: 1px solid color-mix(in srgb, var(--project-color) 18%, transparent);
+	}
+
+	/* ══════════════════════════════════════════
+	   ACCENT DIVIDER
+	   ══════════════════════════════════════════ */
+	.csm-divider {
+		height: 1px;
+		background: color-mix(in srgb, var(--project-color) 45%, var(--color-ink) 15%);
+		margin-bottom: 2rem;
+		transform-origin: center;
+	}
+
+	/* ══════════════════════════════════════════
+	   IMAGE ZONE
+	   ══════════════════════════════════════════ */
+	.csm-images {
+		margin-bottom: 2rem;
+	}
+
+	/* Strip mode — full bleed with negative margins */
+	.csm-images--strip {
+		margin-left: -1.75rem;
+		margin-right: -1.75rem;
+	}
+
+	@media (min-width: 768px) {
+		.csm-images--strip {
+			margin-left: -2.75rem;
+			margin-right: -2.75rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.csm-images--strip {
+			margin-left: -3.25rem;
+			margin-right: -3.25rem;
+		}
+	}
+
+	/* Single image */
+	.csm-images--single {
+		display: block;
+		margin: 0 0 2rem;
+		padding: 1rem;
+		overflow: hidden;
+		border-radius: var(--radius-lg);
+		border: 1px solid color-mix(in srgb, var(--color-ink) 6%, transparent);
+		background: var(--color-surface);
+		flex-shrink: 0;
+	}
+
+	.csm-images--single img {
+		width: 100%;
+		height: auto;
+		max-height: 420px;
+		object-fit: contain;
+		display: block;
+		border-radius: var(--radius-md);
+		margin: 0 auto;
+	}
+
+	@media (min-width: 768px) {
+		.csm-images--single img {
+			max-height: 460px;
+		}
 	}
 
 	/* ══════════════════════════════════════════
 	   METRICS
 	   ══════════════════════════════════════════ */
-	.modal-metrics {
+	.csm-metrics {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 		gap: 0.75rem;
+		margin-bottom: 2.5rem;
 	}
 
-	.metric-card {
+	.csm-metric {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
-		padding: 0.875rem 1rem;
-		background: color-mix(in srgb, var(--color-surface) 70%, transparent);
-		border-radius: var(--radius-md, 8px);
-		border: 1px solid color-mix(in srgb, var(--color-ink) 6%, transparent);
+		gap: 0.375rem;
+		padding: 1rem 1.125rem;
+		background: color-mix(in srgb, var(--color-surface) 65%, transparent);
+		border-radius: var(--radius-md);
+		border: 1px solid color-mix(in srgb, var(--color-ink) 5%, transparent);
+		border-top: 2px solid color-mix(in srgb, var(--project-color) 50%, var(--color-ink) 10%);
 	}
 
-	.metric-value {
+	.csm-metric-value {
 		font-family: var(--font-headline);
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: var(--color-accent);
+		font-size: 1.5rem;
+		font-weight: 500;
+		color: color-mix(in srgb, var(--project-color) 60%, var(--color-ink));
 		line-height: 1;
+		letter-spacing: -0.01em;
 	}
 
-	.metric-label {
+	@media (min-width: 768px) {
+		.csm-metric-value {
+			font-size: 1.75rem;
+		}
+	}
+
+	.csm-metric-label {
 		font-family: var(--font-data);
 		font-size: 9px;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		color: var(--color-ink);
-		opacity: 0.5;
+		opacity: 0.45;
 	}
 
 	/* ══════════════════════════════════════════
 	   CASE STUDY BODY
 	   ══════════════════════════════════════════ */
-	.case-study-body {
+	.csm-body {
 		display: flex;
 		flex-direction: column;
-		gap: 1.75rem;
+		gap: 2.25rem;
+		margin-bottom: 2.5rem;
 	}
 
-	.case-section {
+	.csm-section {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.625rem;
 	}
 
-	.section-label {
+	.csm-section-header {
 		display: flex;
-		align-items: center;
-		gap: 0.75rem;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.csm-section-number {
+		font-family: var(--font-headline);
+		font-size: 1.25rem;
+		font-weight: 350;
+		color: color-mix(in srgb, var(--project-color) 60%, var(--color-ink));
+		line-height: 1;
+		letter-spacing: -0.01em;
+	}
+
+	@media (min-width: 768px) {
+		.csm-section-number {
+			font-size: 1.5rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.csm-section-number {
+			font-size: 2rem;
+		}
+	}
+
+	.csm-section-name {
 		font-family: var(--font-data);
 		font-size: 10px;
-		letter-spacing: 0.1em;
+		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		color: var(--color-ink);
+		opacity: 0.5;
 	}
 
-	.label-number {
-		color: var(--color-accent);
-		font-weight: 600;
-	}
-
-	.case-section p {
+	.csm-section-text {
 		font-family: var(--font-data);
 		font-size: 0.875rem;
-		line-height: 1.75;
+		line-height: 1.85;
 		color: var(--color-ink);
-		opacity: 0.75;
+		opacity: 0.7;
 		margin: 0;
 	}
 
+	@media (min-width: 768px) {
+		.csm-section-text {
+			font-size: 0.9375rem;
+		}
+	}
+
 	/* ══════════════════════════════════════════
-	   PROJECT LINK
+	   FOOTER / CTA
 	   ══════════════════════════════════════════ */
-	.modal-link {
+	.csm-footer {
+		padding-top: 0.5rem;
+		padding-bottom: 0.5rem;
+	}
+
+	.csm-cta {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.625rem;
@@ -522,15 +724,25 @@
 		text-transform: uppercase;
 		color: var(--color-base);
 		background: var(--color-ink);
-		padding: 0.75rem 1.25rem;
+		padding: 0.8rem 1.4rem;
 		border-radius: var(--radius-full);
 		text-decoration: none;
 		cursor: pointer;
-		transition: background 200ms ease;
+		transition: all 250ms ease;
 		width: fit-content;
 	}
 
-	.modal-link:hover {
-		background: var(--color-accent);
+	.csm-cta:hover {
+		background: var(--project-color);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 16px -4px color-mix(in srgb, var(--project-color) 40%, transparent);
+	}
+
+	.csm-cta svg {
+		transition: transform 250ms ease;
+	}
+
+	.csm-cta:hover svg {
+		transform: translate(2px, -2px);
 	}
 </style>

@@ -413,12 +413,21 @@
 	   ══════════════════════════════════════════ */
 	.gallery-strip {
 		display: flex;
+		gap: 0.875rem;
 		overflow-x: auto;
 		overflow-y: hidden;
 		-webkit-overflow-scrolling: touch;
 		scrollbar-width: none;
 		cursor: grab;
 		touch-action: pan-x;
+		padding: 1.25rem 1.5rem;
+	}
+
+	@media (min-width: 768px) {
+		.gallery-strip {
+			gap: 1rem;
+			padding: 1.5rem 2rem;
+		}
 	}
 
 	.gallery-strip::-webkit-scrollbar {
@@ -431,7 +440,7 @@
 	}
 
 	.gallery-strip img {
-		height: 380px;
+		height: 320px;
 		width: auto;
 		flex-shrink: 0;
 		display: block;
@@ -439,21 +448,24 @@
 		user-select: none;
 		-webkit-user-drag: none;
 		pointer-events: none;
+		border-radius: 0.75rem;
+		box-shadow: 0 2px 12px -4px rgba(54, 50, 47, 0.12);
 	}
 
 	@media (min-width: 768px) {
 		.gallery-strip img {
-			height: 460px;
+			height: 400px;
+			border-radius: 0.875rem;
 		}
 	}
 
 	@media (min-width: 1024px) {
 		.gallery-strip img {
-			height: 520px;
+			height: 460px;
 		}
 	}
 
-	/* Edge fades */
+	/* Edge fades — hidden by default, kept for non-modal contexts */
 	.fade-edge {
 		position: absolute;
 		top: 0;
@@ -463,28 +475,22 @@
 		opacity: 0;
 		transition: opacity var(--duration-normal, 300ms) ease;
 		z-index: 2;
+		display: none;
 	}
 
 	.fade-edge.visible {
-		opacity: 1;
+		opacity: 0;
+		display: none;
 	}
 
 	.fade-left {
 		left: 0;
-		background: linear-gradient(
-			to right,
-			color-mix(in srgb, var(--color-surface) 90%, transparent),
-			transparent
-		);
+		background: transparent;
 	}
 
 	.fade-right {
 		right: 0;
-		background: linear-gradient(
-			to left,
-			color-mix(in srgb, var(--color-surface) 90%, transparent),
-			transparent
-		);
+		background: transparent;
 	}
 
 	/* Scroll hint */
