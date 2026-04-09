@@ -75,10 +75,21 @@ export const technicalSkills: Skill[] = [
 	// Medium - Strong proficiency
 	{ name: 'AWS', category: 'Cloud', size: 'medium', icon: '☁', color: '#FF9900' },
 	{ name: 'TypeScript', category: 'Language', size: 'medium', icon: 'TS', color: '#3178C6' },
+	{ name: 'Node.js', category: 'Backend', size: 'medium', icon: '⬢', color: '#339933' },
+	{ name: 'Tailwind CSS', category: 'Framework', size: 'medium', icon: '❋', color: '#06B6D4' },
 	// Small - Supporting skills
+	{ name: 'Python', category: 'Language', size: 'small', icon: '🐍', color: '#3776AB' },
 	{ name: 'FastAPI', category: 'Backend', size: 'small', icon: '⚙', color: '#009688' },
 	{ name: 'React Native', category: 'Mobile', size: 'small', icon: '📱', color: '#61DAFB' },
+	{ name: 'PostgreSQL', category: 'Database', size: 'small', icon: '🐘', color: '#4169E1' },
+	{ name: 'Supabase', category: 'Database', size: 'small', icon: '◈', color: '#3FCF8E' },
 	{ name: 'Playwright', category: 'Testing', size: 'small', icon: '🎭', color: '#2EAD33' },
+	{ name: 'Jest', category: 'Testing', size: 'small', icon: '✓', color: '#C21325' },
+	{ name: 'Cloudflare', category: 'Cloud', size: 'small', icon: '⛅', color: '#F48120' },
+	{ name: 'AWS ECS', category: 'Cloud', size: 'small', icon: '▣', color: '#FF9900' },
+	{ name: 'Docker', category: 'DevOps', size: 'small', icon: '🐳', color: '#2496ED' },
+	{ name: 'pnpm', category: 'DevOps', size: 'small', icon: '⚡', color: '#F69220' },
+	{ name: 'npm', category: 'DevOps', size: 'small', icon: '▪', color: '#CB3837' },
 	{ name: 'GSAP', category: 'Motion', size: 'small', icon: '◐', color: '#88CE02' }
 ];
 
@@ -93,8 +104,8 @@ export const skillCategories = {
 		'Shadow DOM',
 		'GSAP'
 	],
-	backend: ['Python (FastAPI)', 'Node.js', 'C++', 'AWS (Lambda, DynamoDB, AppSync)', 'PostgreSQL'],
-	tools: ['Vite', 'Playwright', 'pnpm', 'Docker', 'Git/GitHub', 'CI/CD Pipelines'],
+	backend: ['Python (FastAPI)', 'Node.js', 'C++', 'AWS (Lambda, DynamoDB, AppSync, ECS)', 'PostgreSQL', 'Supabase'],
+	tools: ['Vite', 'Playwright', 'Jest', 'pnpm', 'npm', 'Docker', 'Git/GitHub', 'CI/CD Pipelines', 'Cloudflare'],
 	methodologies: ['Agile (SCRUM)', 'Domain-Driven Design (DDD)', 'Product Lifecycle Management']
 } as const;
 
@@ -180,7 +191,7 @@ export interface CaseStudy {
 // PROJECTS
 // ============================================
 
-export type ProjectLayoutType = 'editorial' | 'data' | 'immersive';
+export type ProjectLayoutType = 'editorial' | 'data' | 'immersive' | 'compact';
 
 export interface Project {
 	id: string;
