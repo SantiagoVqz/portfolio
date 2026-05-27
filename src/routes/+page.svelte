@@ -18,6 +18,7 @@
 	import Constellation from '$lib/components/Constellation.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import SectionIndicators from '$lib/components/SectionIndicators.svelte';
+	import Seo from '$lib/components/Seo.svelte';
 
 	import {
 		personalInfo,
@@ -28,10 +29,52 @@
 		education,
 		philosophies,
 		meta,
+		siteUrl,
 		timelineData
 	} from '$lib/constants';
 
 	import type { Project } from '$lib/constants/profile';
+
+	// Structured data for the home page: who I am (Person), the site itself
+	// (WebSite), and the in-page section nav (BreadcrumbList).
+	const homeJsonLd = [
+		{
+			'@context': 'https://schema.org',
+			'@type': 'Person',
+			name: personalInfo.name,
+			url: siteUrl,
+			image: `${siteUrl}/memoji.png`,
+			jobTitle: personalInfo.title,
+			description: meta.description,
+			email: `mailto:${personalInfo.email}`,
+			address: {
+				'@type': 'PostalAddress',
+				addressLocality: 'Monterrey',
+				addressCountry: 'MX'
+			},
+			sameAs: [personalInfo.social.github, personalInfo.social.linkedin],
+			knowsAbout: ['TypeScript', 'SvelteKit', 'React', 'Node.js', 'AWS', 'AI/ML', 'IoT', 'PostgreSQL']
+		},
+		{
+			'@context': 'https://schema.org',
+			'@type': 'WebSite',
+			name: 'Santiago Vazquez Portfolio',
+			url: siteUrl,
+			description: meta.description,
+			author: { '@type': 'Person', name: personalInfo.name }
+		},
+		{
+			'@context': 'https://schema.org',
+			'@type': 'BreadcrumbList',
+			itemListElement: [
+				{ '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+				{ '@type': 'ListItem', position: 2, name: 'Work', item: `${siteUrl}#artifacts` },
+				{ '@type': 'ListItem', position: 3, name: 'Process', item: `${siteUrl}#process` },
+				{ '@type': 'ListItem', position: 4, name: 'Journey', item: `${siteUrl}#archive` },
+				{ '@type': 'ListItem', position: 5, name: 'Contact', item: `${siteUrl}#contact` }
+			]
+		}
+	];
 
 	// Case study modal state
 	let caseStudyProject = $state<Project | null>(null);
@@ -87,115 +130,19 @@
 	});
 </script>
 
+<Seo
+	title={meta.title}
+	description={meta.description}
+	path="/"
+	keywords={[...meta.keywords, 'Software Developer', 'AI', 'IoT', 'Monterrey', 'Mexico', personalInfo.name]}
+	image="/memoji.png"
+	jsonLd={homeJsonLd}
+/>
+
 <svelte:head>
-	<!-- Primary Meta Tags -->
-	<title>{meta.title}</title>
-	<meta name="title" content={meta.title} />
-	<meta name="description" content={meta.description} />
-	<meta name="keywords" content="Full-Stack Engineer, Software Developer, SvelteKit, TypeScript, AI, IoT, Monterrey, Mexico, Santiago Vazquez" />
-	<meta name="author" content={personalInfo.name} />
-	<meta name="robots" content="index, follow" />
-	<link rel="canonical" href="https://santivqzv.dev" />
-
-	<!-- Open Graph / Facebook -->
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://santivqzv.dev" />
-	<meta property="og:title" content={meta.title} />
-	<meta property="og:description" content={meta.description} />
-	<meta property="og:image" content="https://santivqzv.dev/og-image.png" />
-	<meta property="og:image:width" content="1200" />
-	<meta property="og:image:height" content="630" />
-	<meta property="og:site_name" content="Santiago Vazquez Portfolio" />
-	<meta property="og:locale" content="en_US" />
-
-	<!-- Twitter -->
-	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:url" content="https://santivqzv.dev" />
-	<meta name="twitter:title" content={meta.title} />
-	<meta name="twitter:description" content={meta.description} />
-	<meta name="twitter:image" content="https://santivqzv.dev/og-image.png" />
-	<meta name="twitter:creator" content="@santivqzv" />
-
-	<!-- Theme & Mobile -->
+	<!-- Theme & Mobile (not covered by <Seo>) -->
 	<meta name="theme-color" content="#fdfcf8" />
 	<meta name="msapplication-TileColor" content="#fdfcf8" />
-
-	<!-- JSON-LD Structured Data -->
-	{@html `<script type="application/ld+json">
-	{
-		"@context": "https://schema.org",
-		"@type": "Person",
-		"name": "${personalInfo.name}",
-		"url": "https://santivqzv.dev",
-		"image": "https://santivqzv.dev/memoji.png",
-		"jobTitle": "Full-Stack Engineer",
-		"description": "${meta.description}",
-		"email": "mailto:${personalInfo.email}",
-		"address": {
-			"@type": "PostalAddress",
-			"addressLocality": "Monterrey",
-			"addressCountry": "MX"
-		},
-		"sameAs": [
-			"${personalInfo.social.github}",
-			"${personalInfo.social.linkedin}"
-		],
-		"knowsAbout": ["TypeScript", "SvelteKit", "React", "Node.js", "AWS", "AI/ML", "IoT", "PostgreSQL"]
-	}
-	</script>`}
-
-	{@html `<script type="application/ld+json">
-	{
-		"@context": "https://schema.org",
-		"@type": "WebSite",
-		"name": "Santiago Vazquez Portfolio",
-		"url": "https://santivqzv.dev",
-		"description": "${meta.description}",
-		"author": {
-			"@type": "Person",
-			"name": "${personalInfo.name}"
-		}
-	}
-	</script>`}
-
-	{@html `<script type="application/ld+json">
-	{
-		"@context": "https://schema.org",
-		"@type": "BreadcrumbList",
-		"itemListElement": [
-			{
-				"@type": "ListItem",
-				"position": 1,
-				"name": "Home",
-				"item": "https://santivqzv.dev"
-			},
-			{
-				"@type": "ListItem",
-				"position": 2,
-				"name": "Work",
-				"item": "https://santivqzv.dev#artifacts"
-			},
-			{
-				"@type": "ListItem",
-				"position": 3,
-				"name": "Process",
-				"item": "https://santivqzv.dev#process"
-			},
-			{
-				"@type": "ListItem",
-				"position": 4,
-				"name": "Journey",
-				"item": "https://santivqzv.dev#archive"
-			},
-			{
-				"@type": "ListItem",
-				"position": 5,
-				"name": "Contact",
-				"item": "https://santivqzv.dev#contact"
-			}
-		]
-	}
-	</script>`}
 </svelte:head>
 
 <!-- Snippets -->
@@ -224,6 +171,7 @@
 			{ label: 'Artifacts', href: '#artifacts' },
 			{ label: 'Process', href: '#process' },
 			{ label: 'Archive', href: '#archive' },
+			{ label: 'Blog', href: '/blog' },
 			{ label: 'Contact', href: '#contact' }
 		]}
 	/>

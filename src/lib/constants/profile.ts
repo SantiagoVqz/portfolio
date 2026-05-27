@@ -455,6 +455,10 @@ export const navLinks = [
 // META / SEO
 // ============================================
 
+// Canonical production origin — used for SEO canonical URLs, Open Graph,
+// sitemap, and RSS. Keep in sync with the deployed domain.
+export const siteUrl = 'https://santiagovqz.com';
+
 export const meta = {
 	title: 'Santiago Vazquez — Full-Stack Engineer',
 	description:

@@ -95,7 +95,7 @@
 		{:else if image && !mediaError}
 			<img
 				src={image}
-				alt={title}
+				alt={`${title} project screenshot`}
 				class="card-media"
 				class:is-hovered={isHovered}
 				class:is-loaded={mediaLoaded}

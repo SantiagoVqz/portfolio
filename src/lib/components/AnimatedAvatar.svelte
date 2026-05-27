@@ -181,7 +181,7 @@
 			<!-- Actual memoji/avatar image -->
 			<img
 				src={imageSrc}
-				alt="Santiago Vazquez"
+				alt="Santiago Vazquez, Full-Stack Engineer"
 				class="h-auto w-[115%] object-contain"
 				class:memoji-hover={isHovered}
 				style="

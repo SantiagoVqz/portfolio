@@ -11,9 +11,11 @@
 	interface Props {
 		brand?: string;
 		links?: NavLink[];
+		/** Target for the "Contact Me" CTA. Use "/#contact" from non-home pages. */
+		ctaHref?: string;
 	}
 
-	let { brand = 'Santiago Vazquez', links = [] }: Props = $props();
+	let { brand = 'Santiago Vazquez', links = [], ctaHref = '#contact' }: Props = $props();
 
 	// Track scroll state for navbar appearance
 	let isScrolled = $state(false);
@@ -131,7 +133,7 @@
 
 		<!-- CTA / Contact (Desktop) -->
 		<a
-			href="#contact"
+			href={ctaHref}
 			class="navbar-cta desktop-only"
 			use:magnetic={{ strength: 0.4, duration: 0.5 }}
 			data-cursor-hover
@@ -195,7 +197,7 @@
 			{/each}
 		</ul>
 		<a
-			href="#contact"
+			href={ctaHref}
 			class="mobile-cta"
 			onclick={handleLinkClick}
 			tabindex={isMobileMenuOpen ? 0 : -1}
