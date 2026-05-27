@@ -2,7 +2,6 @@
 	import Seo from '$lib/components/Seo.svelte';
 	import { siteUrl, meta } from '$lib/constants';
 	import { page } from '$app/state';
-	import { replaceState } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 
@@ -41,22 +40,21 @@
 		filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 	);
 
-	function updateQuery(tag: string | null, p: number) {
+	// Build the canonical /blog URL for a given filter + page. Used as real
+	// anchor hrefs so the controls are plain links: clickable before/without
+	// hydration, shareable, and indexable. data-sveltekit-* attributes on the
+	// links keep the original UX (replace history instead of stacking entries,
+	// no scroll jump when re-filtering).
+	function hrefFor(tag: string | null, p: number) {
 		const params = new URLSearchParams();
 		if (tag) params.set('tag', tag);
 		if (p > 1) params.set('page', String(p));
 		const qs = params.toString();
-		replaceState(qs ? `/blog?${qs}` : '/blog', {});
+		return qs ? `/blog?${qs}` : '/blog';
 	}
 
-	function selectTag(tag: string | null) {
-		updateQuery(activeTag === tag ? null : tag, 1);
-	}
-
-	function goToPage(p: number) {
-		updateQuery(activeTag, p);
-		if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
-	}
+	// Clicking the active tag again clears the filter (toggle behaviour).
+	const tagHref = (tag: string) => hrefFor(activeTag === tag ? null : tag, 1);
 
 	const pageTitle = 'Blog — Santiago Vazquez';
 	const pageDescription =
@@ -100,21 +98,32 @@
 </header>
 
 {#if tags.length}
-	<div class="tag-filter" role="group" aria-label="Filter posts by topic">
-		<button class="filter-chip" class:active={!activeTag} onclick={() => selectTag(null)}>
+	<nav class="tag-filter" aria-label="Filter posts by topic">
+		<a
+			class="filter-chip"
+			class:active={!activeTag}
+			aria-current={!activeTag ? 'true' : undefined}
+			href={hrefFor(null, 1)}
+			data-sveltekit-replacestate
+			data-sveltekit-noscroll
+			data-cursor-hover
+		>
 			All
-		</button>
+		</a>
 		{#each tags as tag (tag)}
-			<button
+			<a
 				class="filter-chip"
 				class:active={activeTag === tag}
-				aria-pressed={activeTag === tag}
-				onclick={() => selectTag(tag)}
+				aria-current={activeTag === tag ? 'true' : undefined}
+				href={tagHref(tag)}
+				data-sveltekit-replacestate
+				data-sveltekit-noscroll
+				data-cursor-hover
 			>
 				{tag}
-			</button>
+			</a>
 		{/each}
-	</div>
+	</nav>
 {/if}
 
 {#if filtered.length === 0}
@@ -137,35 +146,59 @@
 					</div>
 					<h2 class="post-title">{post.title}</h2>
 					<p class="post-desc">{post.description}</p>
-					{#if post.keywords.length}
-						<ul class="tag-list" aria-label="Topics">
-							{#each post.keywords.slice(0, 4) as tag (tag)}
-								<li>{tag}</li>
-							{/each}
-						</ul>
-					{/if}
 				</a>
+				{#if post.keywords.length}
+					<ul class="tag-list" aria-label="Filter by topic">
+						{#each post.keywords.slice(0, 4) as tag (tag)}
+							<li>
+								<a
+									class="tag-pill"
+									class:active={activeTag === tag}
+									aria-current={activeTag === tag ? 'true' : undefined}
+									href={tagHref(tag)}
+									data-sveltekit-replacestate
+									data-sveltekit-noscroll
+									data-cursor-hover
+								>
+									{tag}
+								</a>
+							</li>
+						{/each}
+					</ul>
+				{/if}
 			</li>
 		{/each}
 	</ul>
 
 	{#if totalPages > 1}
 		<nav class="pagination" aria-label="Pagination">
-			<button
-				class="page-btn"
-				disabled={currentPage === 1}
-				onclick={() => goToPage(currentPage - 1)}
-			>
-				← Prev
-			</button>
+			{#if currentPage === 1}
+				<span class="page-btn" aria-disabled="true">← Prev</span>
+			{:else}
+				<a
+					class="page-btn"
+					href={hrefFor(activeTag, currentPage - 1)}
+					data-sveltekit-replacestate
+					rel="prev"
+					data-cursor-hover
+				>
+					← Prev
+				</a>
+			{/if}
 			<span class="page-status">Page {currentPage} of {totalPages}</span>
-			<button
-				class="page-btn"
-				disabled={currentPage === totalPages}
-				onclick={() => goToPage(currentPage + 1)}
-			>
-				Next →
-			</button>
+			{#if currentPage === totalPages}
+				<span class="page-btn" aria-disabled="true">Next →</span>
+			{:else}
+				<a
+					class="page-btn"
+					href={hrefFor(activeTag, currentPage + 1)}
+					data-sveltekit-replacestate
+					rel="next"
+					data-cursor-hover
+				>
+					Next →
+				</a>
+			{/if}
 		</nav>
 	{/if}
 {/if}
@@ -211,10 +244,12 @@
 	}
 
 	.filter-chip {
+		display: inline-block;
 		font-family: var(--font-data);
 		font-size: 0.7rem;
 		letter-spacing: var(--tracking-wide);
 		text-transform: uppercase;
+		text-decoration: none;
 		padding: 0.45rem 0.85rem;
 		border-radius: var(--radius-full);
 		border: 1px solid color-mix(in srgb, var(--color-ink) 14%, transparent);
@@ -253,7 +288,7 @@
 
 	.post-link {
 		display: block;
-		padding: 2.25rem 0;
+		padding: 2.25rem 0 1.25rem;
 		text-decoration: none;
 		color: inherit;
 		transition:
@@ -306,18 +341,40 @@
 		gap: 0.5rem;
 		list-style: none;
 		margin: 0;
-		padding: 0;
+		padding: 0 0 2.25rem;
 	}
 
 	.tag-list li {
+		display: flex;
+	}
+
+	.tag-pill {
+		display: inline-block;
 		font-family: var(--font-data);
 		font-size: 0.65rem;
 		letter-spacing: var(--tracking-wide);
 		text-transform: uppercase;
+		text-decoration: none;
 		padding: 0.3rem 0.6rem;
 		border-radius: var(--radius-full);
+		border: 1px solid transparent;
 		background: color-mix(in srgb, var(--color-ink) 6%, transparent);
 		color: color-mix(in srgb, var(--color-ink) 65%, transparent);
+		cursor: pointer;
+		transition:
+			background var(--duration-normal) ease,
+			color var(--duration-normal) ease,
+			border-color var(--duration-normal) ease;
+	}
+
+	.tag-pill:hover {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+	}
+
+	.tag-pill.active {
+		background: var(--color-ink);
+		color: var(--color-base);
 	}
 
 	/* Pagination */
@@ -329,10 +386,12 @@
 		margin-top: 3rem;
 	}
 	.page-btn {
+		display: inline-block;
 		font-family: var(--font-data);
 		font-size: 0.72rem;
 		letter-spacing: var(--tracking-wide);
 		text-transform: uppercase;
+		text-decoration: none;
 		padding: 0.6rem 1.1rem;
 		border-radius: var(--radius-full);
 		border: 1px solid color-mix(in srgb, var(--color-ink) 14%, transparent);
@@ -344,11 +403,11 @@
 			color var(--duration-normal) ease,
 			opacity var(--duration-normal) ease;
 	}
-	.page-btn:hover:not(:disabled) {
+	.page-btn:hover:not([aria-disabled='true']) {
 		border-color: var(--color-accent);
 		color: var(--color-accent);
 	}
-	.page-btn:disabled {
+	.page-btn[aria-disabled='true'] {
 		opacity: 0.35;
 		cursor: default;
 	}
