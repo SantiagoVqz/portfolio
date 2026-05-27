@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { getPost, getPublishedPosts } from '$lib/blog';
+import { getPost, getPublishedPosts, getAdjacentPosts, getRelatedPosts } from '$lib/blog';
 
 // Each post is prerendered to static HTML for SEO and performance.
 export const prerender = true;
@@ -12,5 +12,6 @@ export function entries() {
 export function load({ params }) {
 	const post = getPost(params.slug);
 	if (!post) error(404, `Post "${params.slug}" not found`);
-	return { post };
+	const { prev, next } = getAdjacentPosts(params.slug);
+	return { post, prev, next, related: getRelatedPosts(params.slug) };
 }

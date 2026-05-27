@@ -90,3 +90,53 @@ export function getPublishedPosts(): PostMeta[] {
 export function getPost(slug: string): PostMeta | undefined {
 	return posts.find((p) => p.slug === slug && isPublished(p));
 }
+
+/** Every distinct tag across published posts, with post counts, most-used first. */
+export function getTags(): { tag: string; count: number }[] {
+	const counts = new Map<string, number>();
+	for (const post of getPublishedPosts()) {
+		for (const tag of post.keywords) {
+			counts.set(tag, (counts.get(tag) ?? 0) + 1);
+		}
+	}
+	return [...counts.entries()]
+		.map(([tag, count]) => ({ tag, count }))
+		.sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+}
+
+/**
+ * Newer/older neighbours of a post in reverse-chronological order, for
+ * prev/next navigation. `next` is the more recent post, `prev` the older one.
+ */
+export function getAdjacentPosts(slug: string): {
+	prev: PostMeta | null;
+	next: PostMeta | null;
+} {
+	const published = getPublishedPosts();
+	const i = published.findIndex((p) => p.slug === slug);
+	if (i === -1) return { prev: null, next: null };
+	return {
+		next: published[i - 1] ?? null,
+		prev: published[i + 1] ?? null
+	};
+}
+
+/**
+ * Up to `limit` other posts sharing the most keywords with this one,
+ * ranked by overlap then recency. Falls back to nothing if no overlap.
+ */
+export function getRelatedPosts(slug: string, limit = 3): PostMeta[] {
+	const current = getPost(slug);
+	if (!current) return [];
+	const tags = new Set(current.keywords);
+	return getPublishedPosts()
+		.filter((p) => p.slug !== slug)
+		.map((p) => ({ post: p, overlap: p.keywords.filter((k) => tags.has(k)).length }))
+		.filter((entry) => entry.overlap > 0)
+		.sort(
+			(a, b) =>
+				b.overlap - a.overlap || new Date(b.post.date).getTime() - new Date(a.post.date).getTime()
+		)
+		.slice(0, limit)
+		.map((entry) => entry.post);
+}

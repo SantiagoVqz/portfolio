@@ -12,12 +12,24 @@
 	const dateFmt = new Intl.DateTimeFormat('en-US', {
 		year: 'numeric',
 		month: 'long',
-		day: 'numeric'
+		day: 'numeric',
+		timeZone: 'UTC'
 	});
 	const formatDate = (iso: string) => dateFmt.format(new Date(iso));
 
 	const url = $derived(`${siteUrl}/blog/${post.slug}`);
 	const author = $derived(post.author ?? personalInfo.name);
+
+	// Social share image: an explicit cover wins, otherwise the auto-generated
+	// per-post card at /blog/[slug]/og.png.
+	const ogImage = $derived(post.cover ?? `/blog/${post.slug}/og.png`);
+
+	const dateFmtShort = new Intl.DateTimeFormat('en-US', {
+		month: 'short',
+		day: 'numeric',
+		timeZone: 'UTC'
+	});
+	const formatShort = (iso: string) => dateFmtShort.format(new Date(iso));
 
 	// Article structured data — datePublished/dateModified, author, keywords.
 	const jsonLd = $derived({
@@ -29,7 +41,7 @@
 		dateModified: post.updated ?? post.date,
 		author: { '@type': 'Person', name: author, url: siteUrl },
 		publisher: { '@type': 'Person', name: personalInfo.name, url: siteUrl },
-		image: post.cover ? new URL(post.cover, siteUrl).href : `${siteUrl}/memoji.png`,
+		image: new URL(ogImage, siteUrl).href,
 		keywords: post.keywords.join(', '),
 		url,
 		mainEntityOfPage: { '@type': 'WebPage', '@id': url }
@@ -41,7 +53,7 @@
 	description={post.description}
 	path={`/blog/${post.slug}`}
 	keywords={post.keywords}
-	image={post.cover ?? '/memoji.png'}
+	image={ogImage}
 	type="article"
 	article={{
 		publishedTime: post.date,
@@ -84,6 +96,42 @@
 		<Content />
 	</div>
 </article>
+
+{#if data.prev || data.next}
+	<nav class="post-pager" aria-label="More posts">
+		{#if data.prev}
+			<a class="pager-link prev" href="/blog/{data.prev.slug}" data-cursor-hover>
+				<span class="pager-dir">← Older</span>
+				<span class="pager-title">{data.prev.title}</span>
+			</a>
+		{:else}
+			<span></span>
+		{/if}
+		{#if data.next}
+			<a class="pager-link next" href="/blog/{data.next.slug}" data-cursor-hover>
+				<span class="pager-dir">Newer →</span>
+				<span class="pager-title">{data.next.title}</span>
+			</a>
+		{/if}
+	</nav>
+{/if}
+
+{#if data.related.length}
+	<aside class="related" aria-label="Related posts">
+		<h2 class="related-heading">Related reading</h2>
+		<ul class="related-list">
+			{#each data.related as rel (rel.slug)}
+				<li>
+					<a class="related-link" href="/blog/{rel.slug}" data-cursor-hover>
+						<span class="related-date">{formatShort(rel.date)}</span>
+						<span class="related-title">{rel.title}</span>
+						<span class="related-desc">{rel.description}</span>
+					</a>
+				</li>
+			{/each}
+		</ul>
+	</aside>
+{/if}
 
 <style>
 	.post {
@@ -241,5 +289,121 @@
 		border: none;
 		border-top: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
 		margin: 2.5rem 0;
+	}
+
+	/* Prev / next pager */
+	.post-pager {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1.5rem;
+		margin-top: 4rem;
+		padding-top: 2.5rem;
+		border-top: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
+	}
+
+	.pager-link {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		text-decoration: none;
+		color: inherit;
+		transition: transform var(--duration-normal) var(--ease-smooth);
+	}
+	.pager-link.next {
+		text-align: right;
+		align-items: flex-end;
+	}
+	.pager-link:hover {
+		transform: translateY(-2px);
+	}
+
+	.pager-dir {
+		font-family: var(--font-data);
+		font-size: 0.7rem;
+		letter-spacing: var(--tracking-wide);
+		text-transform: uppercase;
+		color: var(--color-accent);
+	}
+	.pager-title {
+		font-family: var(--font-headline);
+		font-size: 1.15rem;
+		line-height: 1.2;
+		color: var(--color-ink);
+	}
+
+	/* Related posts */
+	.related {
+		margin-top: 4rem;
+		padding-top: 2.5rem;
+		border-top: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
+	}
+	.related-heading {
+		font-family: var(--font-data);
+		font-size: 0.72rem;
+		letter-spacing: var(--tracking-widest, 0.2em);
+		text-transform: uppercase;
+		color: var(--color-accent);
+		margin: 0 0 1.5rem;
+	}
+	.related-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 0.5rem;
+	}
+	.related-link {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		column-gap: 1.25rem;
+		row-gap: 0.25rem;
+		padding: 1.25rem 0;
+		text-decoration: none;
+		color: inherit;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+		transition: padding var(--duration-normal) var(--ease-smooth);
+	}
+	.related-link:hover {
+		padding-left: 0.75rem;
+	}
+	.related-date {
+		font-family: var(--font-data);
+		font-size: 0.7rem;
+		letter-spacing: var(--tracking-wide);
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--color-ink) 50%, transparent);
+		padding-top: 0.25rem;
+	}
+	.related-title {
+		font-family: var(--font-headline);
+		font-size: 1.15rem;
+		line-height: 1.2;
+		color: var(--color-ink);
+		transition: color var(--duration-normal) ease;
+	}
+	.related-link:hover .related-title {
+		color: var(--color-accent);
+	}
+	.related-desc {
+		grid-column: 2;
+		font-size: 0.9rem;
+		line-height: 1.5;
+		color: color-mix(in srgb, var(--color-ink) 65%, transparent);
+	}
+
+	@media (max-width: 640px) {
+		.post-pager {
+			grid-template-columns: 1fr;
+		}
+		.pager-link.next {
+			text-align: left;
+			align-items: flex-start;
+		}
+		.related-link {
+			grid-template-columns: 1fr;
+		}
+		.related-desc {
+			grid-column: 1;
+		}
 	}
 </style>

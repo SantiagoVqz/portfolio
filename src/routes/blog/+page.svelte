@@ -1,16 +1,62 @@
 <script lang="ts">
 	import Seo from '$lib/components/Seo.svelte';
 	import { siteUrl, meta } from '$lib/constants';
+	import { page } from '$app/state';
+	import { replaceState } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
+	const PAGE_SIZE = 6;
+
 	const dateFmt = new Intl.DateTimeFormat('en-US', {
 		year: 'numeric',
 		month: 'long',
-		day: 'numeric'
+		day: 'numeric',
+		timeZone: 'UTC'
 	});
 	const formatDate = (iso: string) => dateFmt.format(new Date(iso));
+
+	// Distinct topics across all posts, most common first.
+	const tags = $derived(
+		[...new Set(data.posts.flatMap((p) => p.keywords))].sort((a, b) => a.localeCompare(b))
+	);
+
+	// The URL query string is the source of truth for filter + page, so views
+	// are shareable and the back button works. Query params can't be read while
+	// prerendering, so the static page renders the unfiltered first page and the
+	// client applies the query after hydration.
+	const activeTag = $derived(browser ? page.url.searchParams.get('tag') : null);
+	const requestedPage = $derived(
+		browser ? Math.max(1, Number(page.url.searchParams.get('page')) || 1) : 1
+	);
+
+	const filtered = $derived(
+		activeTag ? data.posts.filter((p) => p.keywords.includes(activeTag)) : data.posts
+	);
+	const totalPages = $derived(Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)));
+	const currentPage = $derived(Math.min(requestedPage, totalPages));
+	const pagePosts = $derived(
+		filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+	);
+
+	function updateQuery(tag: string | null, p: number) {
+		const params = new URLSearchParams();
+		if (tag) params.set('tag', tag);
+		if (p > 1) params.set('page', String(p));
+		const qs = params.toString();
+		replaceState(qs ? `/blog?${qs}` : '/blog', {});
+	}
+
+	function selectTag(tag: string | null) {
+		updateQuery(activeTag === tag ? null : tag, 1);
+	}
+
+	function goToPage(p: number) {
+		updateQuery(activeTag, p);
+		if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
 
 	const pageTitle = 'Blog — Santiago Vazquez';
 	const pageDescription =
@@ -53,11 +99,35 @@
 	<p class="lede">{pageDescription}</p>
 </header>
 
-{#if data.posts.length === 0}
-	<p class="empty">No posts yet — check back soon.</p>
+{#if tags.length}
+	<div class="tag-filter" role="group" aria-label="Filter posts by topic">
+		<button class="filter-chip" class:active={!activeTag} onclick={() => selectTag(null)}>
+			All
+		</button>
+		{#each tags as tag (tag)}
+			<button
+				class="filter-chip"
+				class:active={activeTag === tag}
+				aria-pressed={activeTag === tag}
+				onclick={() => selectTag(tag)}
+			>
+				{tag}
+			</button>
+		{/each}
+	</div>
+{/if}
+
+{#if filtered.length === 0}
+	<p class="empty">
+		{#if activeTag}
+			No posts tagged "{activeTag}" yet.
+		{:else}
+			No posts yet — check back soon.
+		{/if}
+	</p>
 {:else}
 	<ul class="post-list">
-		{#each data.posts as post (post.slug)}
+		{#each pagePosts as post (post.slug)}
 			<li class="post-item">
 				<a class="post-link" href="/blog/{post.slug}" data-cursor-hover>
 					<div class="post-meta">
@@ -78,11 +148,31 @@
 			</li>
 		{/each}
 	</ul>
+
+	{#if totalPages > 1}
+		<nav class="pagination" aria-label="Pagination">
+			<button
+				class="page-btn"
+				disabled={currentPage === 1}
+				onclick={() => goToPage(currentPage - 1)}
+			>
+				← Prev
+			</button>
+			<span class="page-status">Page {currentPage} of {totalPages}</span>
+			<button
+				class="page-btn"
+				disabled={currentPage === totalPages}
+				onclick={() => goToPage(currentPage + 1)}
+			>
+				Next →
+			</button>
+		</nav>
+	{/if}
 {/if}
 
 <style>
 	.blog-header {
-		margin-bottom: 4rem;
+		margin-bottom: 2.5rem;
 	}
 
 	.eyebrow {
@@ -110,6 +200,40 @@
 		font-size: 1.0625rem;
 		line-height: 1.6;
 		color: color-mix(in srgb, var(--color-ink) 75%, transparent);
+	}
+
+	/* Tag filter */
+	.tag-filter {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: 3rem;
+	}
+
+	.filter-chip {
+		font-family: var(--font-data);
+		font-size: 0.7rem;
+		letter-spacing: var(--tracking-wide);
+		text-transform: uppercase;
+		padding: 0.45rem 0.85rem;
+		border-radius: var(--radius-full);
+		border: 1px solid color-mix(in srgb, var(--color-ink) 14%, transparent);
+		background: transparent;
+		color: color-mix(in srgb, var(--color-ink) 65%, transparent);
+		cursor: pointer;
+		transition:
+			background var(--duration-normal) ease,
+			color var(--duration-normal) ease,
+			border-color var(--duration-normal) ease;
+	}
+	.filter-chip:hover {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+	}
+	.filter-chip.active {
+		background: var(--color-ink);
+		border-color: var(--color-ink);
+		color: var(--color-base);
 	}
 
 	.post-list {
@@ -194,6 +318,46 @@
 		border-radius: var(--radius-full);
 		background: color-mix(in srgb, var(--color-ink) 6%, transparent);
 		color: color-mix(in srgb, var(--color-ink) 65%, transparent);
+	}
+
+	/* Pagination */
+	.pagination {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-top: 3rem;
+	}
+	.page-btn {
+		font-family: var(--font-data);
+		font-size: 0.72rem;
+		letter-spacing: var(--tracking-wide);
+		text-transform: uppercase;
+		padding: 0.6rem 1.1rem;
+		border-radius: var(--radius-full);
+		border: 1px solid color-mix(in srgb, var(--color-ink) 14%, transparent);
+		background: transparent;
+		color: var(--color-ink);
+		cursor: pointer;
+		transition:
+			border-color var(--duration-normal) ease,
+			color var(--duration-normal) ease,
+			opacity var(--duration-normal) ease;
+	}
+	.page-btn:hover:not(:disabled) {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+	}
+	.page-btn:disabled {
+		opacity: 0.35;
+		cursor: default;
+	}
+	.page-status {
+		font-family: var(--font-data);
+		font-size: 0.72rem;
+		letter-spacing: var(--tracking-wide);
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--color-ink) 55%, transparent);
 	}
 
 	.empty {
