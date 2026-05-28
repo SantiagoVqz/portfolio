@@ -4,6 +4,10 @@
 
 	// Initialize cursor and scroll tracking on mount
 	onMount(() => {
+		if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+			scrollState.init();
+			return () => scrollState.destroy();
+		}
 		cursorState.init();
 		scrollState.init();
 

@@ -74,6 +74,12 @@
 			// Run page load animation after a brief delay
 			setTimeout(runPageLoadAnimation, 100);
 
+			// Skip cursor/sunlight tracking on touch devices — synthesized mouse events
+			// from taps would otherwise leave the cursor stuck in the "hovering" state.
+			if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+				return () => {};
+			}
+
 			// Initialize sunlight follower with slower, dreamy movement
 			const sunlightProxy = { x: 0, y: 0 };
 			const sunlightXTo = gsap.quickTo(sunlightProxy, 'x', {
