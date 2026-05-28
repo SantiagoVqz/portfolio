@@ -6,14 +6,14 @@
 
 	let { children } = $props();
 
-	// Sunlight cursor state
-	let sunlightX = $state(0);
-	let sunlightY = $state(0);
-	let cursorX = $state(0);
-	let cursorY = $state(0);
-	let cursorScale = $state(1);
-	let isHovering = $state(false);
-	let isVisible = $state(false);
+	// Sunlight cursor state (disabled while we fix the mouse animation)
+	// let sunlightX = $state(0);
+	// let sunlightY = $state(0);
+	// let cursorX = $state(0);
+	// let cursorY = $state(0);
+	// let cursorScale = $state(1);
+	// let isHovering = $state(false);
+	// let isVisible = $state(false);
 
 	// Page load animation state
 	let pageLoaded = $state(false);
@@ -74,6 +74,11 @@
 			// Run page load animation after a brief delay
 			setTimeout(runPageLoadAnimation, 100);
 
+			// Mouse animation (cursor + sunlight) disabled while we fix it.
+			return () => {};
+			/* eslint-disable */
+			// @ts-nocheck
+			/*
 			// Skip cursor/sunlight tracking on touch devices — synthesized mouse events
 			// from taps would otherwise leave the cursor stuck in the "hovering" state.
 			if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
@@ -173,6 +178,7 @@
 				document.removeEventListener('mouseenter', handleMouseEnter);
 				document.removeEventListener('mouseleave', handleMouseLeave);
 			};
+			*/
 		};
 
 		let cleanup: (() => void) | undefined;
@@ -203,7 +209,7 @@
 	/>
 </svelte:head>
 
-<!-- Sunlight glow effect (large, soft radial gradient) -->
+<!-- Mouse animation (sunlight glow + custom cursor) disabled while we fix it.
 <div
 	class="sunlight-glow pointer-events-none fixed inset-0 z-[9990] opacity-60"
 	style="
@@ -217,7 +223,6 @@
 	aria-hidden="true"
 ></div>
 
-<!-- Custom cursor -->
 <div
 	class="custom-cursor pointer-events-none fixed z-[9999] mix-blend-difference"
 	class:opacity-0={!isVisible}
@@ -237,6 +242,8 @@
 		class:bg-opacity-20={isHovering}
 	></div>
 </div>
+-->
+
 
 <!-- Main content with smooth scrolling -->
 <SmoothScroll smooth={1.2}>
