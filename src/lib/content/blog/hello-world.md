@@ -1,7 +1,7 @@
 ---
 title: 'Welcome to the Blog'
 description: 'Why I started writing here — a space for engineering notes, product updates, and lessons learned building software that scales.'
-date: '2026-05-27'
+date: '2026-05-25'
 keywords:
   - Engineering
   - SvelteKit

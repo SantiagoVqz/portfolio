@@ -1,7 +1,7 @@
 ---
 title: 'Why I Reach for SvelteKit'
 description: 'The handful of reasons SvelteKit keeps winning my greenfield projects — from runes to prerendering to how little ceremony it asks for.'
-date: '2026-06-10'
+date: '2026-05-26'
 keywords:
   - SvelteKit
   - Engineering
