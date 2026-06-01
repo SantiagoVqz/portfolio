@@ -11,8 +11,7 @@
 	import ProjectEditorial from '$lib/components/ProjectEditorial.svelte';
 	import ProjectData from '$lib/components/ProjectData.svelte';
 	import ProjectImmersive from '$lib/components/ProjectImmersive.svelte';
-	// ProjectCompact available for future /projects page
-	// import ProjectCompact from '$lib/components/ProjectCompact.svelte';
+	import ProjectCarousel from '$lib/components/ProjectCarousel.svelte';
 	import CaseStudyModal from '$lib/components/CaseStudyModal.svelte';
 	import DisplayCabinet from '$lib/components/DisplayCabinet.svelte';
 	import Constellation from '$lib/components/Constellation.svelte';
@@ -75,6 +74,10 @@
 			]
 		}
 	];
+
+	// Home shows featured projects in full layouts; the rest live in the carousel.
+	const featuredProjects = $derived(projects.filter((p) => p.featured));
+	const moreProjects = $derived(projects.filter((p) => !p.featured));
 
 	// Case study modal state
 	let caseStudyProject = $state<Project | null>(null);
@@ -169,6 +172,7 @@
 		brand={personalInfo.shortName}
 		links={[
 			{ label: 'Artifacts', href: '#artifacts' },
+			{ label: 'Work', href: '/work' },
 			{ label: 'Process', href: '#process' },
 			{ label: 'Archive', href: '#archive' },
 			{ label: 'Blog', href: '/blog' },
@@ -306,9 +310,9 @@
 		</div>
 	</div>
 
-	<!-- Varied project layouts -->
+	<!-- Varied project layouts (featured only) -->
 	<div class="space-y-16 px-6 pb-24 md:px-12 lg:px-20">
-		{#each projects as project, i (project.id)}
+		{#each featuredProjects as project, i (project.id)}
 			<div class="project-item mx-auto max-w-6xl">
 				{#if project.layoutType === 'editorial'}
 					<ProjectEditorial
@@ -332,6 +336,39 @@
 			</div>
 		{/each}
 	</div>
+
+	<!-- More work — carousel of everything else -->
+	{#if moreProjects.length > 0}
+		<div class="px-6 pb-24 md:px-12 lg:px-20">
+			<div class="mx-auto max-w-6xl" use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}>
+				<div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+					<div>
+						<div class="mb-3 flex items-center gap-4">
+							<span class="text-xl">◇</span>
+							{@render sectionLabel('More Work')}
+						</div>
+						<h3
+							class="font-serif text-2xl font-medium tracking-tight text-[--color-ink] md:text-3xl"
+							style="font-family: var(--font-headline)"
+						>
+							Client &amp; personal projects
+						</h3>
+					</div>
+					<a
+						href="/work"
+						class="group inline-flex items-center gap-2 rounded-full border border-[--color-ink]/15 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.1em] text-[--color-ink] transition-colors duration-300 hover:border-[--color-ink] hover:bg-[--color-ink] hover:text-[--color-base]"
+						use:magnetic={{ strength: 0.2, duration: 0.4 }}
+						data-cursor-hover
+					>
+						<span>View all work</span>
+						<span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+					</a>
+				</div>
+
+				<ProjectCarousel projects={moreProjects} onViewCaseStudy={openCaseStudy} />
+			</div>
+		</div>
+	{/if}
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════

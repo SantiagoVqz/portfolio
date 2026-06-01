@@ -15,6 +15,7 @@ export function GET() {
 
 	const staticPages: UrlEntry[] = [
 		{ loc: `${siteUrl}/`, changefreq: 'monthly', priority: '1.0' },
+		{ loc: `${siteUrl}/work`, changefreq: 'monthly', priority: '0.8' },
 		{ loc: `${siteUrl}/blog`, changefreq: 'weekly', priority: '0.8' }
 	];
 
