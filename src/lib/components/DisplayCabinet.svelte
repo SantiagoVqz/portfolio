@@ -10,7 +10,6 @@
 	let { skills }: Props = $props();
 
 	let containerRef = $state<HTMLElement>();
-	let hoveredSkill = $state<string | null>(null);
 
 	// Group skills by category
 	const groupedSkills = $derived.by(() => {
@@ -67,39 +66,19 @@
 		{#each categories as category (category)}
 			{@const categorySkills = groupedSkills[category]}
 			<div class="cabinet-compartment">
-				<!-- Glass effect top bar -->
-				<div class="compartment-glass"></div>
-
 				<!-- Category label -->
 				<div class="compartment-label">
 					<span class="label-text">{category}</span>
 					<span class="label-count">{categorySkills.length}</span>
 				</div>
 
-				<!-- Skills as objects in compartment -->
+				<!-- Skills as uniform tiles -->
 				<div class="compartment-items">
 					{#each categorySkills as skill (skill.name)}
-						<button
-							class="skill-object"
-							class:large={skill.size === 'large'}
-							class:medium={skill.size === 'medium'}
-							class:hovered={hoveredSkill === skill.name}
-							style="--skill-color: {skill.color}"
-							onmouseenter={() => hoveredSkill = skill.name}
-							onmouseleave={() => hoveredSkill = null}
-							onfocus={() => hoveredSkill = skill.name}
-							onblur={() => hoveredSkill = null}
-							data-cursor-hover
-							aria-label="{skill.name} — {skill.size === 'large' ? 'Expert' : skill.size === 'medium' ? 'Proficient' : 'Familiar'}"
-						>
+						<span class="skill-object" style="--skill-color: {skill.color}">
 							<span class="skill-icon">{skill.icon}</span>
 							<span class="skill-name">{skill.name}</span>
-							{#if hoveredSkill === skill.name}
-								<span class="skill-tooltip">
-									{skill.size === 'large' ? 'Expert' : skill.size === 'medium' ? 'Proficient' : 'Familiar'}
-								</span>
-							{/if}
-						</button>
+						</span>
 					{/each}
 				</div>
 			</div>
@@ -133,21 +112,6 @@
 
 	.cabinet-compartment:hover {
 		border-color: color-mix(in srgb, var(--color-ink) 15%, transparent);
-		box-shadow: var(--shadow-diffused);
-	}
-
-	/* Glass effect overlay */
-	.compartment-glass {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(
-			135deg,
-			rgba(253, 252, 248, 0.4) 0%,
-			transparent 50%,
-			rgba(253, 252, 248, 0.1) 100%
-		);
-		pointer-events: none;
-		border-radius: inherit;
 	}
 
 	.compartment-label {
@@ -187,39 +151,18 @@
 	}
 
 	.skill-object {
-		position: relative;
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem 0.875rem;
-		background: var(--color-surface);
-		border: 1px solid color-mix(in srgb, var(--skill-color) 20%, transparent);
+		background: var(--color-base);
+		border: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
 		border-radius: var(--radius-full);
-		cursor: none;
-		transition: all var(--duration-normal) var(--ease-smooth);
-		font-family: inherit;
-		font-size: inherit;
-		color: inherit;
+		transition: border-color var(--duration-normal) var(--ease-smooth);
 	}
 
-	.skill-object:hover,
-	.skill-object.hovered {
-		transform: translateY(-2px) scale(1.05);
-		background: color-mix(in srgb, var(--skill-color) 10%, var(--color-base));
-		border-color: color-mix(in srgb, var(--skill-color) 50%, transparent);
-		box-shadow: 0 4px 16px -4px color-mix(in srgb, var(--skill-color) 30%, transparent);
-	}
-
-	.skill-object.large {
-		padding: 0.625rem 1rem;
-		border-width: 2px;
+	.cabinet-compartment:hover .skill-object {
 		border-color: color-mix(in srgb, var(--skill-color) 35%, transparent);
-		background: color-mix(in srgb, var(--skill-color) 8%, var(--color-base));
-	}
-
-	.skill-object.medium {
-		border-color: color-mix(in srgb, var(--skill-color) 25%, transparent);
-		background: color-mix(in srgb, var(--skill-color) 5%, var(--color-surface));
 	}
 
 	.skill-icon {
@@ -227,59 +170,11 @@
 		line-height: 1;
 	}
 
-	.skill-object.large .skill-icon {
-		font-size: 1rem;
-	}
-
 	.skill-name {
 		font-family: var(--font-data);
 		font-size: 11px;
 		font-weight: 500;
 		color: var(--color-ink);
-	}
-
-	.skill-object.large .skill-name {
-		font-size: 12px;
-		font-weight: 600;
-	}
-
-	.skill-tooltip {
-		position: absolute;
-		bottom: calc(100% + 8px);
-		left: 50%;
-		transform: translateX(-50%);
-		font-family: var(--font-data);
-		font-size: 9px;
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
-		color: var(--color-base);
-		background: var(--color-ink);
-		padding: 0.25rem 0.625rem;
-		border-radius: var(--radius-sm);
-		white-space: nowrap;
-		pointer-events: none;
-		animation: tooltipIn 0.2s ease forwards;
-	}
-
-	.skill-tooltip::after {
-		content: '';
-		position: absolute;
-		top: 100%;
-		left: 50%;
-		transform: translateX(-50%);
-		border: 4px solid transparent;
-		border-top-color: var(--color-ink);
-	}
-
-	@keyframes tooltipIn {
-		from {
-			opacity: 0;
-			transform: translateX(-50%) translateY(4px);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(-50%) translateY(0);
-		}
 	}
 
 	@media (max-width: 640px) {

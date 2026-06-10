@@ -4,35 +4,33 @@
 	import { magnetic } from '$lib/actions/magnetic';
 	import { revealWithExit } from '$lib/actions/reveal';
 	import { textReveal } from '$lib/actions/textReveal';
-	import { parallaxScale } from '$lib/actions/parallax';
 	import { pageLoad } from '$lib/actions/pageLoad';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import GenerativeMesh from '$lib/components/GenerativeMesh.svelte';
-	import ProjectEditorial from '$lib/components/ProjectEditorial.svelte';
-	import ProjectData from '$lib/components/ProjectData.svelte';
-	import ProjectImmersive from '$lib/components/ProjectImmersive.svelte';
-	import ProjectCarousel from '$lib/components/ProjectCarousel.svelte';
 	import CaseStudyModal from '$lib/components/CaseStudyModal.svelte';
 	import DisplayCabinet from '$lib/components/DisplayCabinet.svelte';
-	import Constellation from '$lib/components/Constellation.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
-	import SectionIndicators from '$lib/components/SectionIndicators.svelte';
 	import Seo from '$lib/components/Seo.svelte';
+	import { getPublishedPosts } from '$lib/blog';
 
 	import {
 		personalInfo,
-		professionalProfile,
 		technicalSkills,
 		languages,
 		projects,
-		education,
-		philosophies,
 		meta,
 		siteUrl,
 		timelineData
 	} from '$lib/constants';
 
 	import type { Project } from '$lib/constants/profile';
+
+	// Latest writing, surfaced on the home page (full archive lives at /blog).
+	const recentPosts = getPublishedPosts().slice(0, 3);
+
+	// A short month-year label for writing rows, e.g. "Jun 2026".
+	const postDate = (iso: string) =>
+		new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
 	// Structured data for the home page: who I am (Person), the site itself
 	// (WebSite), and the in-page section nav (BreadcrumbList).
@@ -67,17 +65,17 @@
 			'@type': 'BreadcrumbList',
 			itemListElement: [
 				{ '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
-				{ '@type': 'ListItem', position: 2, name: 'Work', item: `${siteUrl}#artifacts` },
-				{ '@type': 'ListItem', position: 3, name: 'Process', item: `${siteUrl}#process` },
-				{ '@type': 'ListItem', position: 4, name: 'Journey', item: `${siteUrl}#archive` },
-				{ '@type': 'ListItem', position: 5, name: 'Contact', item: `${siteUrl}#contact` }
+				{ '@type': 'ListItem', position: 2, name: 'Work', item: `${siteUrl}#work` },
+				{ '@type': 'ListItem', position: 3, name: 'Tools', item: `${siteUrl}#tools` },
+				{ '@type': 'ListItem', position: 4, name: 'Timeline', item: `${siteUrl}#timeline` },
+				{ '@type': 'ListItem', position: 5, name: 'Writing', item: `${siteUrl}#writing` },
+				{ '@type': 'ListItem', position: 6, name: 'Contact', item: `${siteUrl}#contact` }
 			]
 		}
 	];
 
-	// Home shows featured projects in full layouts; the rest live in the carousel.
+	// Home shows a short, uniform list of featured work; the full archive is /work.
 	const featuredProjects = $derived(projects.filter((p) => p.featured));
-	const moreProjects = $derived(projects.filter((p) => !p.featured));
 
 	// Case study modal state
 	let caseStudyProject = $state<Project | null>(null);
@@ -105,25 +103,44 @@
 			gsap.registerPlugin(ScrollTrigger);
 
 			ctx = gsap.context(() => {
-				// Reveal each project on scroll
-				const projectItems = document.querySelectorAll('.project-item');
-				projectItems.forEach((item, i) => {
+				// Reveal each list row (work + writing) as it enters the viewport.
+				const rows = document.querySelectorAll('.list-row');
+				rows.forEach((item) => {
 					gsap.fromTo(
 						item,
-						{ opacity: 0, y: 60 },
+						{ opacity: 0, y: 24 },
 						{
 							opacity: 1,
 							y: 0,
-							duration: 0.8,
+							duration: 0.7,
 							ease: 'power3.out',
 							scrollTrigger: {
 								trigger: item,
-								start: 'top 85%',
+								start: 'top 90%',
 								toggleActions: 'play none none reverse'
 							}
 						}
 					);
 				});
+
+				// Draw the timeline's vertical line as the section scrolls through.
+				const line = document.querySelector('.timeline-line');
+				if (line) {
+					gsap.fromTo(
+						line,
+						{ scaleY: 0, transformOrigin: 'top' },
+						{
+							scaleY: 1,
+							ease: 'none',
+							scrollTrigger: {
+								trigger: '#timeline',
+								start: 'top 70%',
+								end: 'bottom 80%',
+								scrub: true
+							}
+						}
+					);
+				}
 			});
 		};
 
@@ -149,13 +166,16 @@
 </svelte:head>
 
 <!-- Snippets -->
-{#snippet sectionLabel(text: string)}
-	<span
-		class="mb-4 inline-block font-mono text-[10px] tracking-widest uppercase"
-		style="color: var(--color-accent)"
+{#snippet sectionHead(title: string, description: string)}
+	<h2
+		class="font-serif text-3xl font-medium tracking-tight text-[--color-ink] md:text-4xl"
+		style="font-family: var(--font-headline)"
 	>
-		{text}
-	</span>
+		{title}
+	</h2>
+	<p class="mt-3 max-w-xl text-[--color-ink]/50 text-sm md:text-base">
+		{description}
+	</p>
 {/snippet}
 
 <!-- Skip to Content - Accessibility -->
@@ -171,18 +191,14 @@
 	<Navbar
 		brand={personalInfo.shortName}
 		links={[
-			{ label: 'Artifacts', href: '#artifacts' },
-			{ label: 'Work', href: '/work' },
-			{ label: 'Process', href: '#process' },
-			{ label: 'Archive', href: '#archive' },
-			{ label: 'Blog', href: '/blog' },
+			{ label: 'Work', href: '#work' },
+			{ label: 'Tools', href: '#tools' },
+			{ label: 'Timeline', href: '#timeline' },
+			{ label: 'Writing', href: '/blog' },
 			{ label: 'Contact', href: '#contact' }
 		]}
 	/>
 </div>
-
-<!-- Section Indicators (right side dots) -->
-<SectionIndicators />
 
 <!-- Command Palette -->
 <CommandPalette />
@@ -198,498 +214,354 @@
 <main id="main-content">
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
-     THE ARRIVAL (HERO)
-     Full-bleed Canvas 2D generative mesh background, text floats on top
+     HERO — statement-led, left-aligned. The idea leads; the name is a quiet label.
      ═══════════════════════════════════════════════════════════════════════════ -->
 <section
 	id="hero"
-	class="hero relative flex min-h-screen items-center justify-center overflow-hidden px-6 md:px-12 lg:px-20"
+	class="hero relative flex min-h-screen items-center overflow-hidden px-6 md:px-12 lg:px-20"
 	aria-label="Introduction"
 >
 	<!-- Generative Mesh Background -->
 	<GenerativeMesh />
 
-	<!-- Main content floating on top -->
-	<div
-		class="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center justify-center text-center"
-		use:parallaxScale={{ scaleStart: 1, scaleEnd: 0.95, opacityStart: 1, opacityEnd: 0.3, start: 'top top', end: '80% top' }}
-	>
-		<!-- Text content -->
-		<div class="flex-1" data-load="hero-content">
-			<!-- Availability badge -->
-			<div data-load="hero-badge" class="mb-6">
-				<span
-					class="inline-flex items-center gap-3 rounded-full px-4 py-2"
-					style="background: color-mix(in srgb, var(--color-surface) 80%, transparent); border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);"
-				>
-					<span class="h-2 w-2 animate-pulse rounded-full bg-[--color-tension]"></span>
-					<span class="font-mono text-[10px] tracking-widest text-[--color-ink]/60 uppercase">
-						{personalInfo.locationShort} · Available for work
-					</span>
-				</span>
-			</div>
+	<!-- Content -->
+	<div class="relative z-10 mx-auto w-full max-w-3xl" data-load="hero-content">
+		<!-- Name, small -->
+		<span
+			class="mb-8 block font-mono text-[11px] tracking-[0.2em] text-[--color-ink]/40 uppercase"
+		>
+			{personalInfo.shortName}
+		</span>
 
-			<!-- Large name -->
-			<h1
-				class="mb-6 font-serif leading-none tracking-tight"
-				style="font-family: var(--font-headline)"
+		<!-- Statement — the focal point -->
+		<h1
+			class="font-serif text-3xl font-medium leading-[1.15] tracking-tight text-[--color-ink] md:text-5xl lg:text-[3.25rem]"
+			style="font-family: var(--font-headline)"
+			use:textReveal={{ stagger: 0.012, duration: 0.9, y: 40, rotationX: -40, delay: 0.2 }}
+		>
+			I turn hard, ambiguous problems into products that ship.
+		</h1>
+
+		<!-- Supporting line — the specifics, quieter -->
+		<p
+			data-load="hero-subtitle"
+			class="mt-6 max-w-xl text-base leading-relaxed text-[--color-ink]/55 md:text-lg"
+		>
+			Engineer and builder. Lately: municipal AI for U.S. cities, IoT fulfillment, and a
+			couple of startups.
+		</p>
+
+		<!-- Philosophies, distilled to one quiet line -->
+		<p class="mt-5 font-mono text-[11px] tracking-[0.12em] text-[--color-ink]/35 lowercase">
+			product-first · built to scale · shipped with tests
+		</p>
+
+		<!-- CTA -->
+		<div data-load="hero-cta" class="mt-10">
+			<a
+				href="#work"
+				class="group inline-flex items-center gap-4 font-mono text-xs tracking-widest text-[--color-ink]/60 uppercase transition-colors duration-500 hover:text-[--color-accent]"
+				use:magnetic={{ strength: 0.3, duration: 0.5 }}
+				data-cursor-hover
 			>
-				<span
-					class="mb-3 block text-lg font-normal text-[--color-ink]/40 md:text-xl"
-					style="font-family: var(--font-data); letter-spacing: 0.12em; font-weight: 300;"
-				>
-					Hi, I'm
-				</span>
-				<span
-					class="hero-name block text-5xl font-medium text-[--color-ink] md:text-7xl lg:text-8xl"
-					style="line-height: 0.95;"
-					use:textReveal={{ stagger: 0.025, duration: 1, y: 80, rotationX: -60, delay: 0.3 }}
-				>
-					Santiago Vazquez
-				</span>
-			</h1>
-
-			<!-- Tagline -->
-			<div data-load="hero-subtitle" class="mb-8">
-				<p
-					class="mx-auto max-w-lg leading-relaxed font-light text-[--color-ink]/50 text-base md:text-lg lg:text-xl"
-					style="font-family: var(--font-headline); font-style: italic;"
-				>
-					Building products that scale — from municipal AI systems to IoT solutions
-				</p>
-			</div>
-
-			<!-- CTA -->
-			<div data-load="hero-cta">
-				<a
-					href="#artifacts"
-					class="group inline-flex items-center gap-4 font-mono text-xs tracking-widest text-[--color-ink]/60 uppercase transition-colors duration-500 hover:text-[--color-accent]"
-					use:magnetic={{ strength: 0.3, duration: 0.5 }}
-					data-cursor-hover
-				>
-					<span>Explore my work</span>
-					<span class="h-[1px] w-8 bg-current transition-all duration-500 group-hover:w-12"></span>
-					<span class="transition-transform duration-500 group-hover:translate-x-1">↓</span>
-				</a>
-			</div>
-		</div>
-	</div>
-
-	<!-- Bottom decoration -->
-	<div class="absolute bottom-8 left-1/2 hidden -translate-x-1/2 md:block">
-		<div class="flex flex-col items-center gap-2 opacity-20">
-			<div class="h-16 w-[1px] bg-gradient-to-b from-transparent via-[--color-ink] to-transparent"></div>
+				<span>see my work</span>
+				<span class="h-[1px] w-8 bg-current transition-all duration-500 group-hover:w-12"></span>
+				<span class="transition-transform duration-500 group-hover:translate-x-1">→</span>
+			</a>
 		</div>
 	</div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
-     THE ARTIFACTS (PROJECTS)
-     Varied layouts — editorial, data, immersive
+     WORK — uniform list of featured projects; a row opens its case study.
      ═══════════════════════════════════════════════════════════════════════════ -->
-<section id="artifacts" class="relative" aria-label="Selected Work">
-	<!-- Section header -->
-	<div class="px-6 py-24 md:px-12 lg:px-20">
-		<div
-			class="mx-auto max-w-6xl"
-			use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}
-		>
-			<div class="mb-4 flex items-center gap-4">
-				<span class="text-2xl">◈</span>
-				{@render sectionLabel('The Artifacts')}
-			</div>
-			<h2
-				class="font-serif text-4xl font-medium tracking-tight text-[--color-ink] md:text-5xl lg:text-6xl"
-				style="font-family: var(--font-headline)"
-			>
-				Selected Work
-			</h2>
-			<p class="mt-4 max-w-xl text-[--color-ink]/50 text-base md:text-lg">
-				Products I've shipped — from enterprise SaaS to embedded systems.
-			</p>
+<section id="work" class="relative px-6 py-24 md:px-12 md:py-32 lg:px-20" aria-label="Selected work">
+	<div class="mx-auto max-w-3xl">
+		<div use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}>
+			{@render sectionHead('Selected work', 'A few things I’ve built and shipped.')}
 		</div>
-	</div>
 
-	<!-- Varied project layouts (featured only) -->
-	<div class="space-y-16 px-6 pb-24 md:px-12 lg:px-20">
-		{#each featuredProjects as project, i (project.id)}
-			<div class="project-item mx-auto max-w-6xl">
-				{#if project.layoutType === 'editorial'}
-					<ProjectEditorial
-						{project}
-						index={i}
-						onViewCaseStudy={() => openCaseStudy(project)}
-					/>
-				{:else if project.layoutType === 'data'}
-					<ProjectData
-						{project}
-						index={i}
-						onViewCaseStudy={() => openCaseStudy(project)}
-					/>
-				{:else if project.layoutType === 'immersive'}
-					<ProjectImmersive
-						{project}
-						index={i}
-						onViewCaseStudy={() => openCaseStudy(project)}
-					/>
-				{/if}
-			</div>
-		{/each}
-	</div>
-
-	<!-- More work — carousel of everything else -->
-	{#if moreProjects.length > 0}
-		<div class="px-6 pb-24 md:px-12 lg:px-20">
-			<div class="mx-auto max-w-6xl" use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}>
-				<div class="mb-8 flex flex-wrap items-end justify-between gap-4">
-					<div>
-						<div class="mb-3 flex items-center gap-4">
-							<span class="text-xl">◇</span>
-							{@render sectionLabel('More Work')}
-						</div>
-						<h3
-							class="font-serif text-2xl font-medium tracking-tight text-[--color-ink] md:text-3xl"
-							style="font-family: var(--font-headline)"
-						>
-							Client &amp; personal projects
-						</h3>
-					</div>
-					<a
-						href="/work"
-						class="group inline-flex items-center gap-2 rounded-full border border-[--color-ink]/15 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.1em] text-[--color-ink] transition-colors duration-300 hover:border-[--color-ink] hover:bg-[--color-ink] hover:text-[--color-base]"
-						use:magnetic={{ strength: 0.2, duration: 0.4 }}
+		<ul class="mt-12 border-t border-[--color-ink]/10">
+			{#each featuredProjects as project (project.id)}
+				<li class="list-row border-b border-[--color-ink]/10">
+					<button
+						type="button"
+						class="work-row group w-full py-6 text-left"
+						onclick={() => openCaseStudy(project)}
 						data-cursor-hover
+						aria-label="View case study for {project.title}"
 					>
-						<span>View all work</span>
-						<span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-1">→</span>
-					</a>
-				</div>
+						<div class="flex items-baseline justify-between gap-4">
+							<span
+								class="font-serif text-xl font-medium text-[--color-ink] transition-colors duration-300 group-hover:text-[--color-accent] md:text-2xl"
+								style="font-family: var(--font-headline)"
+							>
+								{project.title}
+							</span>
+							<span class="shrink-0 font-mono text-xs text-[--color-ink]/40">{project.year}</span>
+						</div>
+						<p class="mt-2 max-w-xl text-sm text-[--color-ink]/55 md:text-base">
+							{project.subtitle ?? project.description}
+						</p>
+						{#if project.tags?.length}
+							<div class="mt-3 flex flex-wrap gap-x-3 gap-y-1">
+								{#each project.tags.slice(0, 4) as tag (tag)}
+									<span class="font-mono text-[10px] tracking-wide text-[--color-ink]/35 uppercase">{tag}</span>
+								{/each}
+							</div>
+						{/if}
+					</button>
+				</li>
+			{/each}
+		</ul>
 
-				<ProjectCarousel projects={moreProjects} onViewCaseStudy={openCaseStudy} />
-			</div>
+		<div class="mt-10">
+			<a
+				href="/work"
+				class="group inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.1em] text-[--color-ink]/60 transition-colors duration-300 hover:text-[--color-accent]"
+				use:magnetic={{ strength: 0.2, duration: 0.4 }}
+				data-cursor-hover
+			>
+				<span>all work</span>
+				<span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+			</a>
 		</div>
-	{/if}
+	</div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
-     THE PROCESS (TECH STACK)
-     Display cabinet with glass compartments
+     TOOLS — what I reach for, grouped by category (uniform tiles).
      ═══════════════════════════════════════════════════════════════════════════ -->
-<section id="process" class="relative bg-[--color-surface] px-6 py-24 md:py-32" aria-label="Technical Skills">
-	<div class="relative z-10 mx-auto max-w-4xl">
-		<div
-			class="mb-12 text-center"
-			use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}
-		>
-			<div class="mb-4 flex items-center justify-center gap-4">
-				<span class="text-2xl">⚙</span>
-				{@render sectionLabel('The Process')}
-			</div>
-			<h2
-				class="font-serif text-4xl font-medium tracking-tight text-[--color-ink] md:text-5xl"
-				style="font-family: var(--font-headline)"
-			>
-				My Toolbox
-			</h2>
-			<p class="mx-auto mt-4 max-w-md text-[--color-ink]/50 text-base">
-				The technologies and frameworks I reach for when building products.
-			</p>
+<section id="tools" class="relative bg-[--color-surface] px-6 py-24 md:px-12 md:py-32 lg:px-20" aria-label="Tools">
+	<div class="relative z-10 mx-auto max-w-3xl">
+		<div use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}>
+			{@render sectionHead('Tools', 'What I reach for when building products.')}
 		</div>
 
-		<DisplayCabinet skills={technicalSkills} />
+		<div class="mt-12">
+			<DisplayCabinet skills={technicalSkills} />
+		</div>
 
-		<!-- Languages as small badges -->
+		<!-- Languages as plain text -->
 		<div
-			class="mt-12 text-center"
+			class="mt-10 flex flex-wrap items-baseline gap-x-2 gap-y-1"
 			use:revealWithExit={{ blur: 8, y: 20, duration: 0.8, persist: true }}
 		>
-			<span
-				class="mb-4 block font-mono text-[10px] tracking-widest text-[--color-ink]/40 uppercase"
-			>
-				I also speak
+			<span class="font-mono text-[10px] tracking-widest text-[--color-ink]/40 uppercase">
+				languages
 			</span>
-			<div class="flex flex-wrap justify-center gap-3">
-				{#each languages as lang (lang.name)}
+			<span class="text-sm text-[--color-ink]/60">
+				{#each languages as lang, i (lang.name)}{i > 0 ? ', ' : ''}{lang.name} ({lang.proficiency}){/each}
+			</span>
+		</div>
+	</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     TIMELINE — compact single column, newest first, with a scroll-drawn line.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section id="timeline" class="relative px-6 py-24 md:px-12 md:py-32 lg:px-20" aria-label="Timeline">
+	<div class="mx-auto max-w-3xl">
+		<div use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}>
+			{@render sectionHead('Timeline', 'From the classroom to the codebase.')}
+		</div>
+
+		<ol class="relative mt-12 pl-6">
+			<!-- Drawn vertical line -->
+			<span
+				class="timeline-line pointer-events-none absolute top-2 bottom-2 left-[3px] w-[1px] bg-[--color-ink]/15"
+				aria-hidden="true"
+			></span>
+
+			{#each [...timelineData].reverse() as item (item.title)}
+				<li class="list-row relative pb-8 last:pb-0">
+					<!-- Dot -->
 					<span
-						class="inline-flex items-center gap-2 rounded-full border border-[--color-ink]/10 bg-[--color-base] px-4 py-2"
-					>
-						<span class="text-lg">{lang.flag}</span>
-						<span class="font-mono text-xs text-[--color-ink]/70">{lang.name}</span>
-						<span class="font-mono text-[9px] text-[--color-ink]/40 uppercase">
-							{lang.proficiency}
-						</span>
-					</span>
-				{/each}
-			</div>
-		</div>
-	</div>
-</section>
+						class="absolute top-[7px] -left-6 h-[7px] w-[7px] rounded-full"
+						style="background: {item.type === 'milestone' ? 'var(--color-gold)' : item.type === 'work' ? 'var(--color-accent)' : 'var(--color-tension)'}"
+						aria-hidden="true"
+					></span>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     THE ARCHIVE (JOURNEY & ABOUT)
-     Editorial timeline with alternating entries
-     ═══════════════════════════════════════════════════════════════════════════ -->
-<section id="archive" class="relative px-6 py-24 md:py-32" aria-label="Career Journey">
-	<div class="mx-auto max-w-4xl">
-		<div
-			class="mb-12 text-center"
-			use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}
-		>
-			<div class="mb-4 flex items-center justify-center gap-4">
-				<span class="text-2xl">✧</span>
-				{@render sectionLabel('The Archive')}
-			</div>
-			<h2
-				class="font-serif text-4xl font-medium tracking-tight text-[--color-ink] md:text-5xl"
-				style="font-family: var(--font-headline)"
-			>
-				My Journey
-			</h2>
-			<p class="mt-4 mx-auto max-w-lg text-[--color-ink]/40 text-sm md:text-base" style="font-family: var(--font-data)">
-				From the classroom to the codebase — the milestones that shaped how I build.
-			</p>
-		</div>
-
-		<Constellation
-			timeline={timelineData}
-			{education}
-			{philosophies}
-			bio={professionalProfile.bio as unknown as string[]}
-		/>
-	</div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     THE CONTACT
-     Email-first + social hub + playful exit + resume download
-     ═══════════════════════════════════════════════════════════════════════════ -->
-<section id="contact" class="relative bg-[--color-surface] px-6 py-24 md:py-32" aria-label="Contact Information">
-	<!-- Ambient background -->
-	<div class="pointer-events-none absolute inset-0 overflow-hidden">
-		<div
-			class="absolute top-0 left-1/4 h-[400px] w-[400px] rounded-full opacity-12"
-			style="background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%); filter: blur(100px);"
-		></div>
-		<div
-			class="absolute right-1/4 bottom-0 h-[300px] w-[300px] rounded-full opacity-8"
-			style="background: radial-gradient(circle, var(--color-tension) 0%, transparent 70%); filter: blur(80px);"
-		></div>
-	</div>
-
-	<div class="relative z-10 mx-auto max-w-5xl">
-		<!-- Hero email area -->
-		<div
-			class="mb-16 text-center"
-			use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}
-		>
-			<div class="mb-4 flex items-center justify-center gap-4">
-				<span class="text-2xl">◆</span>
-				{@render sectionLabel('Get in Touch')}
-			</div>
-			<h2
-				class="font-serif text-4xl font-medium tracking-tight text-[--color-ink] md:text-5xl"
-				style="font-family: var(--font-headline)"
-			>
-				Let's build something together
-			</h2>
-			<p class="mx-auto mt-4 max-w-md text-[--color-ink]/50 text-base">
-				Have a project in mind? I'd love to hear from you.
-			</p>
-		</div>
-
-		<!-- Email hero + social hub -->
-		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" use:revealWithExit={{ blur: 15, y: 30, duration: 1, persist: true }}>
-
-			<!-- Email Card (Large) -->
-			<a
-				href="mailto:{personalInfo.email}"
-				class="card group relative flex flex-col justify-between overflow-hidden p-8 md:col-span-2 lg:col-span-2 lg:row-span-2"
-				use:magnetic={{ strength: 0.15, duration: 0.5 }}
-				data-cursor-hover
-				aria-label="Send email to {personalInfo.email}"
-			>
-				<div
-					class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-					style="background: radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 60%);"
-				></div>
-
-				<div class="relative">
-					<div class="mb-6 flex items-center gap-3">
-						<span class="relative flex h-3 w-3">
-							<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75"></span>
-							<span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
-						</span>
-						<span class="font-mono text-[10px] tracking-widest text-emerald-600 uppercase">
-							Available for projects
+					<div class="flex items-baseline gap-3">
+						<span class="font-mono text-[11px] tracking-wide text-[--color-ink]/40">
+							{item.year}{item.endYear ? `–${item.endYear}` : item.current ? '–now' : ''}
 						</span>
 					</div>
-
 					<h3
-						class="mb-4 font-serif text-2xl font-medium text-[--color-ink] md:text-3xl"
+						class="mt-1 font-serif text-lg font-medium text-[--color-ink]"
 						style="font-family: var(--font-headline)"
 					>
-						Let's work together
+						{item.title}
+						<span class="text-[--color-ink]/40">· {item.company}</span>
 					</h3>
-					<p class="max-w-md text-[--color-ink]/50 text-sm leading-relaxed md:text-base">
-						Whether you need a technical partner for your next venture or want to discuss an idea — I'm always open to interesting conversations.
-					</p>
-				</div>
+					<p class="mt-1 max-w-xl text-sm text-[--color-ink]/55">{item.description}</p>
+				</li>
+			{/each}
+		</ol>
+	</div>
+</section>
 
-				<div class="relative mt-8 flex items-center justify-between">
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     WRITING — latest posts; full archive lives at /blog.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section id="writing" class="relative bg-[--color-surface] px-6 py-24 md:px-12 md:py-32 lg:px-20" aria-label="Recent writing">
+	<div class="mx-auto max-w-3xl">
+		<div use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}>
+			{@render sectionHead('Recent writing', 'Notes on engineering, AI, and shipping.')}
+		</div>
+
+		<ul class="mt-12 border-t border-[--color-ink]/10">
+			{#each recentPosts as post (post.slug)}
+				<li class="list-row border-b border-[--color-ink]/10">
+					<a
+						href="/blog/{post.slug}"
+						class="group block py-6"
+						data-cursor-hover
+					>
+						<div class="flex items-baseline justify-between gap-4">
+							<span
+								class="font-serif text-lg font-medium text-[--color-ink] transition-colors duration-300 group-hover:text-[--color-accent] md:text-xl"
+								style="font-family: var(--font-headline)"
+							>
+								{post.title}
+							</span>
+							<span class="shrink-0 font-mono text-xs text-[--color-ink]/40">{postDate(post.date)}</span>
+						</div>
+						<p class="mt-2 max-w-xl text-sm text-[--color-ink]/55">{post.description}</p>
+					</a>
+				</li>
+			{/each}
+		</ul>
+
+		<div class="mt-10">
+			<a
+				href="/blog"
+				class="group inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.1em] text-[--color-ink]/60 transition-colors duration-300 hover:text-[--color-accent]"
+				use:magnetic={{ strength: 0.2, duration: 0.4 }}
+				data-cursor-hover
+			>
+				<span>all writing</span>
+				<span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+			</a>
+		</div>
+	</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CONTACT — quiet hairline rows; same column + idiom as Work/Writing.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section id="contact" class="relative bg-[--color-base] px-6 py-24 md:px-12 md:py-32 lg:px-20" aria-label="Get in touch">
+	<div class="mx-auto max-w-3xl">
+		<div use:revealWithExit={{ blur: 12, y: 30, duration: 1, persist: true }}>
+			{@render sectionHead('Get in touch', 'A technical partner, an idea to kick around — always open.')}
+		</div>
+
+		<ul class="mt-12 border-t border-[--color-ink]/10">
+			<!-- Email -->
+			<li class="list-row border-b border-[--color-ink]/10">
+				<a
+					href="mailto:{personalInfo.email}"
+					class="group flex items-center justify-between gap-4 py-6"
+					data-cursor-hover
+					aria-label="Send email to {personalInfo.email}"
+				>
 					<span
-						class="font-serif text-lg font-medium text-[--color-ink] transition-colors duration-300 group-hover:text-[--color-accent] md:text-xl lg:text-2xl"
+						class="font-serif text-lg font-medium text-[--color-ink] transition-colors duration-300 group-hover:text-[--color-accent] md:text-xl"
 						style="font-family: var(--font-headline)"
 					>
 						{personalInfo.email}
 					</span>
-					<span class="flex h-12 w-12 items-center justify-center rounded-full bg-[--color-accent] text-xl text-[--color-ink] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-45">
-						→
-					</span>
-				</div>
-			</a>
+					<span aria-hidden="true" class="font-mono text-sm text-[--color-ink]/40 transition-transform duration-300 group-hover:translate-x-1">→</span>
+				</a>
+			</li>
 
-			<!-- GitHub Card -->
-			<a
-				href={personalInfo.social.github}
-				target="_blank"
-				rel="noopener noreferrer"
-				class="card group relative flex flex-col justify-between overflow-hidden p-6"
-				use:magnetic={{ strength: 0.25, duration: 0.4 }}
-				data-cursor-hover
-				aria-label="View GitHub profile (opens in new tab)"
-			>
-				<div>
-					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-ink] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
-						⌘
-					</div>
-					<h3 class="mb-2 font-serif text-lg font-medium text-[--color-ink]" style="font-family: var(--font-headline)">
-						GitHub
-					</h3>
-					<p class="text-[--color-ink]/50 text-sm">
-						Check out my code and open source work
-					</p>
-				</div>
-				<div class="mt-4 flex items-center gap-2 font-mono text-xs text-[--color-ink]/40 uppercase">
-					<span>View profile</span>
-					<span class="transition-transform duration-300 group-hover:translate-x-1">↗</span>
-				</div>
-			</a>
-
-			<!-- LinkedIn Card -->
-			<a
-				href={personalInfo.social.linkedin}
-				target="_blank"
-				rel="noopener noreferrer"
-				class="card group relative flex flex-col justify-between overflow-hidden p-6"
-				use:magnetic={{ strength: 0.25, duration: 0.4 }}
-				data-cursor-hover
-				aria-label="Connect on LinkedIn (opens in new tab)"
-			>
-				<div>
-					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-tension] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
-						◎
-					</div>
-					<h3 class="mb-2 font-serif text-lg font-medium text-[--color-ink]" style="font-family: var(--font-headline)">
-						LinkedIn
-					</h3>
-					<p class="text-[--color-ink]/50 text-sm">
-						Connect professionally
-					</p>
-				</div>
-				<div class="mt-4 flex items-center gap-2 font-mono text-xs text-[--color-ink]/40 uppercase">
-					<span>Connect</span>
-					<span class="transition-transform duration-300 group-hover:translate-x-1">↗</span>
-				</div>
-			</a>
-
-			<!-- Resume Download Card -->
-			<a
-				href="/resume.pdf"
-				download="Santiago_Vazquez_Resume.pdf"
-				class="card group relative flex flex-col justify-between overflow-hidden p-6"
-				use:magnetic={{ strength: 0.25, duration: 0.4 }}
-				data-cursor-hover
-				aria-label="Download resume as PDF"
-			>
-				<div>
-					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-gold] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
-						↓
-					</div>
-					<h3 class="mb-2 font-serif text-lg font-medium text-[--color-ink]" style="font-family: var(--font-headline)">
-						Resume
-					</h3>
-					<p class="text-[--color-ink]/50 text-sm">
-						Download my full CV
-					</p>
-				</div>
-				<div class="mt-4 flex items-center gap-2 font-mono text-xs text-[--color-ink]/40 uppercase">
-					<span>Download PDF</span>
-					<span class="transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
-				</div>
-			</a>
-
-			<!-- Phone Card -->
-			<a
-				href="tel:{personalInfo.phone}"
-				class="card group relative flex flex-col justify-between overflow-hidden p-6"
-				use:magnetic={{ strength: 0.25, duration: 0.4 }}
-				data-cursor-hover
-				aria-label="Call {personalInfo.phone}"
-			>
-				<div>
-					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-accent] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
-						☎
-					</div>
-					<h3 class="mb-2 font-serif text-lg font-medium text-[--color-ink]" style="font-family: var(--font-headline)">
-						Phone
-					</h3>
-					<p class="text-[--color-ink]/50 text-sm">
-						{personalInfo.phone}
-					</p>
-				</div>
-				<div class="mt-4 flex items-center gap-2 font-mono text-xs text-[--color-ink]/40 uppercase">
-					<span>Call</span>
-					<span class="transition-transform duration-300 group-hover:translate-x-1">↗</span>
-				</div>
-			</a>
-
-			<!-- Playful exit card -->
-			<div
-				class="card group relative flex flex-col justify-between overflow-hidden p-6 md:col-span-2 lg:col-span-3"
-			>
-				<div>
-					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-[--radius-md] bg-[--color-accent] text-2xl text-[--color-base] transition-transform duration-[--duration-slow] group-hover:scale-[--scale-emphasis] group-hover:rotate-6">
-						✦
-					</div>
-					<blockquote
-						class="font-serif text-lg italic text-[--color-ink]/80 leading-relaxed"
+			<!-- GitHub -->
+			<li class="list-row border-b border-[--color-ink]/10">
+				<a
+					href={personalInfo.social.github}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="group flex items-center justify-between gap-4 py-6"
+					data-cursor-hover
+					aria-label="View GitHub profile (opens in new tab)"
+				>
+					<span
+						class="font-serif text-lg font-medium text-[--color-ink] transition-colors duration-300 group-hover:text-[--color-accent] md:text-xl"
 						style="font-family: var(--font-headline)"
 					>
-						Fun fact: This portfolio has 0 npm packages with security vulnerabilities. I checked.
-					</blockquote>
-				</div>
-				<div class="mt-4 flex items-center gap-2 font-mono text-xs text-[--color-ink]/40 uppercase">
-					<span>— Built with obsessive attention to detail</span>
-				</div>
-			</div>
-		</div>
+						GitHub
+					</span>
+					<span aria-hidden="true" class="font-mono text-sm text-[--color-ink]/40 transition-transform duration-300 group-hover:translate-x-1">↗</span>
+				</a>
+			</li>
 
-		<!-- Location & Footer info -->
-		<div
-			class="mt-12 flex flex-col items-center gap-6 text-center"
-			use:revealWithExit={{ blur: 8, y: 15, duration: 0.8, persist: true }}
-		>
-			<div class="flex items-center gap-4 text-[--color-ink]/30">
-				<span class="font-mono text-xs">Monterrey, MX</span>
-				<span class="h-1 w-1 rounded-full bg-current"></span>
-				<span class="font-mono text-xs">CST (UTC-6)</span>
-			</div>
-			<div class="inline-flex items-center gap-4 text-[--color-ink]/20">
-				<span class="h-[1px] w-8 bg-current"></span>
-				<span class="font-mono text-[10px] tracking-widest uppercase">Looking forward to it</span>
-				<span class="h-[1px] w-8 bg-current"></span>
-			</div>
-		</div>
+			<!-- LinkedIn -->
+			<li class="list-row border-b border-[--color-ink]/10">
+				<a
+					href={personalInfo.social.linkedin}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="group flex items-center justify-between gap-4 py-6"
+					data-cursor-hover
+					aria-label="Connect on LinkedIn (opens in new tab)"
+				>
+					<span
+						class="font-serif text-lg font-medium text-[--color-ink] transition-colors duration-300 group-hover:text-[--color-accent] md:text-xl"
+						style="font-family: var(--font-headline)"
+					>
+						LinkedIn
+					</span>
+					<span aria-hidden="true" class="font-mono text-sm text-[--color-ink]/40 transition-transform duration-300 group-hover:translate-x-1">↗</span>
+				</a>
+			</li>
+
+			<!-- Resume -->
+			<li class="list-row border-b border-[--color-ink]/10">
+				<a
+					href="/resume.pdf"
+					download="Santiago_Vazquez_Resume.pdf"
+					class="group flex items-center justify-between gap-4 py-6"
+					data-cursor-hover
+					aria-label="Download resume as PDF"
+				>
+					<span
+						class="font-serif text-lg font-medium text-[--color-ink] transition-colors duration-300 group-hover:text-[--color-accent] md:text-xl"
+						style="font-family: var(--font-headline)"
+					>
+						Resume <span class="text-[--color-ink]/40">(PDF)</span>
+					</span>
+					<span aria-hidden="true" class="font-mono text-sm text-[--color-ink]/40 transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
+				</a>
+			</li>
+
+			<!-- Phone -->
+			<li class="list-row border-b border-[--color-ink]/10">
+				<a
+					href="tel:{personalInfo.phone}"
+					class="group flex items-center justify-between gap-4 py-6"
+					data-cursor-hover
+					aria-label="Call {personalInfo.phone}"
+				>
+					<span
+						class="font-serif text-lg font-medium text-[--color-ink] transition-colors duration-300 group-hover:text-[--color-accent] md:text-xl"
+						style="font-family: var(--font-headline)"
+					>
+						Phone <span class="text-[--color-ink]/40">· {personalInfo.phone}</span>
+					</span>
+					<span aria-hidden="true" class="font-mono text-sm text-[--color-ink]/40 transition-transform duration-300 group-hover:translate-x-1">↗</span>
+				</a>
+			</li>
+		</ul>
+
+		<!-- npm joke — a quiet personality beat -->
+		<p class="mt-10 max-w-xl font-serif text-base italic text-[--color-ink]/50" style="font-family: var(--font-headline)">
+			This portfolio has 0 npm packages with security vulnerabilities. I checked.
+		</p>
+
+		<!-- Location, one quiet line -->
+		<p class="mt-8 font-mono text-[11px] tracking-wide text-[--color-ink]/30">
+			Monterrey · CST (UTC−6)
+		</p>
 	</div>
 </section>
 
