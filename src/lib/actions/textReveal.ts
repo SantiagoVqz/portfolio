@@ -23,7 +23,7 @@ export const textReveal: Action<HTMLElement, TextRevealOptions | undefined> = (
 	options = {}
 ) => {
 	// Only run on client
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 
@@ -174,7 +174,7 @@ export const lineReveal: Action<HTMLElement, LineRevealOptions | undefined> = (
 	node,
 	options = {}
 ) => {
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 

@@ -21,7 +21,7 @@ interface CountUpOptions {
  */
 export const countUp: Action<HTMLElement, CountUpOptions | undefined> = (node, options = {}) => {
 	// Only run on client
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 
@@ -165,7 +165,7 @@ export const animateValue: Action<HTMLElement, AnimateValueOptions | undefined> 
 	node,
 	options = {}
 ) => {
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 

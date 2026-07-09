@@ -219,6 +219,39 @@ export interface Project {
 
 export const projects: Project[] = [
 	{
+		id: 'echo',
+		title: 'Echo',
+		subtitle: 'CityFront AI',
+		description:
+			'An AI assistant for cities — a retrieval-augmented, agent-driven system that answers residents from each city\'s own knowledge and guides them through creating 311 service requests, delivered as a fully isolated embeddable widget.',
+		longDescription:
+			'The flagship AI product I lead at CityFront AI. Echo grounds every answer in a city\'s own published information and orchestrates agents to walk residents through reporting issues and submitting service requests. It ships as a multi-tenant, embeddable widget that drops into any municipal website without conflicts.',
+		year: '2025',
+		tags: ['RAG', 'AI Agents', 'Multi-tenant', 'SvelteKit', 'Python'],
+		color: '#D4E0D8',
+		metrics: [
+			{ label: 'client onboarding', value: '<72 hr' },
+			{ label: 'E2E coverage', value: '98%+' },
+			{ label: 'U.S. cities served', value: 'multiple' }
+		],
+		image: AskEchoImage,
+		layoutType: 'editorial',
+		category: 'client',
+		featured: true,
+		caseStudy: {
+			problem:
+				'Cities field the same questions over and over and rely on residents finding the right form to report problems. They needed an assistant that answers accurately from their own information and turns a conversation into a properly filed service request.',
+			approach:
+				'A retrieval-augmented, agent-driven assistant that grounds responses in each city\'s knowledge and guides residents through creating 311 requests — built multi-tenant so a new city can be onboarded quickly and embedded anywhere without breaking the host site.',
+			solution:
+				'I led the design and build of the assistant and its delivery layer: an isolated, embeddable widget that works on any municipal site, with a configuration-driven onboarding flow and automated deployments.',
+			outcome:
+				'Reduced client onboarding from two weeks to under 72 hours, sustained 98%+ automated test coverage, and now serves residents across multiple U.S. cities.',
+			screenshots: [],
+			codeSnippets: []
+		}
+	},
+	{
 		id: 'knot',
 		title: 'KNOT',
 		subtitle: 'Co-founded',
@@ -229,6 +262,10 @@ export const projects: Project[] = [
 		year: '2025',
 		tags: ['SvelteKit', 'FastAPI', 'PostgreSQL', 'Stripe', 'WhatsApp API'],
 		color: '#C9A84C',
+		metrics: [
+			{ label: 'less manual coordination', value: '70%' },
+			{ label: 'languages', value: 'ES / EN' }
+		],
 		image: KnotImage,
 		layoutType: 'data',
 		category: 'startup',
@@ -257,6 +294,10 @@ export const projects: Project[] = [
 		year: '2025',
 		tags: ['React Native', 'Expo', 'FastAPI', 'PostgreSQL', 'Zustand'],
 		color: '#A8D5BA',
+		metrics: [
+			{ label: 'platforms', value: 'iOS + Android' },
+			{ label: 'currency support', value: 'multi' }
+		],
 		image: PiggySlice1,
 		images: [PiggySlice1, PiggySlice2, PiggySlice3, PiggySlice4, PiggySlice5, PiggySlice6],
 		layoutType: 'immersive',
@@ -271,39 +312,6 @@ export const projects: Project[] = [
 				'Built with React Native and Expo for cross-platform deployment, FastAPI backend with PostgreSQL for reliable financial data storage, and Zustand for performant client-side state management. Features include automated categorization, recurring transaction detection, and real-time budget alerts.',
 			outcome:
 				'Launched on both iOS and Android. Users report improved spending awareness and consistent savings habit formation through goal tracking and visual progress indicators.',
-			screenshots: [],
-			codeSnippets: []
-		}
-	},
-	{
-		id: 'echo',
-		title: 'Echo',
-		subtitle: 'CityFront AI',
-		description:
-			'An AI assistant for cities — a retrieval-augmented, agent-driven system that answers residents from each city\'s own knowledge and guides them through creating 311 service requests, delivered as a fully isolated embeddable widget.',
-		longDescription:
-			'The flagship AI product I lead at CityFront AI. Echo grounds every answer in a city\'s own published information and orchestrates agents to walk residents through reporting issues and submitting service requests. It ships as a multi-tenant, embeddable widget that drops into any municipal website without conflicts.',
-		year: '2025',
-		tags: ['RAG', 'AI Agents', 'Multi-tenant', 'SvelteKit', 'Python'],
-		color: '#D4E0D8',
-		metrics: [
-			{ label: 'Onboarding Time', value: '<72hrs' },
-			{ label: 'Test Coverage', value: '98%+' },
-			{ label: 'Clients Served', value: 'Multiple U.S. Cities' }
-		],
-		image: AskEchoImage,
-		layoutType: 'editorial',
-		category: 'client',
-		featured: true,
-		caseStudy: {
-			problem:
-				'Cities field the same questions over and over and rely on residents finding the right form to report problems. They needed an assistant that answers accurately from their own information and turns a conversation into a properly filed service request.',
-			approach:
-				'A retrieval-augmented, agent-driven assistant that grounds responses in each city\'s knowledge and guides residents through creating 311 requests — built multi-tenant so a new city can be onboarded quickly and embedded anywhere without breaking the host site.',
-			solution:
-				'I led the design and build of the assistant and its delivery layer: an isolated, embeddable widget that works on any municipal site, with a configuration-driven onboarding flow and automated deployments.',
-			outcome:
-				'Reduced client onboarding from two weeks to under 72 hours, sustained 98%+ automated test coverage, and now serves residents across multiple U.S. cities.',
 			screenshots: [],
 			codeSnippets: []
 		}
@@ -584,12 +592,13 @@ export const timelineData: TimelineItem[] = [
 // NAVIGATION
 // ============================================
 
+// One canonical nav, identical on every route. The brand mark is "Home";
+// "Work" always means the full archive at /work (selected work on the
+// landing page is reachable by scrolling). CTA handles Contact.
 export const navLinks = [
-	{ label: 'Work', href: '#work' },
-	{ label: 'Journey', href: '#timeline' },
-	{ label: 'About', href: '#about' },
-	{ label: 'Stack', href: '#stack' },
-	{ label: 'Contact', href: '#contact' }
+	{ label: 'Work', href: '/work' },
+	{ label: 'Timeline', href: '/#timeline' },
+	{ label: 'Writing', href: '/blog' }
 ] as const;
 
 // ============================================

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { magnetic } from '$lib/actions/magnetic';
 	import { scrollState } from '$lib/stores/scroll.svelte';
+	import { navLinks } from '$lib/constants';
 	import { onMount } from 'svelte';
 
 	interface NavLink {
@@ -10,12 +12,16 @@
 
 	interface Props {
 		brand?: string;
-		links?: NavLink[];
-		/** Target for the "Contact Me" CTA. Use "/#contact" from non-home pages. */
+		/** Defaults to the canonical site nav — pass links only to override. */
+		links?: readonly NavLink[];
 		ctaHref?: string;
 	}
 
-	let { brand = 'Santiago Vazquez', links = [], ctaHref = '#contact' }: Props = $props();
+	let { brand = 'Santiago Vazquez', links = navLinks, ctaHref = '/#contact' }: Props = $props();
+
+	// Route-based active state; anchor links ("/#timeline") are never active.
+	const isActive = (href: string) =>
+		!href.includes('#') && (page.url.pathname === href || page.url.pathname.startsWith(`${href}/`));
 
 	// Track scroll state for navbar appearance
 	let isScrolled = $state(false);
@@ -119,6 +125,8 @@
 						<a
 							href={link.href}
 							class="nav-link"
+							class:active={isActive(link.href)}
+							aria-current={isActive(link.href) ? 'page' : undefined}
 							use:magnetic={{ strength: 0.3, duration: 0.4 }}
 							data-cursor-hover
 							role="menuitem"
@@ -186,6 +194,8 @@
 					<a
 						href={link.href}
 						class="mobile-link"
+						class:active={isActive(link.href)}
+						aria-current={isActive(link.href) ? 'page' : undefined}
 						onclick={handleLinkClick}
 						role="menuitem"
 						tabindex={isMobileMenuOpen ? 0 : -1}
@@ -303,6 +313,15 @@
 
 	.nav-link:hover .link-text {
 		color: var(--color-accent);
+	}
+
+	/* Active route: settled underline + fired-clay text */
+	.nav-link.active .link-line {
+		transform: scaleX(1);
+	}
+
+	.nav-link.active .link-text {
+		color: var(--color-accent-deep, var(--color-accent));
 	}
 
 	/* CTA Button (Desktop) */
@@ -442,11 +461,21 @@
 		text-decoration: none;
 		color: var(--color-ink);
 		border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
-		transition: all var(--duration-normal) ease;
+		transition:
+			transform var(--duration-normal) var(--ease-smooth),
+			border-color var(--duration-normal) ease;
 	}
 
 	.mobile-link:hover {
-		padding-left: 0.5rem;
+		transform: translateX(0.5rem);
+		border-color: var(--color-accent);
+	}
+
+	.mobile-link.active .mobile-link-text {
+		color: var(--color-accent-deep, var(--color-accent));
+	}
+
+	.mobile-link.active {
 		border-color: var(--color-accent);
 	}
 
@@ -492,15 +521,17 @@
 		transform: translateX(4px);
 	}
 
-	/* Scroll Progress */
+	/* Scroll Progress — scaleX, not width, so it never triggers layout */
 	.scroll-progress {
 		position: absolute;
 		bottom: 0;
 		left: 0;
 		height: 2px;
-		width: calc(var(--progress) * 100%);
+		width: 100%;
 		background: linear-gradient(90deg, var(--color-accent), var(--color-tension));
-		transition: width 0.1s linear;
+		transform: scaleX(var(--progress));
+		transform-origin: left;
+		transition: transform 0.1s linear;
 	}
 
 	/* Desktop only */

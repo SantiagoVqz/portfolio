@@ -82,17 +82,7 @@
 />
 
 <div data-load="navbar">
-	<Navbar
-		brand={personalInfo.shortName}
-		ctaHref="/#contact"
-		links={[
-			{ label: 'Home', href: '/' },
-			{ label: 'Work', href: '/work' },
-			{ label: 'Process', href: '/#process' },
-			{ label: 'Blog', href: '/blog' },
-			{ label: 'Contact', href: '/#contact' }
-		]}
-	/>
+	<Navbar brand={personalInfo.shortName} />
 </div>
 
 <main id="main-content" class="work-shell">
@@ -165,7 +155,7 @@
 		font-size: 0.7rem;
 		letter-spacing: var(--tracking-widest, 0.2em);
 		text-transform: uppercase;
-		color: var(--color-accent);
+		color: var(--color-accent-deep, var(--color-accent));
 	}
 
 	h1 {

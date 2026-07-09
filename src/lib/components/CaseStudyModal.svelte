@@ -2,14 +2,20 @@
 	import { browser } from '$app/environment';
 	import type { Project } from '$lib/constants/profile';
 	import ImageCarousel from './ImageCarousel.svelte';
+	import Schematic from './Schematic.svelte';
+	import { schematicFor } from '$lib/constants/schematics';
 
 	interface Props {
 		project: Project | null;
 		open: boolean;
+		/** Figure number — matches the project's number on the home sheet. */
+		fig?: number;
 		onClose: () => void;
 	}
 
-	let { project, open, onClose }: Props = $props();
+	let { project, open, fig = 1, onClose }: Props = $props();
+
+	const schematic = $derived(project ? schematicFor(project.id) : null);
 
 	let dialogRef = $state<HTMLDialogElement>();
 	let contentRef = $state<HTMLDivElement>();
@@ -139,6 +145,14 @@
 				'-=0.15'
 			);
 
+			// Schematic figure
+			tl.fromTo(
+				'.csm-schematic',
+				{ y: 20, opacity: 0 },
+				{ y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' },
+				'-=0.2'
+			);
+
 			// Images
 			tl.fromTo(
 				'.csm-images',
@@ -218,6 +232,13 @@
 
 				<!-- Accent divider -->
 				<div class="csm-divider"></div>
+
+				<!-- The figure — same schematic as the home sheet -->
+				{#if schematic}
+					<figure class="csm-schematic" aria-label="{project.title} architecture diagram">
+						<Schematic def={schematic} {fig} delay={0.35} />
+					</figure>
+				{/if}
 
 				<!-- Image zone -->
 				{#if imageMode === 'strip' && project.images}
@@ -392,6 +413,7 @@
 	.csm-entering .csm-title,
 	.csm-entering .csm-tag,
 	.csm-entering .csm-divider,
+	.csm-entering .csm-schematic,
 	.csm-entering .csm-images,
 	.csm-entering .csm-metric,
 	.csm-entering .csm-section,
@@ -542,6 +564,32 @@
 	/* ══════════════════════════════════════════
 	   IMAGE ZONE
 	   ══════════════════════════════════════════ */
+	/* ══════════════════════════════════════════
+	   SCHEMATIC FIGURE
+	   ══════════════════════════════════════════ */
+	.csm-schematic {
+		margin: 0 auto 2.25rem;
+		max-width: 640px;
+		width: 100%;
+		/* Keep figure text readable on narrow screens: pan, don't shrink */
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.csm-schematic :global(svg) {
+		min-width: 33rem;
+	}
+
+	@media (min-width: 640px) {
+		.csm-schematic {
+			overflow-x: visible;
+		}
+		.csm-schematic :global(svg) {
+			min-width: 0;
+		}
+	}
+
 	.csm-images {
 		margin-bottom: 2rem;
 	}
@@ -653,6 +701,16 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.625rem;
+	}
+
+	/* Two-column rhythm on desktop: number + name rail, prose right */
+	@media (min-width: 768px) {
+		.csm-section {
+			display: grid;
+			grid-template-columns: 150px 1fr;
+			gap: 1.5rem;
+			align-items: start;
+		}
 	}
 
 	.csm-section-header {
