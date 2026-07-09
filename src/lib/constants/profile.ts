@@ -9,12 +9,12 @@
 
 import AskEchoImage from '$lib/assets/projects/askEcho/Screenshot 2026-04-06 at 21.34.06.png';
 import KnotImage from '$lib/assets/projects/Knot/Knot.jpeg';
-import PiggySlice1 from '$lib/assets/projects/piggy/slice-1.png';
-import PiggySlice2 from '$lib/assets/projects/piggy/slice-2.png';
-import PiggySlice3 from '$lib/assets/projects/piggy/slice-3.png';
-import PiggySlice4 from '$lib/assets/projects/piggy/slice-4.png';
-import PiggySlice5 from '$lib/assets/projects/piggy/slice-5.png';
-import PiggySlice6 from '$lib/assets/projects/piggy/slice-6.png';
+import PiggySite1 from '$lib/assets/projects/piggy/site-01.png';
+import PiggySite2 from '$lib/assets/projects/piggy/site-02.png';
+import PiggySite3 from '$lib/assets/projects/piggy/site-03.png';
+import Tonta01 from '$lib/assets/projects/tonta/tonta-01.png';
+import Tonta02 from '$lib/assets/projects/tonta/tonta-02.png';
+import Tonta03 from '$lib/assets/projects/tonta/tonta-03.png';
 
 export const personalInfo = {
 	name: 'Santiago Vázquez Villarreal',
@@ -298,8 +298,9 @@ export const projects: Project[] = [
 			{ label: 'platforms', value: 'iOS + Android' },
 			{ label: 'currency support', value: 'multi' }
 		],
-		image: PiggySlice1,
-		images: [PiggySlice1, PiggySlice2, PiggySlice3, PiggySlice4, PiggySlice5, PiggySlice6],
+		href: 'https://piggy.tonta.mx',
+		image: PiggySite1,
+		images: [PiggySite1, PiggySite2, PiggySite3],
 		layoutType: 'immersive',
 		category: 'startup',
 		featured: true,
@@ -311,7 +312,41 @@ export const projects: Project[] = [
 			solution:
 				'Built with React Native and Expo for cross-platform deployment, FastAPI backend with PostgreSQL for reliable financial data storage, and Zustand for performant client-side state management. Features include automated categorization, recurring transaction detection, and real-time budget alerts.',
 			outcome:
-				'Launched on both iOS and Android. Users report improved spending awareness and consistent savings habit formation through goal tracking and visual progress indicators.',
+				'Currently in development for iOS and Android. The core experience is built — transaction tracking, budget categories, savings goals with visual progress, and group expense splitting — with launch on both platforms ahead.',
+			screenshots: [],
+			codeSnippets: []
+		}
+	},
+	{
+		id: 'tonta',
+		title: 'Tonta',
+		subtitle: 'Product Studio',
+		description:
+			'A bilingual product studio I co-founded with my brother — shipping web, mobile, and AI-native software for teams across Latin America and the U.S. From idea to shipped product, fast.',
+		longDescription:
+			'Tonta is the studio behind much of the work in this archive. We build vertical software for specific industries — govtech, fintech, manufacturing, and developer tools — pairing fast shipping with the design systems and documentation that let a product outlive its launch.',
+		year: '2025',
+		tags: ['Product Studio', 'Web & Mobile', 'AI-native', 'Design Systems'],
+		color: '#4CA97E',
+		metrics: [
+			{ label: 'products shipped', value: '5' },
+			{ label: 'markets', value: 'LATAM + US' }
+		],
+		image: Tonta01,
+		images: [Tonta01, Tonta02, Tonta03],
+		href: 'https://tonta.mx',
+		layoutType: 'compact',
+		category: 'startup',
+		featured: false,
+		caseStudy: {
+			problem:
+				'Most teams don\'t need another generic tool — they need software shaped around how their industry actually works, shipped fast enough to test against reality instead of guesses.',
+			approach:
+				'A small, senior studio that takes products from idea to shipped software: web platforms and APIs, native mobile apps, and AI-native systems like assistants and RAG — built bilingually for Latin America and the U.S.',
+			solution:
+				'We ship early and refine in the open, backing each build with design systems and documentation so it holds up as it grows. Vertical focus over generic tooling; real-world testing over speculative design.',
+			outcome:
+				'Five products shipped across govtech, fintech, consumer, developer tools, and manufacturing — several of which appear in this archive: Echo, Piggy, KNOT, Inkwell, and VVF.',
 			screenshots: [],
 			codeSnippets: []
 		}

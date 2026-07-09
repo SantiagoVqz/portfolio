@@ -421,6 +421,25 @@
 		cursor: grab;
 		touch-action: pan-x;
 		padding: 1.25rem 1.5rem;
+		/* Smooth, minimal swipe: each image settles to center on release */
+		scroll-snap-type: x mandatory;
+		scroll-behavior: smooth;
+	}
+
+	/* Free-flowing while dragging; snap only kicks in once released */
+	.gallery-strip.dragging {
+		scroll-snap-type: none;
+		scroll-behavior: auto;
+	}
+
+	.gallery-strip img {
+		scroll-snap-align: center;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.gallery-strip {
+			scroll-behavior: auto;
+		}
 	}
 
 	@media (min-width: 768px) {

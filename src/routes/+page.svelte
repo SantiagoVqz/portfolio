@@ -285,11 +285,6 @@
 			couple of startups.
 		</p>
 
-		<!-- Proof — measured, annotated -->
-		<p class="mt-5 font-mono text-[11px] tracking-[0.1em] text-(color:--color-ink)/70">
-			&lt;72 hr client onboarding&ensp;·&ensp;98%+ E2E coverage&ensp;·&ensp;4 apps shipped &amp; led
-		</p>
-
 		<!-- CTA pair -->
 		<div data-load="hero-cta" class="mt-10 flex flex-wrap items-center gap-6">
 			<TraceButton href="#contact" variant="solid">

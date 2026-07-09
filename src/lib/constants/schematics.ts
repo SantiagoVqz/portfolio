@@ -281,6 +281,26 @@ export const schematics: Record<string, SchematicDef> = {
 		]
 	},
 
+	tonta: {
+		id: 'tonta',
+		title: 'Tonta — idea to shipped product',
+		nodes: [
+			{ id: 'brief', kind: 'users', x: 46, y: 58, w: 90, h: 48, label: 'Idea / brief' },
+			{ id: 'studio', kind: 'browser', x: 196, y: 44, w: 168, h: 116, label: 'Tonta', sub: 'product studio', accent: 'clay' },
+			{ id: 'web', kind: 'box', x: 444, y: 36, w: 160, h: 48, label: 'Web & API' },
+			{ id: 'mobile', kind: 'box', x: 444, y: 112, w: 160, h: 48, label: 'Mobile apps' },
+			{ id: 'ai', kind: 'box', x: 444, y: 188, w: 160, h: 48, label: 'AI-native' },
+			{ id: 'shipped', kind: 'pill', x: 196, y: 248, w: 168, h: 44, label: 'Shipped product', accent: 'sage' }
+		],
+		edges: [
+			{ from: 'brief', to: 'studio', fromSide: 'right', toSide: 'left' },
+			{ from: 'studio', to: 'web', fromSide: 'right', toSide: 'left', fromShift: -42 },
+			{ from: 'studio', to: 'mobile', fromSide: 'right', toSide: 'left', fromShift: 34 },
+			{ from: 'studio', to: 'ai', fromSide: 'right', toSide: 'left', fromShift: 48, bend: 404 },
+			{ from: 'studio', to: 'shipped', fromSide: 'bottom', toSide: 'top', dashed: true, label: 'ships, fast' }
+		]
+	},
+
 	vvf: {
 		id: 'vvf',
 		title: 'VVF — manufacturing ERP',

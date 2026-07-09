@@ -26,7 +26,8 @@
 		'cityfront-311': 'multi-tenant 311',
 		'cityfront-mobile': 'field reporting',
 		inkwell: 'feed pipeline',
-		vvf: 'manufacturing ERP'
+		vvf: 'manufacturing ERP',
+		tonta: 'product studio'
 	};
 
 	onMount(() => {
@@ -285,6 +286,33 @@
 			<line x1="330" y1="196" x2="346" y2="192" class="ill-s ill-clay" pathLength="100" />
 			<line x1="356" y1="189" x2="372" y2="185" class="ill-s ill-clay" pathLength="100" />
 			<line x1="382" y1="182" x2="398" y2="178" class="ill-s ill-clay" pathLength="100" />
+		</g>
+	{:else if id === 'tonta'}
+		<!-- Idea → shipped: a spark, a pipeline, a shipped package -->
+		<g>
+			<!-- Lightbulb (idea) -->
+			<circle cx="126" cy="130" r="30" class="ill-s" pathLength="100" />
+			<path d="M 118 132 L 124 142 L 128 132 L 134 142" class="ill-s ill-thin ill-clay" pathLength="100" />
+			<line x1="112" y1="164" x2="140" y2="164" class="ill-s ill-thin" pathLength="100" />
+			<line x1="115" y1="172" x2="137" y2="172" class="ill-s ill-thin" pathLength="100" />
+			<line x1="119" y1="180" x2="133" y2="180" class="ill-s ill-thin" pathLength="100" />
+			<!-- Idea sparks -->
+			<g class="ill-f" aria-hidden="true">
+				<line x1="126" y1="82" x2="126" y2="70" class="ill-spark" />
+				<line x1="90" y1="98" x2="82" y2="90" class="ill-spark" />
+				<line x1="162" y1="98" x2="170" y2="90" class="ill-spark" />
+			</g>
+			<!-- Pipeline: idea → build → ship -->
+			<path d="M 156 148 H 214 Q 230 148 230 164 V 192 Q 230 208 246 208 H 300" class="ill-s ill-sage" pathLength="100" />
+			<circle cx="196" cy="148" r="4.5" class="ill-s ill-thin" pathLength="100" />
+			<circle cx="230" cy="180" r="4.5" class="ill-s ill-thin" pathLength="100" />
+			<circle cx="300" cy="208" r="4" class="ill-f ill-dot" />
+			<!-- Shipped package -->
+			<rect x="306" y="176" width="86" height="66" rx="6" class="ill-s" pathLength="100" />
+			<line x1="306" y1="197" x2="392" y2="197" class="ill-s ill-thin" pathLength="100" />
+			<line x1="349" y1="176" x2="349" y2="242" class="ill-s ill-thin" pathLength="100" />
+			<!-- Shipped check -->
+			<path d="M 332 218 L 344 230 L 368 206" class="ill-s ill-clay" pathLength="100" />
 		</g>
 	{/if}
 
