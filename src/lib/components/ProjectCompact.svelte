@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Project } from '$lib/constants/profile';
 	import { magnetic } from '$lib/actions/magnetic';
+	import ProjectIllustration from './ProjectIllustration.svelte';
 
 	interface Props {
 		project: Project;
@@ -12,23 +13,13 @@
 </script>
 
 <article class="compact-card" style="--accent: {project.color}">
-	<!-- Image -->
-	{#if project.image}
-		<div class="card-image">
-			<img
-				src={project.image}
-				alt="{project.title} screenshot"
-				loading="lazy"
-			/>
-			<div class="image-year">
-				<span>{project.year}</span>
-			</div>
+	<!-- Illustration — sketch spot art; screenshots live inside the case study -->
+	<div class="card-image">
+		<ProjectIllustration id={project.id} title={project.title} />
+		<div class="image-year">
+			<span>{project.year}</span>
 		</div>
-	{:else}
-		<div class="card-image card-image--empty">
-			<span class="empty-label">{project.title}</span>
-		</div>
-	{/if}
+	</div>
 
 	<!-- Content -->
 	<div class="card-content">
@@ -101,30 +92,21 @@
 		flex-shrink: 0;
 	}
 
-	.card-image img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
+	/* Illustration fills the zone; a gentle lift on card hover */
+	.card-image :global(svg) {
 		transition: transform var(--duration-slower) var(--ease-smooth);
 	}
 
-	.compact-card:hover .card-image img {
-		transform: scale(1.04);
+	.compact-card:hover .card-image :global(svg) {
+		transform: translateY(-3px);
 	}
 
-	.card-image--empty {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.empty-label {
-		font-family: var(--font-headline);
-		font-size: 2rem;
-		font-weight: 400;
-		color: var(--color-ink);
-		opacity: 0.08;
-		letter-spacing: 0.05em;
+	@media (prefers-reduced-motion: reduce) {
+		.card-image :global(svg),
+		.compact-card:hover .card-image :global(svg) {
+			transition: none;
+			transform: none;
+		}
 	}
 
 	.image-year {

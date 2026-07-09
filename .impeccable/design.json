@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-08T21:31:43Z",
+  "title": "Design System: Santiago Vázquez — Portfolio",
+  "extensions": {
+    "colorMeta": {
+      "base": { "role": "neutral", "displayName": "Sun-bleached Paper", "canonical": "#fdfcf8", "tonalRamp": ["#26241f", "#3a3730", "#524d43", "#6e685b", "#928b7b", "#bdb6a6", "#e0dccf", "#fdfcf8"] },
+      "surface": { "role": "neutral", "displayName": "Raw Ceramic", "canonical": "#f2f0e9", "tonalRamp": ["#26241f", "#39362f", "#514d43", "#6d675a", "#918b7b", "#bcb5a5", "#dedacd", "#f2f0e9"] },
+      "ink": { "role": "neutral", "displayName": "Soft Charcoal", "canonical": "#36322f", "tonalRamp": ["#1c1a18", "#26231f", "#36322f", "#4d4842", "#6b655c", "#948d81", "#c2bcae", "#eae6dc"] },
+      "accent": { "role": "primary", "displayName": "Baked Clay", "canonical": "#cc8b65", "tonalRamp": ["#3d2415", "#5e3820", "#824e2d", "#a5643c", "#cc8b65", "#dba98c", "#e9c8b5", "#f5e6dc"] },
+      "accent-deep": { "role": "primary", "displayName": "Fired Clay", "canonical": "#8f6347", "tonalRamp": ["#2e1f16", "#4a3324", "#674631", "#8f6347", "#a97e60", "#c39d84", "#dcc1ae", "#f0e2d7"] },
+      "tension": { "role": "secondary", "displayName": "Dried Sage", "canonical": "#7d9c8b", "tonalRamp": ["#22302a", "#33473d", "#465f52", "#5a7a6a", "#7d9c8b", "#9fb8ab", "#c2d3ca", "#e3ede8"] },
+      "gold": { "role": "tertiary", "displayName": "Muted Gold", "canonical": "#d4a843", "tonalRamp": ["#3e300f", "#5e4a18", "#816523", "#a68330", "#d4a843", "#e0bd6c", "#ecd39a", "#f6e9c9"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero and section-opening headlines. Fraunces 600, ceiling ~4rem." },
+      "headline": { "displayName": "Headline", "purpose": "Major section titles. Fraunces 500." },
+      "title": { "displayName": "Title", "purpose": "Card titles, project names. Fraunces 500." },
+      "body": { "displayName": "Body", "purpose": "All running copy. DM Mono 400, cap measure at ~70ch." },
+      "label": { "displayName": "Label", "purpose": "Metadata, tags, button and nav text. DM Mono 500, uppercase, tracking 0.15em." }
+    },
+    "shadows": [
+      { "name": "diffused", "value": "inset 0px 2px 8px -2px rgba(54,50,47,0.08), 0px 8px 24px -6px rgba(54,50,47,0.04)", "purpose": "Resting tactility for surface cards and panels." },
+      { "name": "deep", "value": "inset 0px 4px 16px -4px rgba(54,50,47,0.12), 0px 12px 32px -8px rgba(54,50,47,0.08)", "purpose": "Hover/active elevation; material presses toward the reader." }
+    ],
+    "motion": [
+      { "name": "ease-smooth", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing (ease-out-expo) for all state transitions and reveals." },
+      { "name": "duration-fast", "value": "150ms", "purpose": "Micro-interactions, hover feedback." },
+      { "name": "duration-normal", "value": "300ms", "purpose": "Standard transitions, card lifts." },
+      { "name": "duration-slow", "value": "500ms", "purpose": "Reveals and larger transitions." },
+      { "name": "duration-slower", "value": "800ms", "purpose": "Choreographed entrances." }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled ink pill for the primary call to action; shifts to clay on hover.",
+      "html": "<a href=\"#contact\" class=\"ds-btn-primary\">GET IN TOUCH</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; background: var(--color-ink, #36322f); color: var(--color-base, #fdfcf8); font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.75rem 1.75rem; border: none; border-radius: 9999px; text-decoration: none; cursor: pointer; transition: background 300ms cubic-bezier(0.16,1,0.3,1), transform 300ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-primary:hover { background: var(--color-accent, #cc8b65); transform: translateY(-2px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-accent, #cc8b65); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Outlined pill that inverts to ink fill on hover.",
+      "html": "<a href=\"#work\" class=\"ds-btn-secondary\">VIEW WORK</a>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; background: var(--color-base, #fdfcf8); color: var(--color-ink, #36322f); font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.75rem 1.75rem; border: 1px solid var(--color-ink, #36322f); border-radius: 9999px; text-decoration: none; cursor: pointer; transition: background 300ms cubic-bezier(0.16,1,0.3,1), color 300ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-secondary:hover { background: var(--color-ink, #36322f); color: var(--color-base, #fdfcf8); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--color-accent, #cc8b65); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Text-only action; ink shifts to clay on hover.",
+      "html": "<a href=\"#\" class=\"ds-btn-ghost\">READ MORE</a>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-ink, #36322f); background: none; border: none; padding: 0.5rem 0; cursor: pointer; text-decoration: none; transition: color 300ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-ghost:hover { color: var(--color-accent, #cc8b65); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--color-accent, #cc8b65); outline-offset: 2px; }"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Tactile paper card with subtle border; lifts and warms on hover.",
+      "html": "<article class=\"ds-card\"><span class=\"ds-card-tag\">SVELTEKIT · FASTAPI</span><h3 class=\"ds-card-title\">KNOT</h3><p class=\"ds-card-body\">A bilingual wedding-planning SaaS with guest management, RSVP tracking, and Stripe billing.</p></article>",
+      "css": ".ds-card { display: block; background: var(--color-base, #fdfcf8); border: 1px solid color-mix(in srgb, var(--color-ink, #36322f) 8%, transparent); border-radius: 1.25rem; padding: 2rem; transition: all 300ms cubic-bezier(0.16,1,0.3,1); box-shadow: inset 0px 2px 8px -2px rgba(54,50,47,0.08), 0px 8px 24px -6px rgba(54,50,47,0.04); } .ds-card:hover { border-color: color-mix(in srgb, var(--color-accent, #cc8b65) 40%, transparent); box-shadow: inset 0px 4px 16px -4px rgba(54,50,47,0.12), 0px 12px 32px -8px rgba(54,50,47,0.08); transform: translateY(-4px); } .ds-card-tag { font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.15em; color: var(--color-tension, #7d9c8b); } .ds-card-title { font-family: 'Fraunces', serif; font-weight: 500; font-size: 1.25rem; line-height: 1.3; letter-spacing: -0.02em; color: var(--color-ink, #36322f); margin: 0.5rem 0; } .ds-card-body { font-family: 'DM Mono', monospace; font-size: 0.875rem; line-height: 1.6; color: color-mix(in srgb, var(--color-ink, #36322f) 70%, transparent); margin: 0; }"
+    },
+    {
+      "name": "Nav Bar",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Fixed glass-backed top navigation; ink labels shift to clay on hover/active.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-brand\">Santiago Vazquez</span><ul class=\"ds-nav-links\"><li><a href=\"#work\" class=\"ds-nav-link is-active\">Work</a></li><li><a href=\"#about\" class=\"ds-nav-link\">About</a></li><li><a href=\"#contact\" class=\"ds-nav-link\">Contact</a></li></ul></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; background: color-mix(in srgb, var(--color-base, #fdfcf8) 80%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); } .ds-nav-brand { font-family: 'Fraunces', serif; font-weight: 500; font-size: 1rem; color: var(--color-ink, #36322f); } .ds-nav-links { display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0; } .ds-nav-link { font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-ink, #36322f); text-decoration: none; transition: color 300ms cubic-bezier(0.16,1,0.3,1); } .ds-nav-link:hover, .ds-nav-link.is-active { color: var(--color-accent, #cc8b65); } .ds-nav-link:focus-visible { outline: 2px solid var(--color-accent, #cc8b65); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Engineer's Workbench",
+    "overview": "This is a portfolio where the design is itself the argument. Everything on the surface is tactile and exact at once — sun-bleached paper, raw ceramic, baked clay — the materials of something made by hand, but assembled with an engineer's precision. Warmth carries the personality; precision carries the credibility. The two are never traded against each other. Serif headlines (Fraunces) speak with confidence; a monospace body (DM Mono) speaks with technical precision. It rejects both the stock engineer-portfolio (dark mode, neon accent, hero-metric template) and the sterile navy corporate gloss — enterprise-credible without being sterile, distinctive without being gimmicky.",
+    "keyCharacteristics": [
+      "Warm ceramic-and-paper palette — never dark mode, never neon.",
+      "Fraunces serif display against a DM Mono body: confident + technical in one pairing.",
+      "Tactile depth via soft inset+drop shadows, not hard drop shadows or flat corporate surfaces.",
+      "Full, quiet borders and generous radii; no colored side-stripes, no hard edges.",
+      "Motion is choreographed and purposeful (GSAP + Lenis), with full reduced-motion equivalents."
+    ],
+    "rules": [
+      { "name": "The Warm-Neutral Rule", "body": "The body is always paper (#fdfcf8) or ceramic (#f2f0e9). Dark mode is forbidden; a dark surface is a deliberate, local inversion, never the page.", "section": "colors" },
+      { "name": "The One-Clay Rule", "body": "Baked Clay stays under ~10% of any screen. Text hierarchy comes from weight, size, and the ink ramp (100/70/50% opacity), not from spraying the accent everywhere.", "section": "colors" },
+      { "name": "The Two-Voice Rule", "body": "Serif for what asserts (headlines, names), mono for what informs (body, data, labels). Never blur the two — no serif body, no mono headlines.", "section": "typography" },
+      { "name": "The Mono-Measure Rule", "body": "Monospace body is wider per character; never run it past ~70ch or it becomes a wall.", "section": "typography" },
+      { "name": "The Warm-Shadow Rule", "body": "Shadows are always keyed to ink (#36322f) at low opacity, never black. A cold gray shadow breaks the ceramic warmth instantly.", "section": "elevation" },
+      { "name": "The Depth-On-Intent Rule", "body": "Surfaces rest at Diffused and rise to Deep only on hover/focus. Depth signals interactivity; a static deep shadow is noise.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the body on Sun-bleached Paper (#fdfcf8) or Raw Ceramic (#f2f0e9). Warmth lives in the surface.",
+      "Do pair Fraunces headlines with DM Mono body — serif asserts, mono informs.",
+      "Do hold Baked Clay under ~10% of any screen; derive hierarchy from the ink opacity ramp (100/70/50%).",
+      "Do key every shadow to ink at low opacity, resting at Diffused and rising to Deep on interaction.",
+      "Do give featured projects bespoke layouts (editorial/data/immersive/compact) rather than one repeated card.",
+      "Do ship a full prefers-reduced-motion equivalent for every GSAP/scroll animation; reveals must enhance already-visible content, never gate it (WCAG 2.1 AA).",
+      "Do verify body text hits ≥4.5:1 — ink on paper passes; .text-muted (ink at 50%) is metadata-only, never body."
+    ],
+    "donts": [
+      "Don't ship a generic template portfolio: no dark mode + neon accent, no hero-metric card template, no identical icon-heading-text project grid.",
+      "Don't drift corporate/SaaS sterile: no navy-and-blue, no flat personality-free enterprise gloss.",
+      "Don't go overdesigned/gimmicky: no motion or effects that fight legibility, no cleverness over clarity.",
+      "Don't let it read as a resume-as-webpage: no flat CV text dump without hierarchy or narrative.",
+      "Don't use glassmorphism decoratively — it's reserved for the nav backdrop and rare purposeful overlays only.",
+      "Don't use cursor: none (or any hidden-cursor trick) as a click-blocking mechanism.",
+      "Don't use colored side-stripe borders (border-left/right >1px) or gradient text — both banned.",
+      "Don't run DM Mono body past ~70ch, or use pure black anywhere."
+    ]
+  }
+}

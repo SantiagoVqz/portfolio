@@ -29,7 +29,7 @@ interface PageLoadOptions {
  */
 export const pageLoad: Action<HTMLElement, PageLoadOptions | undefined> = (node, options = {}) => {
 	// Only run on client
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 
@@ -233,7 +233,7 @@ export const staggerEntrance: Action<HTMLElement, StaggerEntranceOptions | undef
 	node,
 	options = {}
 ) => {
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 

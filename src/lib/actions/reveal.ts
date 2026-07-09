@@ -31,7 +31,7 @@ interface RevealOptions {
  */
 export const reveal: Action<HTMLElement, RevealOptions | undefined> = (node, options = {}) => {
 	// Only run on client
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 
@@ -198,7 +198,7 @@ export const revealWithExit: Action<HTMLElement, RevealWithExitOptions | undefin
 	options = {}
 ) => {
 	// Only run on client
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 
@@ -405,7 +405,7 @@ export const cardSettle: Action<HTMLElement, CardSettleOptions | undefined> = (
 	options = {}
 ) => {
 	// Only run on client
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 
@@ -481,7 +481,7 @@ export const cardSettle: Action<HTMLElement, CardSettleOptions | undefined> = (
  */
 export const revealBatch: Action<HTMLElement, RevealOptions | undefined> = (node, options = {}) => {
 	// Only run on client
-	if (typeof window === 'undefined') {
+	if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		return { destroy() {} };
 	}
 

@@ -1,6 +1,5 @@
 // Type definitions for GSAP imports
 type GSAPInstance = typeof import('gsap').gsap;
-type ScrollTriggerInstance = import('gsap/ScrollTrigger').ScrollTrigger;
 
 /**
  * Global Scroll Progress State
@@ -14,39 +13,50 @@ function createScrollState() {
 	let isScrolling = $state(false);
 
 	let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
-	let scrollTriggerInstance: ScrollTriggerInstance | null = null;
+	let lastY = 0;
+	let lastTime = 0;
+	let handler: (() => void) | null = null;
 
-	async function init() {
+	function init() {
 		// Only run in browser
 		if (typeof window === 'undefined') return;
 
-		const { gsap } = await import('gsap');
-		const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-		gsap.registerPlugin(ScrollTrigger);
+		// Plain scroll math — a document-level ScrollTrigger went stale across
+		// client-side navigations and pinned the progress bar at 100%.
+		const measure = () => {
+			const max = document.documentElement.scrollHeight - window.innerHeight;
+			progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+		};
 
-		// Create a ScrollTrigger for the entire document
-		scrollTriggerInstance = ScrollTrigger.create({
-			trigger: document.body,
-			start: 'top top',
-			end: 'bottom bottom',
-			onUpdate: (self) => {
-				progress = self.progress;
-				direction = self.direction === 1 ? 'down' : 'up';
-				velocity = Math.abs(self.getVelocity() / 1000); // Normalize velocity
+		handler = () => {
+			const now = performance.now();
+			const y = window.scrollY;
+			direction = y >= lastY ? 'down' : 'up';
+			velocity = now > lastTime ? Math.abs(y - lastY) / (now - lastTime) : 0;
+			lastY = y;
+			lastTime = now;
+			measure();
 
-				isScrolling = true;
+			isScrolling = true;
+			if (scrollTimeout) clearTimeout(scrollTimeout);
+			scrollTimeout = setTimeout(() => {
+				isScrolling = false;
+			}, 150);
+		};
 
-				// Reset scrolling state after a delay
-				if (scrollTimeout) clearTimeout(scrollTimeout);
-				scrollTimeout = setTimeout(() => {
-					isScrolling = false;
-				}, 150);
-			}
-		});
+		lastY = window.scrollY;
+		lastTime = performance.now();
+		measure();
+		window.addEventListener('scroll', handler, { passive: true });
+		window.addEventListener('resize', handler, { passive: true });
 	}
 
 	function destroy() {
-		scrollTriggerInstance?.kill();
+		if (handler) {
+			window.removeEventListener('scroll', handler);
+			window.removeEventListener('resize', handler);
+			handler = null;
+		}
 		if (scrollTimeout) clearTimeout(scrollTimeout);
 	}
 

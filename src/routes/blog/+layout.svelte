@@ -16,16 +16,7 @@
 </svelte:head>
 
 <div data-load="navbar">
-	<Navbar
-		brand={personalInfo.shortName}
-		ctaHref="/#contact"
-		links={[
-			{ label: 'Work', href: '/#artifacts' },
-			{ label: 'Process', href: '/#process' },
-			{ label: 'Archive', href: '/#archive' },
-			{ label: 'Blog', href: '/blog' }
-		]}
-	/>
+	<Navbar brand={personalInfo.shortName} />
 </div>
 
 <main id="main-content" class="blog-shell">

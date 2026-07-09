@@ -1,5 +1,9 @@
 # CLAUDE.md — Portfolio Codebase Guide
 
+## Design Context
+
+Strategic design intent lives in **PRODUCT.md** (root). Register: **brand** (portfolio — design IS the product). Audience: **enterprise recruiters/hiring managers** screening for stack fit + scale. Personality: **confident, technical, direct** — enterprise-credible without the sterile corporate look; distinctive without gimmicks. Core principles: show don't tell, reward the skim + earn the deep read, the medium is the proof, substance over spectacle, specific beats generic. A11y target: **WCAG 2.1 AA**. Read PRODUCT.md (and DESIGN.md, when present) before design work.
+
 ## Project Overview
 
 A modern, highly-animated personal portfolio website built with **Svelte 5 + SvelteKit 2**. Single-page design with anchor-based navigation, scroll-driven animations, and a tactile design system.

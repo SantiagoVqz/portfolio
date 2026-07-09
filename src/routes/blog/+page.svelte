@@ -215,7 +215,7 @@
 		font-size: 0.7rem;
 		letter-spacing: var(--tracking-widest, 0.2em);
 		text-transform: uppercase;
-		color: var(--color-accent);
+		color: var(--color-accent-deep, var(--color-accent));
 	}
 
 	h1 {

@@ -2,7 +2,6 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { browser } from '$app/environment';
-	import SmoothScroll from '$lib/components/SmoothScroll.svelte';
 
 	let { children } = $props();
 
@@ -245,12 +244,10 @@
 -->
 
 
-<!-- Main content with smooth scrolling -->
-<SmoothScroll smooth={1.2}>
-	<div class="app-wrapper min-h-screen bg-[--color-base] text-[--color-ink]">
-		{@render children()}
-	</div>
-</SmoothScroll>
+<!-- Main content — native scroll (Lenis removed: inertia read as slow) -->
+<div class="app-wrapper min-h-screen bg-[--color-base] text-[--color-ink]">
+	{@render children()}
+</div>
 
 <style>
 	/* Keep visual cursor layers from ever intercepting clicks */
