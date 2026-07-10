@@ -11,7 +11,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint ."
+		"lint": "prettier --check . && eslint .",
+		"clean": "rm -rf .svelte-kit build .output .vercel .netlify .wrangler node_modules/.vite && find . -path ./node_modules -prune -o -name '.DS_Store' -print -delete && rm -rf node_modules"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
